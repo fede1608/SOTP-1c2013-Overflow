@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdbool.h>
 #include "libmemoria.h"
 #include <stdlib.h>
@@ -5,48 +6,60 @@
 //int cont = 0;
 //char *array1[10];
 //t_list* array2;
-t_list * lista = list_create();
+t_list * lista;
 void *mem = 0;
 int tam = 0;
+t_memoria segmento1 = "lista";
+
 t_memoria crear_memoria(int tamanio) {
+	lista = list_create();
 
 	//array1[cont] = (char *)realloc(array1[cont],sizeof()*cont);
 	//array2 = (t_list *)realloc(array2,sizeof(t_list*)*cont);
 	//cont +=1;
 
 	tam = tamanio;
-	mem = malloc(tamanio);
+	mem = malloc(tamanio);//no es necesario creo
 	particion *vacio = malloc(sizeof(particion));
 	vacio->id = '0';
-	vacio->inicio = (int)mem;
+	vacio->inicio =0;
+	//vacio->inicio = (int)mem;
 	vacio->libre = true;
 	vacio->tamanio = tamanio;
-	vacio->dato = NULL;
+	vacio->dato=NULL;
 
-	list_add_in_index(lista,vacio->id,vacio);
+
+	list_add(lista,vacio);
+	printf("test%s",segmento1);
 	return "lista";
-}
+	}
 
 int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenido) {
+
 	if (tamanio>tam) return -1;
-	if (strcmp(segmento,"lista"))
-		{	int i;
+	if (!strcmp(segmento,"lista"))
+		{
+		printf("testAP1\n");
+		int i;
 			for (i=0;i<lista->elements_count;i++) {
+				printf("testfor%d ",i);
 				particion *part = list_get(lista,i);
 				if (part->id==id) return -1;
 				if (part->libre==true) {
-					if (part->tamanio<=tamanio)
+					if (part->tamanio>tamanio)
 					{
 						particion *nuevaP = malloc(sizeof(particion));
 						nuevaP->id = id;
 						nuevaP->inicio = part->inicio;
 						nuevaP->libre = false;
 						nuevaP->tamanio = tamanio;
-						nuevaP->dato = contenido;
+						//nuevaP->dato = contenido;
+						nuevaP->dato=(char *)malloc(strlen(contenido)+1);
+						strcpy(nuevaP->dato,contenido);
 						list_add_in_index(lista,i,nuevaP);
 						int resto = part->tamanio -tamanio;
 						if (resto > 0) {
-							//si sobra me moria se crea una particion free
+							//si sobra memoria se crea una particion free
 							particion *memresto = malloc(sizeof(particion));
 							memresto->id = '0';
 							memresto->inicio = part->inicio + tamanio;
@@ -56,20 +69,24 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 							list_add_in_index(lista,i+1,memresto);
 							list_remove(lista,i+2);
 						}else list_remove(lista,i+1);
+						printf("test1");
 						return 1;
 					}
 
 
 
 				}
-			} return 0; //no encontro espacios vacios
+			}
+			printf("test0");
+			return 0; //no encontro espacios vacios
 		}
-
+	printf("test-1");
 	return -1;
 }
 
 int eliminar_particion(t_memoria segmento, char id) {
-	if (strcmp(segmento,"lista"))
+	printf("testEP1");
+	if (!strcmp(segmento,"lista"))
 	{
 		int i;
 		for (i=0;i<lista->elements_count;i++) {
@@ -99,12 +116,13 @@ int eliminar_particion(t_memoria segmento, char id) {
 }
 
 void liberar_memoria(t_memoria segmento) {
-	if (strcmp(segmento,"lista")) free(mem);
+	printf("testLM");
+	if (!strcmp(segmento,"lista")) free(mem);
 }
 
 t_list* particiones(t_memoria segmento) {
-
-	if (strcmp(segmento,"lista")) return lista;
+	printf("test");
+	if (!strcmp(segmento,"lista")) return lista;
 
 	//if false va a retornar por aca
 	return NULL;
