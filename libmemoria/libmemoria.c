@@ -92,6 +92,52 @@ int eliminar_particion(t_memoria segmento, char id) {
 		for (i=0;i<lista->elements_count;i++) {
 			particion *part = list_get(lista,i);
 			if (part->id==id) {
+				if(i==0) //si es el primer nodo entonces preguntar solo por el nodo siguiente
+				{
+					if(part->tamanio==tam){//si el primer nodo es igual al tamaño total no preguntar por nadie ¬¬ I know you will check this
+						part->dato=NULL;
+						part->libre=true;
+						part->id='0';
+						printf("testEPSuccess");
+						return 1;
+					}
+
+					particion *partpost = list_get(lista,i+1);
+					if (partpost->libre==true) {
+						part->dato=NULL;
+						part->libre=true;
+						part->tamanio+=partpost->tamanio;
+						part->id='0';
+						list_remove(lista,i+1);
+						printf("testEPSuccess");
+						return 1;
+					}else
+						{
+							part->dato=NULL;
+							part->libre=true;
+							part->id='0';
+							printf("testEPSuccess");
+							return 1;
+						}
+
+				} else if (i==(lista->elements_count-1))//si es el ultimo nodo entonces preguntar por el nodo anterior
+				{
+					particion *partpre = list_get(lista,i-1);
+					if (partpre->libre==true) {
+						partpre->tamanio+=part->tamanio;
+						list_remove(lista,i);
+						printf("testEPSuccess");
+						return 1;
+					}else
+					{
+						part->dato=NULL;
+						part->libre=true;
+						part->id='0';
+						printf("testEPSuccess");
+						return 1;
+					}
+				}
+				//sino es ninguna de las anteriores esta en el medio
 				particion *partpre = list_get(lista,i-1);
 				particion *partpost = list_get(lista,i+1);
 				if (partpre->libre==true) {
@@ -107,11 +153,22 @@ int eliminar_particion(t_memoria segmento, char id) {
 				part->tamanio+=partpost->tamanio;
 				part->id='0';
 				list_remove(lista,i+1);
+				}else
+				{
+					part->dato=NULL;
+					part->libre=true;
+					part->id='0';
 				}
+
+
+
+
+				printf("testEPSuccess");
 				return 1;
 			}
 		}
 	}
+	printf("testEPFailed");
 	return 0;
 }
 
