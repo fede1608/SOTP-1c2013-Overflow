@@ -92,7 +92,9 @@ int eliminar_particion(t_memoria segmento, char id) {
 		for (i=0;i<lista->elements_count;i++) {
 			particion *part = list_get(lista,i);
 			if (part->id==id) {
-				if(i==0) //si es el primer nodo entonces preguntar solo por el nodo siguiente
+
+				//todo el laburo q hice para compactar la memoria al pedo¬¬
+				/*if(i==0) //si es el primer nodo entonces preguntar solo por el nodo siguiente
 				{
 					if(part->tamanio==tam){//si el primer nodo es igual al tamaño total no preguntar por nadie ¬¬ I know you will check this
 						part->dato=NULL;
@@ -164,7 +166,12 @@ int eliminar_particion(t_memoria segmento, char id) {
 
 
 				printf("testEPSuccess");
-				return 1;
+				return 1;*/
+				part->dato=NULL;
+				part->libre=true;
+				part->id='0';
+
+
 			}
 		}
 	}
