@@ -1,0 +1,5 @@
+GRABAR:A:1024:[cadena de 1024 bytes]
+GRABAR:B:100:[cadena de 100 bytes]
+BORRAR:A
+GRABAR:C:300:[cadena de 300 bytes]
+BORRAR:C8

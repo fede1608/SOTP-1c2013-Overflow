@@ -1,3 +1,7 @@
+#ifndef LIBMEMORIA_H_
+#define LIBMEMORIA_H_
+#include "commons/collections/list.h"
+
 typedef char* t_memoria;
 
 typedef struct t_particion {
@@ -28,3 +32,5 @@ void liberar_memoria(t_memoria segmento);
 t_list* particiones(t_memoria segmento);
 
 /* Esta funcion devuelve una lista en el formato t_list de las commons-library con la siguiente descripcion por cada particion */
+
+#endif
