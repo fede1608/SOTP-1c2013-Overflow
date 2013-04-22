@@ -29,43 +29,40 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 	if (!strcmp(segmento,"lista"))//strcmp devuelve 0 si los strings coinciden, bien troll, por eso lo niego
 		{
 		int i;
-		int partmax1;
-		int memmax=0;
 			for (i=0;i<lista->elements_count;i++) {
 				particion *part = list_get(lista,i);
-				if ((part->libre==true)&&(part->tamanio > memmax) )
-				{
-					memmax = part->tamanio;
-					partmax1=i;
-				}
 				if (part->id==id) return -1;
-			}
-			particion *partmax = list_get(lista,partmax1);
-					if (memmax>tamanio)
+				if (part->libre==true) {
+					if (part->tamanio>tamanio)
 					{
 						particion *nuevaP = malloc(sizeof(particion));
 						nuevaP->id = id;
-						nuevaP->inicio = partmax->inicio;
+						nuevaP->inicio = part->inicio;
 						nuevaP->libre = false;
 						nuevaP->tamanio = tamanio;
 						//nuevaP->dato = contenido;
 						nuevaP->dato=(char *)malloc(strlen(contenido)+1);
 						strcpy(nuevaP->dato,contenido);
-						list_add_in_index(lista,partmax1,nuevaP);
-						int resto = partmax->tamanio -tamanio;
+						list_add_in_index(lista,i,nuevaP);
+						int resto = part->tamanio -tamanio;
 						if (resto > 0) {
 							//si sobra memoria se crea una particion free
 							particion *memresto = malloc(sizeof(particion));
 							memresto->id = '0';
-							memresto->inicio = partmax->inicio + tamanio;
+							memresto->inicio = part->inicio + tamanio;
 							memresto->libre = true;
 							memresto->tamanio = resto;
 							memresto->dato = NULL;
-							list_add_in_index(lista,partmax1+1,memresto);
-							list_remove(lista,partmax1+2);
-						}else list_remove(lista,partmax1+1);
+							list_add_in_index(lista,i+1,memresto);
+							list_remove(lista,i+2);
+						}else list_remove(lista,i+1);
 						return 1;
 					}
+
+
+
+				}
+			}
 			return 0; //no encontro espacios vacios
 		}
 	return -1;
