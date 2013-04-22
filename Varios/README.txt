@@ -8,6 +8,8 @@ Este proceso tiene las siguientes dependencias:
 Para ejecutarlo, setear antes la variable de entorno LD_LIBRARY_PATH desde bash. El valor de la variable debe ser una cadena con las rutas donde estén ubicadas las librerías separadas por :
 -> Ejemplo:
 export LD_LIBRARY_PATH=/home/utnso/workspace/memoria/Debug/:/home/utnso/workspace/so-commons-library/Debug
+o
+export LD_LIBRARY_PATH=/home/utnso/git/tp-20131c-overflow/libmemoria/Debug:$LD_LIBRARY_PATH
 
 Parámetros
 ----------

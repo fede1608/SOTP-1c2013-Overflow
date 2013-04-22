@@ -3,46 +3,33 @@
 #include "libmemoria.h"
 #include <stdlib.h>
 #include <string.h>
-//int cont = 0;
-//char *array1[10];
-//t_list* array2;
+
 t_list * lista;
-void *mem = 0;
+//void *mem = 0;
 int tam = 0;
-t_memoria segmento1 = "lista";
+
 
 t_memoria crear_memoria(int tamanio) {
 	lista = list_create();
-
-	//array1[cont] = (char *)realloc(array1[cont],sizeof()*cont);
-	//array2 = (t_list *)realloc(array2,sizeof(t_list*)*cont);
-	//cont +=1;
-
 	tam = tamanio;
-	mem = malloc(tamanio);//no es necesario creo
+	//mem = malloc(tamanio);//no es necesario creo
 	particion *vacio = malloc(sizeof(particion));
 	vacio->id = '0';
 	vacio->inicio =0;
-	//vacio->inicio = (int)mem;
 	vacio->libre = true;
 	vacio->tamanio = tamanio;
 	vacio->dato=NULL;
-
-
 	list_add(lista,vacio);
-	printf("test%s",segmento1);
 	return "lista";
 	}
 
 int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenido) {
 
 	if (tamanio>tam) return -1;
-	if (!strcmp(segmento,"lista"))
+	if (!strcmp(segmento,"lista"))//strcmp devuelve 0 si los strings coinciden, bien troll, por eso lo niego
 		{
-		printf("testAP1\n");
 		int i;
 			for (i=0;i<lista->elements_count;i++) {
-				printf("testfor%d ",i);
 				particion *part = list_get(lista,i);
 				if (part->id==id) return -1;
 				if (part->libre==true) {
@@ -69,7 +56,6 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 							list_add_in_index(lista,i+1,memresto);
 							list_remove(lista,i+2);
 						}else list_remove(lista,i+1);
-						printf("test1");
 						return 1;
 					}
 
@@ -77,15 +63,12 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 
 				}
 			}
-			printf("test0");
 			return 0; //no encontro espacios vacios
 		}
-	printf("test-1");
 	return -1;
 }
 
 int eliminar_particion(t_memoria segmento, char id) {
-	printf("testEP1");
 	if (!strcmp(segmento,"lista"))
 	{
 		int i;
@@ -170,24 +153,20 @@ int eliminar_particion(t_memoria segmento, char id) {
 				part->dato=NULL;
 				part->libre=true;
 				part->id='0';
-
+				//3 lineas del orto, me cagoo
 
 			}
 		}
 	}
-	printf("testEPFailed");
 	return 0;
 }
 
 void liberar_memoria(t_memoria segmento) {
-	printf("testLM");
-	if (!strcmp(segmento,"lista")) free(mem);
+	if (!strcmp(segmento,"lista")) list_destroy_and_destroy_elements(lista,NULL);
 }
 
 t_list* particiones(t_memoria segmento) {
-	printf("test");
 	if (!strcmp(segmento,"lista")) return lista;
-
 	//if false va a retornar por aca
 	return NULL;
 }
