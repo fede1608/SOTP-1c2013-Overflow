@@ -6,11 +6,45 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
 
 #define DIRECCION INADDR_ANY   //INADDR_ANY representa la direccion de cualquier
 							   //interfaz conectada con la computadora
 #define PUERTO 5000
 #define BUFF_SIZE 1024
+
+void atenderCliente (int socketNuevaConexion){
+
+	int nbytesRecibidos;
+	char buffer[BUFF_SIZE];
+
+	while (1) {
+
+			// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
+			if ((nbytesRecibidos = recv(socketNuevaConexion, buffer, BUFF_SIZE, 0) )
+					> 0) {
+				printf("Mensaje recibido: ");
+				fwrite(buffer, 1, nbytesRecibidos, stdout);
+				printf("\n");
+				printf("Tamanio del buffer %d bytes!\n", nbytesRecibidos);
+				fflush(stdout);
+
+				if (memcmp(buffer, "fin", nbytesRecibidos) == 0) {
+
+					printf("Server cerrado correctamente.\n");
+					break;
+
+				}
+
+			} else {
+				perror("Error al recibir datos");
+				break;
+			}
+		}
+
+	close(socketNuevaConexion);
+	return;
+}
 
 int main() {
 
@@ -18,7 +52,6 @@ int main() {
 	int nbytesRecibidos;
 
 	struct sockaddr_in socketInfo;
-	char buffer[BUFF_SIZE];
 	int optval = 1;
 
 	// Crear un socket:
@@ -70,39 +103,20 @@ int main() {
 
 		}
 
-		//TODO: En este lugar comenzará un nuevo thread, pasándole de alguna forma la variable socketNuevaConexion
+		//TODO: Creación del thread (en principio uno solo para probar)
+		pthread_t thr1;
 
-		//La conexión sólo se establece al recibir el primer mensaje. Si no aparece esto es porque no llegó
+		//Se crea el thread que va a procesar la función atenderCliente
+		pthread_create( &thr1, NULL, atenderCliente, (int) socketNuevaConexion);
 
-		printf("Conexión establecida wachoooooooo.\n");
+		//Se espera a que termine el thread
+		pthread_join(thr1, NULL);
 
-		//TODO: Convertir este ciclo en una función, así puede ser ejecutada por el thread
-		while (1) {
+		//Liberamos los recursos del thread cuando ya no lo usamos más
+		pthread_detach(thr1);
 
-			// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
-			if ((nbytesRecibidos = recv(socketNuevaConexion, buffer, BUFF_SIZE, 0) )
-					> 0) {
-				printf("Mensaje recibido: ");
-				fwrite(buffer, 1, nbytesRecibidos, stdout);
-				printf("\n");
-				printf("Tamanio del buffer %d bytes!\n", nbytesRecibidos);
-				fflush(stdout);
-
-				if (memcmp(buffer, "fin", nbytesRecibidos) == 0) {
-
-					printf("Server cerrado correctamente.\n");
-					break;
-
-				}
-
-			} else {
-				perror("Error al recibir datos");
-				break;
-			}
-		}
-
-		close(socketNuevaConexion);
 	}
+
 	close(socketEscucha);
 	return EXIT_SUCCESS;
 }
