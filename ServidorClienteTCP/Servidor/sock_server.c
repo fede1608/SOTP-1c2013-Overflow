@@ -46,10 +46,9 @@ void atenderCliente (int socketNuevaConexion){
 	return;
 }
 
-int main() {
+int main(void) {
 
 	int socketEscucha, socketNuevaConexion;
-	int nbytesRecibidos;
 
 	struct sockaddr_in socketInfo;
 	int optval = 1;
@@ -103,17 +102,17 @@ int main() {
 
 		}
 
-		//TODO: Creación del thread (en principio uno solo para probar)
+		//Creación del thread que atiende al cliente. Se crean tantos threads como nuevas conexiones haya
 		pthread_t thr1;
 
-		//Se crea el thread que va a procesar la función atenderCliente
-		pthread_create( &thr1, NULL, atenderCliente, (int) socketNuevaConexion);
+		//Se crea el thread y le indicamos que use la función antederCliente con el socket de la nueva conexión
+		//como parámetro
+		pthread_create(&thr1, NULL, atenderCliente, socketNuevaConexion);
 
-		//Se espera a que termine el thread
-		pthread_join(thr1, NULL);
-
-		//Liberamos los recursos del thread cuando ya no lo usamos más
-		pthread_detach(thr1);
+		//Si sólo se quiere que el servidor atienda una sóla conexión, descomentar
+		//lo que viene a continuación:
+		//pthread_join(thr1, NULL);
+		//pthread_detach(thr1);
 
 	}
 
