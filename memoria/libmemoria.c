@@ -12,7 +12,7 @@ int tam = 0;
 t_memoria crear_memoria(int tamanio) {
 	lista = list_create();
 	tam = tamanio;
-	//mem = malloc(tamanio);//no es necesario creo
+	t_memoria mem = malloc(tamanio);
 	particion *vacio = malloc(sizeof(particion));
 	vacio->id = '0';
 	vacio->inicio =0;
@@ -20,14 +20,14 @@ t_memoria crear_memoria(int tamanio) {
 	vacio->tamanio = tamanio;
 	vacio->dato=NULL;
 	list_add(lista,vacio);
-	return "lista";
+	return mem;
 	}
 
 int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenido) {
 
 	if (tamanio>tam) return -1;
-	if (!strcmp(segmento,"lista"))//strcmp devuelve 0 si los strings coinciden, bien troll, por eso lo niego
-		{
+	//if (!strcmp(segmento,"lista"))//strcmp devuelve 0 si los strings coinciden, bien troll, por eso lo niego
+		//{
 		int i;
 		int partmax1;
 		int memmax=0;
@@ -43,18 +43,21 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 			particion *partmax = list_get(lista,partmax1);
 					if (memmax>tamanio)
 					{
+				// Agregar nueva particion
 						particion *nuevaP = malloc(sizeof(particion));
 						nuevaP->id = id;
 						nuevaP->inicio = partmax->inicio;
 						nuevaP->libre = false;
 						nuevaP->tamanio = tamanio;
-						//nuevaP->dato = contenido;
-						nuevaP->dato=(char *)malloc(strlen(contenido)+1);
+//						nuevaP->dato = contenido;
+//						nuevaP->dato=(char *)malloc(strlen(contenido)+1);
+						strcpy((segmento+nuevaP->inicio),contenido);
+						nuevaP->dato=segmento+(nuevaP->inicio);
 						strcpy(nuevaP->dato,contenido);
 						list_add_in_index(lista,partmax1,nuevaP);
 						int resto = partmax->tamanio -tamanio;
 						if (resto > 0) {
-							//si sobra memoria se crea una particion free
+							//si sobra memoria se crea una particion libre
 							particion *memresto = malloc(sizeof(particion));
 							memresto->id = '0';
 							memresto->inicio = partmax->inicio + tamanio;
@@ -67,14 +70,15 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 						return 1;
 					}
 			return 0; //no encontro espacios vacios
-		}
-	return -1;
+//		}
+//	return -1;
 }
 
 int eliminar_particion(t_memoria segmento, char id) {
-	if (!strcmp(segmento,"lista"))
-	{
+//	if (!strcmp(segmento,"lista"))
+//	{
 		int i;
+		int found=0;
 		for (i=0;i<lista->elements_count;i++) {
 			particion *part = list_get(lista,i);
 			if (part->id==id) {
@@ -156,20 +160,21 @@ int eliminar_particion(t_memoria segmento, char id) {
 				part->dato=NULL;
 				part->libre=true;
 				part->id='0';
-				//3 lineas del orto, me cagoo
+				found=1;
+				//4 lineas del orto, me cagoo
 
 			}
 		}
-	}
-	return 0;
+	//}
+		if(!found) return 0;
+		return 1;
 }
 
 void liberar_memoria(t_memoria segmento) {
-	if (!strcmp(segmento,"lista")) list_destroy_and_destroy_elements(lista,NULL);
+	list_destroy_and_destroy_elements(lista,NULL);
+	free(segmento);
 }
 
 t_list* particiones(t_memoria segmento) {
-	if (!strcmp(segmento,"lista")) return lista;
-	//if false va a retornar por aca
-	return NULL;
-}
+	 return lista;
+	}

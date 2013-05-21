@@ -1,10 +1,10 @@
 GRABAR:A:3:qqq
-GRABAR:B:4:wwww
-GRABAR:C:4:wwww
-GRABAR:D:4:wwww
-GRABAR:E:4:wwww
+GRABAR:B:4:wakw
+GRABAR:C:4:wasw
+GRABAR:D:4:wyyr
+GRABAR:E:4:abcd
 BORRAR:E
 BORRAR:A
 BORRAR:B
 BORRAR:C
-
+GRABAR:V:4:abcd

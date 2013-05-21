@@ -3,8 +3,9 @@ Segmento de memoria:
 VACIO[0:2:3]
 VACIO[3:6:4]
 VACIO[7:10:4]
-D[11:14:4]:wwww
+D[11:14:4]:wyyr
 VACIO[15:18:4]
-VACIO[19:119:101]
+V[19:22:4]:abcd
+VACIO[23:121:99]
 --------------------
-Total: 120 bytes, libres: 116 bytes
+Total: 122 bytes, libres: 114 bytes
