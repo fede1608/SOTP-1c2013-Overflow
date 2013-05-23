@@ -16,7 +16,7 @@ int main() {
 	int unSocket;
 
 	struct sockaddr_in socketInfo;
-	char buffer[BUFF_SIZE];
+	//char buffer[BUFF_SIZE];
 
 	printf("Conectando...\n");
 
@@ -48,13 +48,49 @@ int main() {
 
 	while (1) {
 
-		scanf("%s", buffer);
+		//Estructura del paquete como t_paquete y se instancia una llamada Paquete
+		//Type - Tamanio del Payload - Payload
+		typedef struct t_paquete {
+			int8_t type;
+			int16_t payloadlength;
+			char payload[1024];
+		} Paquete;
+
+		//Bautiza a Paquete como p
+		//por conveniencia
+		Paquete p;
+
+		//Define el tipo de mensaje
+		p.type = 1;
+
+		//Recibe el contenido del mensaje que se quiere enviar (payload)
+		scanf("%s", p.payload);
+
+		//Calcula y asigna el tamanio del payload
+		p.payloadlength = strlen(p.payload);
+
+		//---------------------------------
+		//Esto era el primer intento con string, lo dejo por ahora
+		//char type[1];
+		//char payloadlength[2];
+		//char payload[1024];
+		//char paquete[1+2+1024];
+		//int length;
+		//strcpy(type,"1");
+		//scanf("%s", payload);
+		//length = strlen(payload);
+		//sprintf(payloadlength,"%d",length);
+		//sprintf(test,"%d",type);
+		//strcpy(paquete,type);
+		//strcat(paquete,payloadlength);
+		//strcat(paquete,payload);
+		//----------------------------------
 
 		// Enviar los datos leidos por teclado a traves del socket.
-		if (send(unSocket, buffer, strlen(buffer), 0) >= 0) {
+		if (send(unSocket, (struct t_paquete *)&p, sizeof(p), 0) >= 0) {
 			printf("Datos enviados!\n");
 
-			if (strcmp(buffer, "fin") == 0) {
+			if (strcmp(p.payload, "fin") == 0) {
 
 				printf("Cliente cerrado correctamente.\n");
 				break;
