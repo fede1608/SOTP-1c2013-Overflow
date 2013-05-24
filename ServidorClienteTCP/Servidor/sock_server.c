@@ -15,25 +15,33 @@
 
 void atenderCliente (int socketNuevaConexion){
 
+	//Define la estructura del paquete
+	typedef struct t_paquete {
+		int8_t type;
+		int16_t payloadlength;
+		char payload[1024];
+	} Paquete;
+
 	int nbytesRecibidos;
-	char buffer[BUFF_SIZE];
+
+	//Se inicializa una variable tipo Paquete
+	Paquete buffer;
 
 	while (1) {
 
 			// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
-			if ((nbytesRecibidos = recv(socketNuevaConexion, buffer, BUFF_SIZE, 0) )
+			if ((nbytesRecibidos = recv(socketNuevaConexion, &buffer, BUFF_SIZE, 0) )
 					> 0) {
 				printf("Mensaje recibido: ");
-				fwrite(buffer, 1, nbytesRecibidos, stdout);
+				fwrite(buffer.payload, 1, buffer.payloadlength, stdout);
 				printf("\n");
 				printf("Tamanio del buffer %d bytes!\n", nbytesRecibidos);
 				fflush(stdout);
 
-				if (memcmp(buffer, "fin", nbytesRecibidos) == 0) {
-
+				//Verifica que si el payload contiene la palabra "fin" para cerrar la conexion
+				if (memcmp(buffer.payload, "fin", nbytesRecibidos) == 0) {
 					printf("Server cerrado correctamente.\n");
 					break;
-
 				}
 
 			} else {
