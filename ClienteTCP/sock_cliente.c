@@ -49,41 +49,52 @@ int main() {
 		typedef struct t_paquete {
 			int8_t type;
 			int16_t payloadlength;
-			char payload[1024];
+			char payload[1024-sizeof(int8_t)-sizeof(int16_t)];
 		} Paquete;
 
 		//Crea una variable y un puntero tipo Paquete
-		Paquete p;
-		Paquete *buffer;
+		Paquete buffer;
 
 		//Define el tipo de mensaje
-		p.type = 1;
+		buffer.type = 1;
 
 		//Recibe el contenido del mensaje que se quiere enviar (payload)
-		scanf("%s", p.payload);
+		//AVISO: No tengo idea por qué si mandás un string con espacio, lo manda como 2 paquetes distintos
+		printf("Escriba un mensaje\n");
+		scanf("%s", buffer.payload);
 
 		//Calcula y asigna el tamanio del payload
-		p.payloadlength = strlen(p.payload);
+		buffer.payloadlength = strlen(buffer.payload);
 
 		//Asigna la direccion de memoria de p al puntero buffer
-		buffer = &p;
+		//buffer = &p;
 
 		// Envia la dirreccion de memoria del buffer con el tamanio a unSocket
-		//TODO: colocar tamanio del paquete y que se muestre bien en el servidor
-		if (send(unSocket, buffer, 500, 0) >= 0) {
+		if (send(unSocket, &buffer, BUFF_SIZE, 0) >= 0) {
 			printf("Datos enviados!\n");
 
-			if (strcmp(p.payload, "fin") == 0) {
+			if (strcmp(buffer.payload, "fin") == 0) {
 
 				printf("Cliente cerrado correctamente.\n");
 				break;
-
 			}
+
+		memset(buffer.payload,0,BUFF_SIZE-sizeof(int8_t)-sizeof(int16_t));
+
+		if(recv(unSocket, &buffer, BUFF_SIZE, 0)>=0){
+			printf("El mensaje recibido es este: %s\n",buffer.payload);
+		}
+
+		if(buffer.type == 1)
+			printf("A seguir rockeando!\n");
+		if(buffer.type == 2)
+			printf("Se pudrio todo!\n");
 
 		} else {
 			perror("Error al enviar datos. Server no encontrado.\n");
 			break;
 		}
+
 	}
 
 	close(unSocket);

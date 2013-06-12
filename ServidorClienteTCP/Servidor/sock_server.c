@@ -22,12 +22,16 @@ void atenderCliente (int socketNuevaConexion){
 		char payload[1024];
 	} Paquete;
 
-	int nbytesRecibidos;
+	//TODO: Definir el tamanio del paquete
 
 	//Se inicializa una variable tipo Paquete
 	Paquete buffer;
 
 	while (1) {
+
+		int nbytesRecibidos;
+
+		memset(buffer.payload,0,BUFF_SIZE-sizeof(int8_t)-sizeof(int16_t));
 
 			// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
 			if ((nbytesRecibidos = recv(socketNuevaConexion, &buffer, BUFF_SIZE, 0) )
@@ -43,6 +47,19 @@ void atenderCliente (int socketNuevaConexion){
 					printf("Server cerrado correctamente.\n");
 					break;
 				}
+
+				//TODO: Este es un mensaje de prueba, después hay que sacarlo
+				if (strcmp(buffer.payload, "Pudrio") == 0) {
+					buffer.type = 2;
+					printf("Mensaje de rechazo cargado correctamente.\n");
+				}
+
+				memset(buffer.payload,0,BUFF_SIZE-sizeof(int8_t)-sizeof(int16_t));
+
+				strcpy(buffer.payload,"Genial!");
+
+				if (send(socketNuevaConexion, &buffer, BUFF_SIZE, 0) >= 0)
+					printf("Respuesta enviada\n");
 
 			} else {
 				perror("Error al recibir datos");
