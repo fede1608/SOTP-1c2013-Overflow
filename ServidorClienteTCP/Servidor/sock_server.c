@@ -19,50 +19,81 @@ void atenderCliente (int socketNuevaConexion){
 	typedef struct t_paquete {
 		int8_t type;
 		int16_t payloadlength;
-		char payload[1024];
-	} Paquete;
+	} Header;
 
-	//TODO: Definir el tamanio del paquete
-
-	//Se inicializa una variable tipo Paquete
-	Paquete buffer;
+	Header h;
+	void* buffer;
 
 	while (1) {
 
 		int nbytesRecibidos;
 
-		memset(buffer.payload,0,BUFF_SIZE-sizeof(int8_t)-sizeof(int16_t));
+			// Recibe header
+			if(recv(socketNuevaConexion, &h, sizeof(Header),0) > 0){
+				printf("Header del cliente recibido\n");
+				buffer = malloc(h.payloadlength);
 
-			// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
-			if ((nbytesRecibidos = recv(socketNuevaConexion, &buffer, BUFF_SIZE, 0) )
-					> 0) {
-				printf("Mensaje recibido: ");
-				fwrite(buffer.payload, 1, buffer.payloadlength, stdout);
-				printf("\n");
-				printf("Tamanio del buffer %d bytes!\n", nbytesRecibidos);
-				fflush(stdout);
+			// Recibe payload hasta la cantidad indicada por el header y lo guarda en buffer
+				if ((nbytesRecibidos = recv(socketNuevaConexion, buffer, h.payloadlength, 0) )
+						> 0) {
+					printf("Mensaje recibido: ");
+					fwrite(buffer, 1, h.payloadlength, stdout);
+					printf("\n");
+					printf("Tamanio del buffer %d bytes!\n", nbytesRecibidos);
+					fflush(stdout);
 
-				//Verifica que si el payload contiene la palabra "fin" para cerrar la conexion
-				if (memcmp(buffer.payload, "fin", nbytesRecibidos) == 0) {
-					printf("Server cerrado correctamente.\n");
+					//Verifica que si el payload contiene la palabra "fin" para cerrar la conexion
+					if (memcmp(buffer, "fin", nbytesRecibidos) == 0) {
+						printf("Conexion con cliente cerrada correctamente.\n");
+						break;
+					}
+
+					// Define el tipo de mensaje
+					// Test
+					h.type = 1;
+
+					// Esto es un test, si en el buffer esta la palabra "Pudrio",
+					// el tipo de mensaje de respuesta sera 2
+					if (strcmp(buffer, "Pudrio") == 0) {
+						h.type = 2;
+						printf("Mensaje de rechazo cargado correctamente.\n");
+					}
+
+					//No se que hace esto, pero anda
+					memset(buffer,0,h.payloadlength);
+
+					//Arma el nuevo header y buffer para enviar
+					h.payloadlength = strlen("Respuesta del servidor");
+					buffer = malloc(sizeof(h.payloadlength));
+					strcpy(buffer,"Respuesta del servidor");
+
+					//Envia header al cliente
+					if (send(socketNuevaConexion, &h, sizeof(Header), 0) >= 0){
+
+						printf("Header enviado\n");
+
+						//Envia buffer (payload) al cliente
+						if (send(socketNuevaConexion, buffer, h.payloadlength, 0) >= 0)
+							printf("Respuesta enviada\n");
+
+						else
+							printf("Fallo el envio del payload\n");
+
+					}
+
+					else
+						printf("Fallo el envio del Header\n");
+
+					//TODO: No se por que tira error esto
+					//free(buffer);
+
+				} else {
+					perror("Error al recibir datos");
 					break;
 				}
 
-				//TODO: Este es un mensaje de prueba, después hay que sacarlo
-				if (strcmp(buffer.payload, "Pudrio") == 0) {
-					buffer.type = 2;
-					printf("Mensaje de rechazo cargado correctamente.\n");
-				}
-
-				memset(buffer.payload,0,BUFF_SIZE-sizeof(int8_t)-sizeof(int16_t));
-
-				strcpy(buffer.payload,"Genial!");
-
-				if (send(socketNuevaConexion, &buffer, BUFF_SIZE, 0) >= 0)
-					printf("Respuesta enviada\n");
-
 			} else {
-				perror("Error al recibir datos");
+				perror("Error al recibir header");
 				break;
 			}
 		}
