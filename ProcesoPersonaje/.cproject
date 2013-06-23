@@ -36,8 +36,9 @@
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.1061137983" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.misc.pic.893593479" name="Position Independent Code (-fPIC)" superClass="gnu.c.compiler.option.misc.pic" value="false" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.include.paths.42855056" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/so-commons-library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nivel-gui}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/commons-library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/socketsCom}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.files.805950572" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files"/>
 								<option id="gnu.c.compiler.option.warnings.allwarn.102665592" name="All warnings (-Wall)" superClass="gnu.c.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
@@ -45,15 +46,16 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.94071683" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
 								<option id="gnu.c.link.option.paths.1630979002" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/socketsCom/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/so-commons-library/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="/home/utnso/tp-20131c-overflow/Libs"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nivel-gui/Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/commons-library}&quot;"/>
 								</option>
 								<option id="gnu.c.link.option.libs.423208508" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ncurses"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="so-commons-library"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="nivel-gui"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ncurses"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="curses"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socketsCom"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1233173659" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -63,8 +65,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1235899155" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.6533200" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
 								<option id="gnu.both.asm.option.include.paths.1447531685" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/commons-library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/so-commons-library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nivel-gui}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/socketsCom}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1188184594" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -75,16 +78,23 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
 				<externalSettings containerId="nivel-gui;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/nivel"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/nivel/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="nivel" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/nivel-gui"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/nivel-gui/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="nivel-gui" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
-				<externalSettings containerId="commons-library;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+				<externalSettings containerId="so-commons-library;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Commons"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Commons/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="Commons" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/so-commons-library"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/so-commons-library/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="so-commons-library" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="socketsCom;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/socketsCom"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/socketsCom/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="socketsCom" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 			</storageModule>
@@ -135,11 +145,27 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="personaje.cdt.managedbuild.target.gnu.exe.1037127101" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
+		<project id="Personaje.cdt.managedbuild.target.gnu.exe.430815473" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/Personaje"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/Personaje"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.2035350180;cdt.managedbuild.config.gnu.exe.release.2035350180.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.443312256;cdt.managedbuild.tool.gnu.c.compiler.input.482471544">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1761022309;cdt.managedbuild.config.gnu.exe.release.1761022309.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1327526779;cdt.managedbuild.tool.gnu.c.compiler.input.1945580663">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.569807358;cdt.managedbuild.config.gnu.exe.debug.569807358.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1136126185;cdt.managedbuild.tool.gnu.c.compiler.input.497383151">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1530112628;cdt.managedbuild.config.gnu.exe.release.1530112628.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.2068243833;cdt.managedbuild.tool.gnu.c.compiler.input.1791845404">
@@ -152,14 +178,4 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/Personaje"/>
-		</configuration>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/Personaje"/>
-		</configuration>
-	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

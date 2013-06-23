@@ -12,7 +12,7 @@
 
 
 		//Mande un mensaje a un socket determinado
-		int mandarMensaje(int unSocket, int tipo, int tamanio, void *buffer) {
+		int mandarMensaje(int unSocket, int8_t tipo, int tamanio, void *buffer) {
 
 			Header header;
 
@@ -38,14 +38,28 @@
 
 			if((recv(unSocket, &header, sizeof(Header), 0))>=0) {
 				*buffer = malloc (header.payloadlength);
-				if ((recv(unSocket, buffer, header.payloadlength, 0) >= 0)) {
-					return 1;
+				if ((recv(unSocket, *buffer, header.payloadlength, 0) >= 0)) {
+					return (int)header.type;
 				}
 			}
-			return 0;
+			return -1;
 
 		}
+		//Recibe un mensaje del servidor - Version Lucas
+		int recibirHeader(int unSocket, Header* header) {
+				if((recv(unSocket, header, sizeof(Header), 0))>=0) {
+					return 1;
+					}
+					return 0;
+				}
 
+		int recibirData(int unSocket, Header header, void** buffer){
+			*buffer = malloc (header.payloadlength);
+					if ((recv(unSocket, buffer, header.payloadlength, 0) >= 0)) {
+						return 1;
+					}
+			return 0;
+		}
 		//Recibe un mensaje del servidor - Version SO
 		int recv_variable(int socketReceptor, void* buffer) {
 

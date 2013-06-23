@@ -11,8 +11,10 @@ typedef struct t_paquete {
 		} Header;
 
 
-		int mandarMensaje(int unSocket, int tipo, int tamanio, void *buffer);
+		int mandarMensaje(int unSocket, int8_t tipo, int tamanio, void *buffer);
 		int recibirMensaje(int unSocket, void** buffer) ;
+		int recibirHeader(int unSocket, Header* header);
+		int recibirData(int unSocket, Header header, void** buffer);
 		int recv_variable(int socketReceptor, void* buffer);
 		int quieroUnPutoSocketAndando(char* direccion, int puerto);
 
