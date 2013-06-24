@@ -143,8 +143,9 @@ int main(void){
 						rec=caracter;
 						printf("char %c",*rec);
 						flor->quantity--;
-						if(*rec=='F')posRec.x=flor->posx;posRec.y=flor->posy;
-						if(*rec=='H')posRec.x=hongo->posx;posRec.y=hongo->posy;
+						if(*rec=='F'){posRec.x=flor->posx;posRec.y=flor->posy;}
+						if(*rec=='H'){posRec.x=hongo->posx;posRec.y=hongo->posy;}
+						printf("posEnv: %d %d ",posRec.x,posRec.y);
 						if (mandarMensaje(socketNuevaConexion,3 , sizeof(Posicion),&posRec)) {
 
 						}
