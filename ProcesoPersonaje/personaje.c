@@ -38,8 +38,8 @@ int main(void){
 			val=config_get_string_value(config,"obj[Nivel1]");
 			charPer=config_get_string_value(config,"simbolo")[0];
 			veclong=lengthVecConfig(val);
-			pos.x=6;
-			pos.y=6;
+			pos.x=7;
+			pos.y=8;
 			rec.x=10;
 			rec.y=10;
 	//conectar con nivel
@@ -75,44 +75,46 @@ int main(void){
 			}
 
 int ii;
+for(ii=0;ii<veclong;ii++)printf("recurso %c",*obj[ii]);
+
+
+
+void* buffer;
+recActual=*obj[0];
+buffer= &recActual;
+printf("pos %d %d \n",pos.x,pos.y);
+if (mandarMensaje(unSocket,1 , sizeof(char),buffer)) {
+
+	printf("Llego el header de la posicion a recurso al nivel\n");
+
+
+	printf("pos %d %d \n",pos.x,pos.y);
+		printf("Llego el recurso actual necesario al nivel\n");
+		Header unHeader;
+		printf("pos %d %d \n",pos.x,pos.y);
+		if (recibirHeader(unSocket,&unHeader)) {
+
+			printf("pos %d %d %d %d\n",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
+			Posicion lifeSucks;
+			recibirData(unSocket,unHeader,(void**)&lifeSucks);
+			rec=lifeSucks;
+			printf("pos %d %d \n",pos.x,pos.y);
+			printf("Llego %c header respuesta del nivel: %d %d\n",recActual,rec.x,rec.y);
+//							rec = (Posicion)*buffer;
+			printf("Llego la posicion del recurso solicitado del nivel\n");
+
+
+
+		}
+}
+
+
 			for(ii=0;ii<veclong;ii++){
 
 				recActual=*obj[ii];
 
 	//solicitar posicion recurso Recurso: recactual
 
-				h.type = 1;
-				h.payloadlength = sizeof(recActual);
-				void* buffer;
-				buffer= &recActual;
-				printf("pos %d %d \n",pos.x,pos.y);
-				if (mandarMensaje(unSocket,1 , sizeof(recActual),buffer)) {
-
-					printf("Llego el header de la posicion a recurso al nivel\n");
-
-
-					printf("pos %d %d \n",pos.x,pos.y);
-						printf("Llego el recurso actual necesario al nivel\n");
-						Header unHeader;
-						printf("pos %d %d \n",pos.x,pos.y);
-						if (recibirHeader(unSocket,&unHeader)) {
-
-							printf("pos %d %d %d %d\n",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
-							Posicion lifeSucks;
-							recibirData(unSocket,unHeader,(void**)&lifeSucks);
-							rec=lifeSucks;
-							printf("pos %d %d \n",pos.x,pos.y);
-							printf("Llego %c header respuesta del nivel: %d %d\n",recActual,rec.x,rec.y);
-//							rec = (Posicion)*buffer;
-							printf("Llego la posicion del recurso solicitado del nivel\n");
-
-
-
-						}
-
-
-
-				}
 
 				//esperar posicion del recurso posicion : rec
 
@@ -141,9 +143,13 @@ int ii;
 
 					h.type = 3;
 					h.payloadlength = 1;
+
+					if(ii+1==veclong) exit(0);
+					llego=0;
+					recActual=*obj[ii+1];
 					buffer = &recActual;
 					int * algo;
-					if (mandarMensaje(unSocket,(int8_t)3 , sizeof(recActual),buffer)) {
+					if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
 
 
 						printf("Llego el header de peticion de recurso al nivel\n");
@@ -173,8 +179,8 @@ int ii;
 				buffer=&pos;
 				char* sth;
 				if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)) {
-					printf("Llego el header de la posicion a recurso al nivel %d %d\n",pos.x,pos.y);
-					printf("Llego el recurso actual necesario al nivel\n");
+					printf("Llego el header de la posicion del personaje %d %d\n",pos.x,pos.y);
+
 					if (recibirMensaje(unSocket, (void**)&sth)>=0) {
 						printf("Llego header respuesta: %c del nivel\n",*sth);
 //						rec = *buffer;

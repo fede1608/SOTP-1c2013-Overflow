@@ -137,10 +137,14 @@ int main(void){
 			Posicion posPer;
 			recibirHeader(socketNuevaConexion, &headMen);
 			if(headMen.type==3) {
-						recibirData(socketNuevaConexion, headMen, (void**)rec);
+						char* caracter;
+						caracter= malloc(1);
+						recibirData(socketNuevaConexion, headMen, (void**)caracter);
+						rec=caracter;
 						printf("char %c",*rec);
 						flor->quantity--;
-						posRec.x=hongo->posx;posRec.y=hongo->posy;
+						if(*rec=='F')posRec.x=flor->posx;posRec.y=flor->posy;
+						if(*rec=='H')posRec.x=hongo->posx;posRec.y=hongo->posy;
 						if (mandarMensaje(socketNuevaConexion,3 , sizeof(Posicion),&posRec)) {
 
 						}
@@ -155,7 +159,7 @@ int main(void){
 				sth=malloc(1);
 				sth[0]='k';
 				if (mandarMensaje(socketNuevaConexion,4 , sizeof(char),(void*)sth)) {
-				printf("resp pos \n");
+				printf("resp pos %c %d %d \n",flor->id,flor->posx,flor->posy);
 				}
 
 
