@@ -137,11 +137,12 @@ int main(void){
 			Posicion posPer;
 			recibirHeader(socketNuevaConexion, &headMen);
 			if(headMen.type==3) {
-						recibirData(socketNuevaConexion, headMen, (void**)&rec);
+						recibirData(socketNuevaConexion, headMen, (void**)rec);
+						printf("char %c",*rec);
 						flor->quantity--;
 						posRec.x=hongo->posx;posRec.y=hongo->posy;
 						if (mandarMensaje(socketNuevaConexion,3 , sizeof(Posicion),&posRec)) {
-						printf("pos rec");
+
 						}
 					}
 			else{
