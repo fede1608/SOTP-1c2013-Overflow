@@ -25,6 +25,15 @@ typedef struct t_posicion {
 	int8_t y;
 } Posicion;
 
+typedef struct t_datap {
+int socket;
+ITEM_NIVEL * nodo;
+} DataP;
+
+ITEM_NIVEL* listaItems;
+
+void handler(DataP dataPer);
+
 int main(void){
 	void* buffer;
 //	t_config* config=config_create("config.txt");
@@ -178,5 +187,71 @@ int main(void){
 nivel_gui_terminar();
 return 0;
 }
+//handler de cada personaje recibe unstruct con el socket y el puntero a su nodo
+void handler(DataP dataPer)
+{
+	void* buffer;
+	Posicion posAux;
+	char* carAux;
+	Header unHeader;
+	ITEM_NIVEL* nodoAux;
 
+	recibirHeader(dataPer.socket,&unHeader);
+
+	switch(unHeader.type){
+	case 0:
+		recibirData(dataPer.socket,unHeader, (void**)&carAux);
+		printf("Llego el Personaje %c al nivel",*carAux);
+		if (mandarMensaje(dataPer.socket,0 , 1,carAux))
+		{
+			printf("a");
+		}
+			break;
+	case 1:
+		recibirData(dataPer.socket,unHeader, (void**)&carAux);
+		printf("El Personaje %c solicita la Posición del Recurso %c\n",dataPer.nodo->id,*carAux);
+		nodoAux=obtenerRecurso(listaItems, *carAux);
+		posAux.x=nodoAux->posx;
+		posAux.y=nodoAux->posy;
+		buffer=&posAux;
+		if(mandarMensaje(dataPer.socket,1 , sizeof(Posicion),buffer))
+			printf("Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer.nodo->id);
+		break;
+	case 2:
+		recibirData(dataPer.socket, unHeader, (void**)&posAux);
+		dataPer.nodo->posx=posAux.x;
+		dataPer.nodo->posy=posAux.y;
+		printf("Se recibió la posición(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id);
+		carAux=malloc(1);
+		carAux[0]='K';
+		if (mandarMensaje(dataPer.socket,4 , sizeof(char),(void*)carAux)) {
+			printf("Se le aviso al Personaje %c que llego bien su Posición",dataPer.nodo->id);
+		}
+		break;
+	case 3:
+		recibirData(dataPer.socket, unHeader, (void**)&carAux);
+		printf("El Personaje %c solicita una Instancia del Recurso %c\n",dataPer.nodo->id,*carAux);
+		if(restarRecurso(listaItems, *carAux)>0)
+		{
+			printf("Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer.nodo->id);
+			nodoAux=obtenerRecurso(listaItems, *carAux);
+			posAux.x=nodoAux->posx;
+			posAux.y=nodoAux->posy;
+			buffer=&posAux;
+			if(mandarMensaje(dataPer.socket,1 , sizeof(Posicion),buffer))
+				printf("Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
+		}else{
+			printf("No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer.nodo->id);
+			posAux.x=dataPer.nodo->posx;
+			posAux.y=dataPer.nodo->posy;
+			buffer=&posAux;
+			if(mandarMensaje(dataPer.socket,1 , sizeof(Posicion),buffer))
+				printf("Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id,dataPer.nodo->id);
+		}
+		break;
+	default:
+			break;
+	}
+
+}
 
