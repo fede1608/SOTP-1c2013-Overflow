@@ -17,7 +17,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
-#include "socketsOv.h"
+#include  <socketsCom/socketsOv.h>
 
 static int rows,cols;
 
@@ -32,6 +32,8 @@ ITEM_NIVEL * nodo;
 } DataP;
 
 ITEM_NIVEL * listaItems = NULL;
+
+t_log * logger;
 
 void handler(DataP dataPer);
 int listenear(void);
@@ -70,6 +72,18 @@ void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
 //chequee que un personaje este bloqueado (lo veremos despues esto)
 int main(void){
 	void* buffer;
+
+	//Crea archivo log
+	//Si existe lo abre, sino, lo crea
+	//Con trace va a poder loguear t-o-d-o
+	t_log_level detail = LOG_LEVEL_TRACE;
+
+	//LogNivel = Nombre de archivo log
+	//ProcesoNivel = Nombre del proceso
+	//false = Que no aparezca en pantalla los logs
+	//detail = Detalle con el que se va a loguear (TRACE,INFO,DEBUG,etc)
+	logger = log_create("LogNivel","ProcesoNivel",false,detail);
+
 //	t_config* config=config_create("config.txt");
 	nivel_gui_inicializar();
 	nivel_gui_get_area_nivel(&rows, &cols);
@@ -80,12 +94,15 @@ int main(void){
 		struct sockaddr_in socketInfo;
 		int optval = 1;
 
+		//NO PIENSO LOGUEAR ESTO SI YA LO HACE EL LISTENER
+
 		// Crear un socket:
 		// AF_INET: Socket de internet IPv4
 		// SOCK_STREAM: Orientado a la conexion, TCP
 		// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
 		if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 			perror("Error al crear el socket");
+
 			return EXIT_FAILURE;
 		}
 
@@ -164,7 +181,9 @@ int main(void){
 
 			buffer=&posRec;
 			if (mandarMensaje(socketNuevaConexion,1 , sizeof(Posicion),buffer)) {
-			printf("pos rec");
+				//TODO Borrar
+				//printf("pos rec");
+				log_info(logger,"pos rec");
 			}
 		}
 
@@ -184,11 +203,15 @@ int main(void){
 						caracter= malloc(1);
 						recibirData(socketNuevaConexion, headMen, (void**)caracter);
 						rec=caracter;
-						printf("char %c",*rec);
+						//TODO Borrar
+						//printf("char %c",*rec);
+						log_info(logger,"char %c",*rec);
 						flor->quantity--;
 						if(*rec=='F'){posRec.x=flor->posx;posRec.y=flor->posy;}
 						if(*rec=='H'){posRec.x=hongo->posx;posRec.y=hongo->posy;}
-						printf("posEnv: %d %d ",posRec.x,posRec.y);
+						//TODO Borrar
+						//printf("posEnv: %d %d ",posRec.x,posRec.y);
+						log_info(logger,"posEnv: %d %d ",posRec.x,posRec.y);
 						if (mandarMensaje(socketNuevaConexion,3 , sizeof(Posicion),&posRec)) {
 
 						}
@@ -199,11 +222,15 @@ int main(void){
 				recibirData(socketNuevaConexion, headMen, (void**)&posPer);
 				pj1->posx=posPer.x;
 				pj1->posy=posPer.y;
-				printf("px: %d py: %d rx: %d ry:%d",posPer.x,posPer.y,posRec.x,posRec.y);
+				//TODO Borrar
+				//printf("px: %d py: %d rx: %d ry:%d",posPer.x,posPer.y,posRec.x,posRec.y);
+				log_info(logger,"px: %d py: %d rx: %d ry:%d",posPer.x,posPer.y,posRec.x,posRec.y);
 				sth=malloc(1);
 				sth[0]='k';
 				if (mandarMensaje(socketNuevaConexion,4 , sizeof(char),(void*)sth)) {
-				printf("resp pos %c %d %d \n",flor->id,flor->posx,flor->posy);
+					//TODO Borrar
+					//printf("resp pos %c %d %d \n",flor->id,flor->posx,flor->posy);
+					log_info(logger,"resp pos %c %d %d \n",flor->id,flor->posx,flor->posy);
 				}
 
 
@@ -221,7 +248,7 @@ int main(void){
 nivel_gui_terminar();
 return 0;
 }
-//handler de cada personaje recibe unstruct con el socket y el puntero a su nodo
+//handler de cada personaje recibe un struct con el socket y el puntero a su nodo
 void handler(DataP dataPer)
 {
 	void* buffer;
@@ -235,7 +262,9 @@ while(1){
 	switch(unHeader.type){
 	case 0:
 		recibirData(dataPer.socket,unHeader, (void**)&carAux);
-		printf("Llego el Personaje %c al nivel",*carAux);
+		//TODO: borrar
+		//printf("Llego el Personaje %c al nivel",*carAux);
+		log_info(logger,"Llego el Personaje %c al nivel", *carAux);
 		if (mandarMensaje(dataPer.socket,0 , 1,carAux))
 		{
 			printf("a");
@@ -243,44 +272,62 @@ while(1){
 			break;
 	case 1:
 		recibirData(dataPer.socket,unHeader, (void**)&carAux);
-		printf("El Personaje %c solicita la Posición del Recurso %c\n",dataPer.nodo->id,*carAux);
+		//TODO Borrar
+		//printf("El Personaje %c solicita la Posición del Recurso %c\n",dataPer.nodo->id,*carAux);
+		log_info(logger,"El Personaje %c solicita la Posición del Recurso %c\n",dataPer.nodo->id,*carAux);
 		nodoAux=obtenerRecurso(listaItems, *carAux);
 		posAux.x=nodoAux->posx;
 		posAux.y=nodoAux->posy;
 		buffer=&posAux;
 		if(mandarMensaje(dataPer.socket,1 , sizeof(Posicion),buffer))
-			printf("Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer.nodo->id);
+			//TODO Borrar
+			//printf("Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer.nodo->id);
+			log_info(logger,"Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer.nodo->id);
 		break;
 	case 2:
 		recibirData(dataPer.socket, unHeader, (void**)&posAux);
 		dataPer.nodo->posx=posAux.x;
 		dataPer.nodo->posy=posAux.y;
-		printf("Se recibió la posición(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id);
+		//TODO Borrar
+		//printf("Se recibió la posición(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id);
+		log_info(logger,"Se recibió la posición(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id);
 		carAux=malloc(1);
 		carAux[0]='K';
 		if (mandarMensaje(dataPer.socket,4 , sizeof(char),(void*)carAux)) {
-			printf("Se le aviso al Personaje %c que llego bien su Posición",dataPer.nodo->id);
+			//TODO Borrar
+			//printf("Se le aviso al Personaje %c que llego bien su Posición",dataPer.nodo->id);
+			log_info(logger,"Se le aviso al Personaje %c que llego bien su Posición",dataPer.nodo->id);
 		}
 		break;
 	case 3:
 		recibirData(dataPer.socket, unHeader, (void**)&carAux);
-		printf("El Personaje %c solicita una Instancia del Recurso %c\n",dataPer.nodo->id,*carAux);
+		//TODO Borrar
+		//printf("El Personaje %c solicita una Instancia del Recurso %c\n",dataPer.nodo->id,*carAux);
+		log_info(logger,"El Personaje %c solicita una Instancia del Recurso %c\n",dataPer.nodo->id,*carAux);
 		if(restarRecurso(listaItems, *carAux)>0)
 		{
-			printf("Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer.nodo->id);
+			//TODO Borrar
+			//printf("Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer.nodo->id);
+			log_info(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer.nodo->id);
 			nodoAux=obtenerRecurso(listaItems, *carAux);
 			posAux.x=nodoAux->posx;
 			posAux.y=nodoAux->posy;
 			buffer=&posAux;
 			if(mandarMensaje(dataPer.socket,1 , sizeof(Posicion),buffer))
-				printf("Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
+				//TODO Borrar
+				//printf("Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
+				log_info(logger,"Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
 		}else{
-			printf("No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer.nodo->id);
+			//TODO Borrar
+			//printf("No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer.nodo->id);
+			log_info(logger,"No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer.nodo->id);
 			posAux.x=dataPer.nodo->posx;
 			posAux.y=dataPer.nodo->posy;
 			buffer=&posAux;
 			if(mandarMensaje(dataPer.socket,1 , sizeof(Posicion),buffer))
-				printf("Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id,dataPer.nodo->id);
+				//TODO Borrar
+				//printf("Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id,dataPer.nodo->id);
+				log_info(logger,"Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id,dataPer.nodo->id);
 		}
 		break;
 	default:
@@ -304,7 +351,9 @@ int listenear(void){
             // SOCK_STREAM: Orientado a la conexion, TCP
             // 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
             if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-                perror("Error al crear el socket");
+            	//TODO Borrar
+            	//perror("Error al crear el socket");
+            	log_error(logger,"Error al crear el socket");
                 return EXIT_FAILURE;
             }
 
@@ -320,24 +369,32 @@ int listenear(void){
             if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
                     != 0) {
 
-                perror("Error al bindear socket escucha");
+            	//TODO Borrar
+                //perror("Error al bindear socket escucha");
+                log_error(logger,"Error al bindear socket escucha");
                 return EXIT_FAILURE;
             }
 
         // Escuchar nuevas conexiones entrantes.
             if (listen(socketEscucha, 1) != 0) {
-                perror("Error al poner a escuchar socket");
+                //TODO Borrar
+            	//perror("Error al poner a escuchar socket");
+                log_error(logger,"Error al bindear socket escucha");
                 return EXIT_FAILURE;
             }
 
             while (1){
-            printf("Escuchando conexiones entrantes.\n");
+            	//TODO Borrar
+            	//printf("Escuchando conexiones entrantes.\n");
+            	log_info(logger,"Escuchando conexiones entrantes");
 
                 // Aceptar una nueva conexion entrante. Se genera un nuevo socket con la nueva conexion.
                 // La funci贸n accept es bloqueante, no sigue la ejecuci贸n hasta que se reciba algo
                 if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
 
-                    perror("Error al aceptar conexion entrante");
+                	//TODO Borrar
+                	//perror("Error al aceptar conexion entrante");
+                	log_error(logger,"Error al aceptar conexion entrante");
                     return EXIT_FAILURE;
                 }
 
@@ -345,10 +402,16 @@ int listenear(void){
                 char* rec;
                 if(recibirMensaje(socketNuevaConexion, (void**)&rec)>=0) {
 
-                    printf("Llego el Personaje %c del nivel",*rec);
+                    //TODO Borrar
+                	//printf("Llego el Personaje %c del nivel",*rec);
+                	log_info(logger,"Llego el Personaje %c del nivel",*rec);
 
                     if (mandarMensaje(socketNuevaConexion,0 , 1,rec)) {
-                        printf("a");
+                    	//??????
+                    	//TODO Borrar
+                    	//printf("a");
+                    	log_info(logger,"a");
+
                     }
 
                     DataP personaje;
@@ -379,6 +442,3 @@ void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant){
 	*y=(int)strtol(vecStr[3], &aux, 10);
 	*cant=(int)strtol(vecStr[4], &aux, 10);
 	}
-
-
-
