@@ -1,0 +1,48 @@
+//Hay que definir el nivel de detalle
+//se puede elegir entre:
+//LOG_LEVEL_TRACE
+//LOG_LEVEL_DEBUG
+//LOG_LEVEL_INFO
+//LOG_LEVEL_WARNING
+//LOG_LEVEL_ERROR
+
+t_log_level * detail = LOG_LEVEL_INFO;
+
+//Inicializar archivo log
+//Si no existe crea el archivo, si existe, lo abre
+//log_create(Nombre del archivo, Nombre del proceso, si queres que figure el log en pantalla, nivel de detalle)
+
+t_log * log = log_create("ArchivoTxT","Personaje",true,detail);
+
+//Para loguear cosas
+//depende del tipo de detalle que se puso
+//log_trace
+//log_debug
+//log_info
+//log_warning
+//log_error
+
+log_trace(log,"Hola");
+log_trace(log,"Esto es un numero: %d",numero);
+
+//Hay que tener en cuenta algo a la hora de loguear
+//los tipos incluyen al otro, depende del orden
+//si es un log tipo error, solamente vas a poder loguear error
+//si es un log tipo trace, vas a poder loguear TODOS
+//si es un log tipo info, se va a loguear error, warning e info
+
+//El de arriba incluye a los de abajo
+
+//Ejemplo completo
+
+t_log_level * detail = LOG_LEVEL_INFO; //Es tipo info el log este
+log = t_log * log_create("ArchivoTxT","Personaje",true,detail);
+log_trace(log,"Hola"); //No se va a loguear
+log_debug(log,"manga"); //No se va a loguear
+log_info(log,"de");
+log_warning(log,"pussys");
+log_error(log,"!");
+
+//Para destruir un archivo
+log_destroy(log);
+
