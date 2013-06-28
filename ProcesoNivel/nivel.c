@@ -30,10 +30,42 @@ int socket;
 ITEM_NIVEL * nodo;
 } DataP;
 
-ITEM_NIVEL* listaItems;
+ITEM_NIVEL * listaItems = NULL;
 
 void handler(DataP dataPer);
+int listenear(void);
+//1) El proceso nivel crea 1 lista (global)
+//que tiene personajes e items
 
+//2) Listenea personajes para conectarse
+//cuando conectan:
+//-Crea el thread correspondiente
+//-Le pide el simbolo que usa
+//-Con el simbolo, lo agrega a la lista de personajes
+
+//3) El personaje le pide proximo recurso
+//Nivel busca en la lista de recursos
+//y le pasa la posicion del recurso
+
+//4) El personaje avisa a nivel que se mueve
+//Nivel va actualizando la posicion
+//y chequea que este dentro de los margenes (rows,cols)
+
+//5) El personaje esta en el recurso y solicita instancia
+//Verifica que el personaje este en ese lugar
+//Nivel busca en la lista de recursos si tiene
+//instancia de ese recurso. Si la tiene, se la da
+//y actualiza las instancias disponibles de ese recurso
+//si no tiene, le avisa que no tiene
+
+//6) El personaje se desconecta (por muerte o porque completa nivel)
+//Nivel notifica a Orquestador instancias a liberar
+//Nivel libera instancias que tenia el personaje
+//Lo saca de la lista
+
+//7) Chequeo de interbloqueo
+//thread adicional que cada cierto tiempo (configurable)
+//chequee que un personaje este bloqueado (lo veremos despues esto)
 int main(void){
 	void* buffer;
 //	t_config* config=config_create("config.txt");
@@ -255,3 +287,81 @@ void handler(DataP dataPer)
 
 }
 
+
+int listenear(void){
+
+    int socketEscucha ,socketNuevaConexion;
+
+            struct sockaddr_in socketInfo;
+            int optval = 1;
+
+            // Crear un socket:
+            // AF_INET: Socket de internet IPv4
+            // SOCK_STREAM: Orientado a la conexion, TCP
+            // 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
+            if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+                perror("Error al crear el socket");
+                return EXIT_FAILURE;
+            }
+
+            // Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
+            setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
+                    sizeof(optval));
+
+            socketInfo.sin_family = AF_INET;
+            socketInfo.sin_addr.s_addr = INADDR_ANY; //Notar que aca no se usa inet_addr()
+            socketInfo.sin_port = htons(5000);
+
+        // Vincular el socket con una direccion de red almacenada en 'socketInfo'.
+            if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
+                    != 0) {
+
+                perror("Error al bindear socket escucha");
+                return EXIT_FAILURE;
+            }
+
+        // Escuchar nuevas conexiones entrantes.
+            if (listen(socketEscucha, 1) != 0) {
+                perror("Error al poner a escuchar socket");
+                return EXIT_FAILURE;
+            }
+
+            while (1){
+            printf("Escuchando conexiones entrantes.\n");
+
+                // Aceptar una nueva conexion entrante. Se genera un nuevo socket con la nueva conexion.
+                // La funci贸n accept es bloqueante, no sigue la ejecuci贸n hasta que se reciba algo
+                if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
+
+                    perror("Error al aceptar conexion entrante");
+                    return EXIT_FAILURE;
+                }
+
+                //Handshake en el que recibe la letra del personaje
+                char* rec;
+                if(recibirMensaje(socketNuevaConexion, (void**)&rec)>=0) {
+
+                    printf("Llego el Personaje %c del nivel",*rec);
+
+                    if (mandarMensaje(socketNuevaConexion,0 , 1,rec)) {
+                        printf("a");
+                    }
+
+                    DataP personaje;
+
+                    personaje.socket = socketNuevaConexion;
+
+                    //Agrega personaje a la lista y devuelve nodo
+                    personaje.nodo = CrearPersonaje(&listaItems, *rec, 0 ,0);
+
+                    //TODO Fede vos sabes que hacer
+                    pthread_t threadPersonaje;
+                    pthread_create(&threadPersonaje, NULL, handler, &personaje);
+
+                }
+
+
+
+            }
+    return 1;
+}
