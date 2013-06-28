@@ -6,6 +6,7 @@
  */
 #include "config.h"
 #include "nivel.h"
+#include "log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>
@@ -34,6 +35,7 @@ ITEM_NIVEL * listaItems = NULL;
 
 void handler(DataP dataPer);
 int listenear(void);
+void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
 //1) El proceso nivel crea 1 lista (global)
 //que tiene personajes e items
 
@@ -227,7 +229,7 @@ void handler(DataP dataPer)
 	char* carAux;
 	Header unHeader;
 	ITEM_NIVEL* nodoAux;
-
+while(1){
 	recibirHeader(dataPer.socket,&unHeader);
 
 	switch(unHeader.type){
@@ -284,6 +286,8 @@ void handler(DataP dataPer)
 	default:
 			break;
 	}
+
+}
 
 }
 
@@ -365,3 +369,16 @@ int listenear(void){
             }
     return 1;
 }
+
+void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant){
+	char ** vecStr;
+	char* aux;
+	vecStr=string_split(caja, ",");
+	*id=*vecStr[1];
+	*x=(int)strtol(vecStr[2], &aux, 10);
+	*y=(int)strtol(vecStr[3], &aux, 10);
+	*cant=(int)strtol(vecStr[4], &aux, 10);
+	}
+
+
+
