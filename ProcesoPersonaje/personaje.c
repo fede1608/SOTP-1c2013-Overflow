@@ -38,8 +38,8 @@ int main(void){
 			val=config_get_string_value(config,"obj[Nivel1]");
 			charPer=config_get_string_value(config,"simbolo")[0];
 			veclong=lengthVecConfig(val);
-			pos.x=7;
-			pos.y=8;
+			pos.x=1;
+			pos.y=1;
 			rec.x=10;
 			rec.y=10;
 	//conectar con nivel
@@ -61,7 +61,7 @@ int main(void){
 
 				if(recibirMensaje(unSocket, (void**)&jo)>=0) {
 
-					printf("Llego el OK del nivel\n");
+					printf("Llego el OK del nivel char %c\n",*jo);
 
 				}
 
@@ -83,7 +83,7 @@ void* buffer;
 recActual=*obj[0];
 buffer= &recActual;
 printf("pos %d %d \n",pos.x,pos.y);
-if (mandarMensaje(unSocket,1 , sizeof(char),buffer)) {
+if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
 
 	printf("Llego el header de la posicion a recurso al nivel\n");
 
@@ -144,7 +144,10 @@ if (mandarMensaje(unSocket,1 , sizeof(char),buffer)) {
 					h.type = 3;
 					h.payloadlength = 1;
 
-					if(ii+1==veclong) exit(0);
+					if(ii+1==veclong) {
+						mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+						exit(0);
+					}
 					llego=0;
 					recActual=*obj[ii+1];
 					buffer = &recActual;
@@ -152,7 +155,7 @@ if (mandarMensaje(unSocket,1 , sizeof(char),buffer)) {
 					if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
 
 
-						printf("Llego el header de peticion de recurso al nivel\n");
+						printf("Llego el header de peticion de recurso %c al nivel\n",recActual);
 						printf("Llego el buffer del recurso necesario al nivel\n");
 						Header unHeader;
 						Posicion lifeSucks;
