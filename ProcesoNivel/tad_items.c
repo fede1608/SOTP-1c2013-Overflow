@@ -26,7 +26,7 @@
 
  ITEM_NIVEL *  CrearCaja(ITEM_NIVEL** ListaItems, char id, int x , int y, int cant) {
 	ITEM_NIVEL * temp;
-    CrearItem(ListaItems, id, x, y, RECURSO_ITEM_TYPE, cant);
+    temp=CrearItem(ListaItems, id, x, y, RECURSO_ITEM_TYPE, cant);
     return temp;
 }
 
