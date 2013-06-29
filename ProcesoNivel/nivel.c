@@ -97,10 +97,33 @@ int main(void){
 
 
 
-		//	Conectar con el personaje y obtener el simbolo
-		CrearCaja(&listaItems,'F',10,14,7);
-		CrearCaja(&listaItems,'H',17,6,3);
+		//	Leer el config y cargar los recursos
+//		CrearCaja(&listaItems,'F',10,14,7);
+//		CrearCaja(&listaItems,'H',17,6,3);
+		t_config* configNivel = config_create("config.txt");
+			char *varstr;
+			varstr=malloc(8);
+			strcpy(varstr,"Caja");
+			char pal[4];
+			int cantKeys = config_keys_amount(configNivel)-4;
+			int x;
+			for (x=1;x<=cantKeys;x++)
+			{
 
+					sprintf(pal, "%d", x);
+					strcpy(varstr+4,pal);
+
+					if(config_has_property(configNivel,varstr))
+						{
+						char *stringCompleto = config_get_string_value(configNivel,varstr);
+
+						char id;
+						int posx, posy, instancias;
+
+						sacarInfoCaja(stringCompleto, &id, &posx, &posy, &instancias);
+						CrearCaja(&listaItems, id, posx, posy, instancias);
+						}
+				}
 
 		while(1){
 
