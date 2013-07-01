@@ -28,19 +28,19 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.1032684393" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.441975035" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1301787997" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nivel-gui}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/so-commons-library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/socketsCom}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/so-commons-library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nivel-gui}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.993094069" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1707665134" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
 								<option id="gnu.c.link.option.libs.676456437" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="so-commons-library"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="nivel-gui"/>
-									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socketsCom"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="curses"/>
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="pthread"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="so-commons-library"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="socketsCom"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="nivel-gui"/>
 								</option>
 								<option id="gnu.c.link.option.paths.1851209874" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/home/utnso/tp-20131c-overflow/Libs"/>
@@ -53,9 +53,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.859923500" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1611604815" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
 								<option id="gnu.both.asm.option.include.paths.1209789792" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/socketsCom}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/so-commons-library}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/nivel-gui}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/so-commons-library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/socketsCom}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1572204628" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -63,29 +63,7 @@
 					</folderInfo>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="nivel-gui;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/nivel-gui"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/nivel-gui/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="nivel-gui" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="so-commons-library;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/so-commons-library"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/so-commons-library/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="so-commons-library" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="socketsCom;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/socketsCom"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/socketsCom/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="socketsCom" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.config.gnu.exe.release.197163116">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.release.197163116" moduleId="org.eclipse.cdt.core.settings" name="Release">

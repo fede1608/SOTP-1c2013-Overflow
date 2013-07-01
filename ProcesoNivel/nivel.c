@@ -241,49 +241,17 @@ while(1){
 
 int listenear(void){
 
-    int socketEscucha ,socketNuevaConexion;
+    int socketEscucha,socketNuevaConexion;
+    socketEscucha=quieroUnPutoSocketDeEscucha(5000);
 
-            struct sockaddr_in socketInfo;
-            int optval = 1;
-
-            // Crear un socket:
-            // AF_INET: Socket de internet IPv4
-            // SOCK_STREAM: Orientado a la conexion, TCP
-            // 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
-            if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-            	//TODO Borrar
-            	//perror("Error al crear el socket");
-            	log_error(logger,"Error al crear el socket");
-                return EXIT_FAILURE;
-            }
-
-            // Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
-            setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
-                    sizeof(optval));
-
-            socketInfo.sin_family = AF_INET;
-            socketInfo.sin_addr.s_addr = INADDR_ANY; //Notar que aca no se usa inet_addr()
-            socketInfo.sin_port = htons(5000);
-
-        // Vincular el socket con una direccion de red almacenada en 'socketInfo'.
-            if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
-                    != 0) {
-
-            	//TODO Borrar
-                //perror("Error al bindear socket escucha");
-                log_error(logger,"Error al bindear socket escucha");
-                return EXIT_FAILURE;
-            }
-
-        // Escuchar nuevas conexiones entrantes.
-            if (listen(socketEscucha, 10) != 0) {
+            while (1){
+            	// Escuchar nuevas conexiones entrantes.
+            if (listen(socketEscucha, 1) != 0) {
                 //TODO Borrar
             	//perror("Error al poner a escuchar socket");
                 log_error(logger,"Error al bindear socket escucha");
                 return EXIT_FAILURE;
             }
-
-            while (1){
             	//TODO Borrar
             	//printf("Escuchando conexiones entrantes.\n");
             	log_info(logger,"Escuchando conexiones entrantes");
