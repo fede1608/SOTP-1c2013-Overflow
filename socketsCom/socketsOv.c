@@ -83,15 +83,10 @@
 
 		}
 
-		//Crea un socket
-		int quieroUnPutoSocketAndando(char* direccion, int puerto) {
+		int solicitarSocketAlSO () {
 
 			int unSocket;
-
-			struct sockaddr_in socketInfo;
-			//char buffer[BUFF_SIZE];
-
-			printf("Conectando...\n");
+			int optval = 1;
 
 			// Crear un socket:
 			// AF_INET: Socket de internet IPv4
@@ -102,9 +97,30 @@
 				return EXIT_FAILURE;
 			}
 
+			// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
+			setsockopt(unSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+
+			return unSocket;
+		}
+
+		struct sockaddr_in especificarSocketInfo (char* direccion, int puerto) {
+
+			struct sockaddr_in socketInfo;
+
 			socketInfo.sin_family = AF_INET;
 			socketInfo.sin_addr.s_addr = inet_addr(direccion);
 			socketInfo.sin_port = htons(puerto);
+
+			return socketInfo;
+		}
+
+		//Crea un socket
+		int quieroUnPutoSocketAndando(char* direccion, int puerto) {
+
+			int unSocket = solicitarSocketAlSO();
+			struct sockaddr_in socketInfo = especificarSocketInfo (direccion, puerto);
+
+			printf("Conectando...\n");
 
 			// Conectar el socket con la direccion 'socketInfo'.
 			if (connect(unSocket, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
@@ -115,4 +131,21 @@
 
 			printf("Conectado!\n");
 			return unSocket;
+		}
+
+		int quieroUnPutoSocketDeEscucha (int puerto) {
+
+			int socketEscucha = solicitarSocketAlSO();
+			//Se pasa la dirección 0.0.0.0 porque es el equivalente en string de INADDR_ANY
+			struct sockaddr_in socketInfo = especificarSocketInfo ("0.0.0.0", puerto);
+
+			// Vincular el socket con una direccion de red almacenada en 'socketInfo'.
+			if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
+					!= 0) {
+
+				perror("Error al bindear socket escucha");
+				return EXIT_FAILURE;
+			}
+
+			return socketEscucha;
 		}
