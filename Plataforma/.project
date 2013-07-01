@@ -3,6 +3,9 @@
 	<name>Plataforma</name>
 	<comment></comment>
 	<projects>
+		<project>Plataforma</project>
+		<project>ServidorTCP</project>
+		<project>socketsCom</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
