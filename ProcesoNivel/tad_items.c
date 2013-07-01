@@ -26,7 +26,7 @@
 
  ITEM_NIVEL *  CrearCaja(ITEM_NIVEL** ListaItems, char id, int x , int y, int cant) {
 	ITEM_NIVEL * temp;
-    CrearItem(ListaItems, id, x, y, RECURSO_ITEM_TYPE, cant);
+    temp=CrearItem(ListaItems, id, x, y, RECURSO_ITEM_TYPE, cant);
     return temp;
 }
 
@@ -76,7 +76,7 @@ int restarRecurso(ITEM_NIVEL* ListaItems, char id) {
         }
         if ((temp != NULL) && (temp->id == id)) {
                 if ((temp->item_type) && (temp->quantity > 0)) {
-                        temp->quantity = temp->quantity--;
+                        temp->quantity--;
                         return temp->quantity+1;
                 } else return 0;
         }
