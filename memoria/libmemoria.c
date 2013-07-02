@@ -172,7 +172,7 @@ int eliminar_particion(t_memoria segmento, char id) {
 
 void liberar_memoria(t_memoria segmento) {
 	//list_destroy_and_destroy_elements(lista,NULL);
-	free(segmento);
+	//free(segmento);
 }
 
 t_list* particiones(t_memoria segmento) {

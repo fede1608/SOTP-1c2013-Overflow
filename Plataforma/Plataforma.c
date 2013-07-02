@@ -66,15 +66,39 @@ int main (void) {
 //Cardinalidad = 0 hasta N threads ejecutandose simultaneamente, uno por nivel
 int planificador (int numeroDeNivel) {
 
-	//Se informa del estado del thread por pantalla: inciado
-	char* nombreDePlanificador = malloc(sizeof("THR Planificador Nivel ") + sizeof(int));
-	strcpy(nombreDePlanificador, "THR Planificador Nivel ");
-	sprintf(nombreDePlanificador + (strlen(nombreDePlanificador)), "%d", numeroDeNivel);
-	printf("%s: iniciado\n", nombreDePlanificador);
+//	//Se informa del estado del thread por pantalla: inciado
+//	char* nombreDePlanificador = malloc(sizeof("THR Planificador Nivel ") + sizeof(int));
+//	strcpy(nombreDePlanificador, "THR Planificador Nivel ");
+//	sprintf(nombreDePlanificador + (strlen(nombreDePlanificador)), "%d", numeroDeNivel);
+//	printf("%s: iniciado\n", nombreDePlanificador);
+//
+//	//Se informa del estado del thread por pantalla: terminado
+//	printf("%s: terminado\n", nombreDePlanificador);
+//return EXIT_SUCCESS;
 
-	//Se informa del estado del thread por pantalla: terminado
-	printf("%s: terminado\n", nombreDePlanificador);
-	return EXIT_SUCCESS;
+	//TODO Crear estructura de Cola para administrar listos y bloqueados
+
+	//TODO Conectarse con el nivel
+
+	//TODO Abrir listener de Personajes (guardar socket e info del pj en la estructura)
+
+	//while(1) si la lista no apunta a null{
+	//			si quantum>0{
+	//				Mandar mensaje de mov permitido al socket del personaje del nodo actual(primer nodo de la cola)}
+	//			else if(lista no es null){
+	//
+	//			quatum=3;
+	//			buscar el primero de la cola de listos y mandarle un msj de mov permitido}
+	//			esperar respuesta de turno terminado;
+	//			esperar respuesta si tomo un recurso;
+	//			si(tomo recurso& no quedo bloqueado) {quantum=3; poner al final de la cola}
+	//			si (pidio recurso& quedo bloqueado){quatum=3; poner alfinal de la cola de bloquedados}
+	//		}
+
+
+
+
+	return 0;
 };
 //FIN DE PLANIFICADOR
 

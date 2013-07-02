@@ -6,8 +6,8 @@ D[20:29:10]:parabasada
 VACIO[30:34:5]
 VACIO[35:38:4]
 X[39:48:10]:estenoseva
-A[49:51:3]:WIN
-VACIO[52:98:47]
-VACIO[99:123:25]
+VACIO[49:98:50]
+A[99:101:3]:WIN
+VACIO[102:1321:1220]
 --------------------
-Total: 124 bytes, libres: 91 bytes
+Total: 1322 bytes, libres: 1289 bytes
