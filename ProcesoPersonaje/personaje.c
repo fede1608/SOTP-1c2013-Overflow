@@ -22,6 +22,7 @@ typedef struct t_posicion {
 //static int rows,cols;
 Posicion pos;
 Posicion rec;
+int vidas;
 char recActual;
 char charPer;
 int lengthVecConfig(char * value);
@@ -30,19 +31,28 @@ int main(void){
 	t_config* config=config_create("config.txt");
 	//obtener recurso de config
 			char** obj,niveles;
-			char* val;
-			char objNivel[14];
-			int veclong;
-			int llego;
+			char* val,aux;
+			char objNivel[14]="obj[Nivel1]";
+			char corchete[2]="]";
+			int veclong, llego, cantNiv,numNiv, c,ii;
 			Header h;
 			niveles=config_get_array_value(config,"planDeNiveles");
-			obj=config_get_array_value(config,"obj[Nivel1]");
-			val=config_get_string_value(config,"obj[Nivel1]");
+			vidas=config_get_int_value(config,"vidas");
 			charPer=config_get_string_value(config,"simbolo")[0];
+			cantNiv=config_keys_amount(config)-5/*cant de keys fijas*/;
+
+		for(c=0;c<cantNiv;c++){ //for each nivel
+
+			memcpy(&(objNivel[4]),niveles[c],strlen(niveles[c]));
+			memcpy(&(objNivel[4+strlen(niveles[c])]),corchete,2);
+			numNiv=(int)strtol(niveles[c][5], &aux, 10);
+
+			obj=config_get_array_value(config,objNivel);
+			val=config_get_string_value(config,objNivel);
 			veclong=lengthVecConfig(val);
 			pos.x=1;
 			pos.y=1;
-		//TODO implementar for de niveles, conexion solicitud de ip:puerto al orquestator y cierre de esa conex
+		//TODO conexion solicitud de ip:puerto al orquestator y cierre de esa conex
 
 			//conectar con nivel, y planificador
 			int unSocket;
@@ -64,10 +74,8 @@ int main(void){
 				printf("No llego al nivel la confirmacion del personaje (handshake)\n");
 			}
 
-int ii;
-for(ii=0;ii<veclong;ii++)printf("recurso %c",*obj[ii]);
 
-
+//for(ii=0;ii<veclong;ii++)printf("recurso %c",*obj[ii]);
 
 void* buffer;
 recActual=*obj[0];
@@ -169,10 +177,10 @@ for(ii=0;ii<veclong;ii++){
 		//esperar MovPermitido
 		sleep(1);//todo sacar
 	}//fin while(llego)
-}//fin for
+}//fin for each recurso
 
+}//fin for each nivel
 sleep(3);
-
 return 0;
 }
 
