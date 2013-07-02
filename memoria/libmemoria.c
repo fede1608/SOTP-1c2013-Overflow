@@ -5,20 +5,21 @@
 #include <string.h>
 
 t_list * lista;
-//void *mem = 0;
-int tam = 0;
+void *memory;
+int tam;
 
 
 t_memoria crear_memoria(int tamanio) {
 	lista = list_create();
 	tam = tamanio;
 	t_memoria mem = malloc(tamanio);
+	memory=mem;
 	particion *vacio = malloc(sizeof(particion));
 	vacio->id = '0';
 	vacio->inicio =0;
 	vacio->libre = true;
 	vacio->tamanio = tamanio;
-	vacio->dato=NULL;
+	vacio->dato=mem;
 	list_add(lista,vacio);
 	return mem;
 	}
@@ -26,22 +27,24 @@ t_memoria crear_memoria(int tamanio) {
 int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenido) {
 
 	if (tamanio>tam) return -1;
-	//if (!strcmp(segmento,"lista"))//strcmp devuelve 0 si los strings coinciden, bien troll, por eso lo niego
-		//{
 		int i;
 		int partmax1;
 		int memmax=0;
 			for (i=0;i<lista->elements_count;i++) {
+
 				particion *part = list_get(lista,i);
+
 				if ((part->libre==true)&&(part->tamanio > memmax) )
 				{
 					memmax = part->tamanio;
 					partmax1=i;
 				}
-				if (part->id==id) return -1;
+
+
 			}
+
 			particion *partmax = list_get(lista,partmax1);
-					if (memmax>tamanio)
+					if (memmax>=tamanio)
 					{
 				// Agregar nueva particion
 						particion *nuevaP = malloc(sizeof(particion));
@@ -49,10 +52,9 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 						nuevaP->inicio = partmax->inicio;
 						nuevaP->libre = false;
 						nuevaP->tamanio = tamanio;
-//						nuevaP->dato = contenido;
-//						nuevaP->dato=(char *)malloc(strlen(contenido)+1);
-						strcpy((segmento+nuevaP->inicio),contenido);
 						nuevaP->dato=segmento+(nuevaP->inicio);
+						memcpy(nuevaP->dato,contenido,tamanio);
+
 						strcpy(nuevaP->dato,contenido);
 						list_add_in_index(lista,partmax1,nuevaP);
 						int resto = partmax->tamanio -tamanio;
@@ -63,7 +65,7 @@ int almacenar_particion(t_memoria segmento, char id, int tamanio, char* contenid
 							memresto->inicio = partmax->inicio + tamanio;
 							memresto->libre = true;
 							memresto->tamanio = resto;
-							memresto->dato = NULL;
+							memresto->dato = segmento+memresto->inicio;
 							list_add_in_index(lista,partmax1+1,memresto);
 							list_remove(lista,partmax1+2);
 						}else list_remove(lista,partmax1+1);
@@ -157,11 +159,9 @@ int eliminar_particion(t_memoria segmento, char id) {
 
 				printf("testEPSuccess");
 				return 1;*/
-				part->dato=NULL;
 				part->libre=true;
-				part->id='0';
 				found=1;
-				//4 lineas del orto, me cagoo
+				//3 lineas del orto, me cagoo
 
 			}
 		}
@@ -172,7 +172,7 @@ int eliminar_particion(t_memoria segmento, char id) {
 
 void liberar_memoria(t_memoria segmento) {
 	list_destroy_and_destroy_elements(lista,NULL);
-	free(segmento);
+	//free(segmento);
 }
 
 t_list* particiones(t_memoria segmento) {

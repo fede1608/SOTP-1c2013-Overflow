@@ -10,6 +10,7 @@ Para ejecutarlo, setear antes la variable de entorno LD_LIBRARY_PATH desde bash.
 export LD_LIBRARY_PATH=/home/utnso/workspace/memoria/Debug/:/home/utnso/workspace/so-commons-library/Debug
 o
 export LD_LIBRARY_PATH=/home/utnso/tp-20131c-overflow/Libs/:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/home/utnso/TPSO/tp-20131c-overflow/Libs:$LD_LIBRARY_PATH
 
 Parámetros
 ----------

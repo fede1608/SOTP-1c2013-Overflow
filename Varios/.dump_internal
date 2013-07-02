@@ -4,7 +4,6 @@ VACIO[0:2:3]
 V[3:6:4]:abcd
 VACIO[7:10:4]
 D[11:14:4]:wyyr
-VACIO[15:18:4]
-VACIO[19:1221:1203]
+VACIO[15:15:1]
 --------------------
-Total: 1222 bytes, libres: 1214 bytes
+Total: 16 bytes, libres: 8 bytes
