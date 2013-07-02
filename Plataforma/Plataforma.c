@@ -82,17 +82,18 @@ int planificador (int numeroDeNivel) {
 
 	//TODO Abrir listener de Personajes (guardar socket e info del pj en la estructura)
 
-	//while(1) si la lista no apunta a null{
+	//while(1){ si la lista no apunta a null{
 	//			si quantum>0{
 	//				Mandar mensaje de mov permitido al socket del personaje del nodo actual(primer nodo de la cola)}
 	//			else if(lista no es null){
 	//
-	//			quatum=3;
+	//			quatum=varGlogalQuantum;
 	//			buscar el primero de la cola de listos y mandarle un msj de mov permitido}
-	//			esperar respuesta de turno terminado;
-	//			esperar respuesta si tomo un recurso;
-	//			si(tomo recurso& no quedo bloqueado) {quantum=3; poner al final de la cola}
-	//			si (pidio recurso& quedo bloqueado){quatum=3; poner alfinal de la cola de bloquedados}
+	//			esperar respuesta de turno terminado(con la info sobre si quedo bloqueado y si tomo recurso);
+	//			si (tomo recurso& no quedo bloqueado) {quantum=varGlogalQuantum; poner al final de la cola}
+	//			si (pidio recurso& quedo bloqueado){quatum=varGlogalQuantum; poner alfinal de la cola de bloquedados}
+	//			sleep(varGlobalSleep);
+	//			}
 	//		}
 
 

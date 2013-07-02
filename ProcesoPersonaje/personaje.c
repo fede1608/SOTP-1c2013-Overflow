@@ -5,7 +5,6 @@
  *      Author: utnso
  */
 #include "config.h"
-#include "nivel.h"
 #include <string.h>
 #include "string.h"
 #include <stdio.h>
@@ -34,34 +33,35 @@ int main(void){
 			char* val;
 			int veclong;
 			int llego;
+			Header h;
+
 			obj=config_get_array_value(config,"obj[Nivel1]");
 			val=config_get_string_value(config,"obj[Nivel1]");
 			charPer=config_get_string_value(config,"simbolo")[0];
 			veclong=lengthVecConfig(val);
 			pos.x=1;
 			pos.y=1;
-			rec.x=10;
-			rec.y=10;
-	//conectar con nivel
+		//TODO implementar for de niveles, conexion solicitud de ip:puerto al orquestator y cierre de esa conex
+
+			//conectar con nivel, y planificador
 
 			int unSocket;
-			printf("antes de mandar1\n");
+
 			unSocket = quieroUnPutoSocketAndando("127.0.0.1",5000);
-			printf("antes de mandar1\n");
-			Header h;
-			h.type = 0;
-			h.payloadlength = 1;
-			char* jo;
-			jo=malloc(1);
-			*jo=charPer;
-			printf("antes de mandar\n");
-			if (mandarMensaje(unSocket,0 , 1,jo)) {
+
+
+
+			char* charbuf;
+			charbuf=malloc(1);
+			*charbuf=charPer;
+
+			if (mandarMensaje(unSocket,0 , 1,charbuf)) {
 
 				printf("Llego el OK al nivel\n");
 
-				if(recibirMensaje(unSocket, (void**)&jo)>=0) {
+				if(recibirMensaje(unSocket, (void**)&charbuf)>=0) {
 
-					printf("Llego el OK del nivel char %c\n",*jo);
+					printf("Llego el OK del nivel char %c\n",*charbuf);
 
 				}
 
@@ -119,58 +119,53 @@ if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
 				//esperar posicion del recurso posicion : rec
 
 
-				llego=1;
+			llego=1;
 
-				while(llego){
+			while(llego){
+
+				//TODO esperar mensaje de movPermitido para continuar
 
 					printf("pos %d %d \n",pos.x,pos.y);
-			//if ((char)*obj[now]==elemento->id) { //strcmp devuelve 0 si es true por eso hay q negarlo, vaya uno a saber porque
-				if (pos.x!=rec.x) {
-					(rec.x-pos.x)>0?pos.x++:pos.x--;
 
-				}else if (pos.y!=rec.y) {
-					(rec.y-pos.y)>0?pos.y++:pos.y--;
-
-				}else {
-					//solicitar
-//					llego=0;
-
-//
-
-
-				//Solicitar instancia del recActual
-					//esperar OK
-
-					h.type = 3;
-					h.payloadlength = 1;
-
-					if(ii+1==veclong) {
-						mandarMensaje(unSocket,4 , sizeof(char),&recActual);
-						exit(0);
+					if (pos.x!=rec.x) {
+						(rec.x-pos.x)>0?pos.x++:pos.x--;
 					}
-					llego=0;
-					recActual=*obj[ii+1];
-					buffer = &recActual;
-					int * algo;
-					if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
+					else if (pos.y!=rec.y) {
+						(rec.y-pos.y)>0?pos.y++:pos.y--;
+					} else {
 
 
-						printf("Llego el header de peticion de recurso %c al nivel\n",recActual);
-						printf("Llego el buffer del recurso necesario al nivel\n");
-						Header unHeader;
-						Posicion lifeSucks;
-						if (recibirHeader(unSocket,&unHeader)) {
-							printf("Llego header%d %d respuesta del nivel\n", unHeader.payloadlength,unHeader.type);
-						recibirData(unSocket,unHeader,(void**)&lifeSucks);
-									rec=lifeSucks;
-//									llego = *algo;
-									printf("Llego la confirmacion del recurso del nivel %d  %d\n",rec.x,rec.y);
+							//Solicitar instancia del recActual
+							//esperar OK
 
+						h.type = 3;
+						h.payloadlength = 1;
+
+						if(ii+1==veclong) {
+							mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+							exit(0); //todo settear variable de escape de nivel terminado
+						}
+						llego=0;
+						recActual=*obj[ii+1];
+						buffer = &recActual;
+
+						if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
+
+
+							printf("Llego el header de peticion de recurso %c al nivel\n",recActual);
+							printf("Llego el buffer del recurso necesario al nivel\n");
+							Header unHeader;
+							Posicion lifeSucks;
+							if (recibirHeader(unSocket,&unHeader)) {
+								printf("Llego header%d %d respuesta del nivel\n", unHeader.payloadlength,unHeader.type);
+								recibirData(unSocket,unHeader,(void**)&lifeSucks);
+								rec=lifeSucks;
+								printf("Llego la confirmacion del recurso del nivel %d  %d\n",rec.x,rec.y);
 								}
 
 							}
 
-				}
+						}
 
 
 
@@ -178,26 +173,21 @@ if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
 
 				//aviso posicion pos al nivel
 
-				h.type = 2;
-				buffer=&pos;
-				char* sth;
-				if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)) {
-					printf("Llego el header de la posicion del personaje %d %d\n",pos.x,pos.y);
-
-					if (recibirMensaje(unSocket, (void**)&sth)>=0) {
-						printf("Llego header respuesta: %c del nivel\n",*sth);
-//						rec = *buffer;
+						h.type = 2;
+						buffer=&pos;
+						char* sth;
+						if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)) {
+							printf("Llego el header de la posicion del personaje %d %d\n",pos.x,pos.y);
+							if (recibirMensaje(unSocket, (void**)&sth)>=0) {
+								printf("Llego header respuesta: %c del nivel\n",*sth);
+//							rec = *buffer;
 						}
-
-
 					}
-
-
-		sleep(1);
-		}
-}
+					sleep(1);
+				}//fin while(llego)
+			}//fin for
 		sleep(3);
-//solicitar cerrar conexxion
+
 return 0;
 }
 
