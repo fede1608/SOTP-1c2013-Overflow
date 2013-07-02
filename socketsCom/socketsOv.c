@@ -94,7 +94,9 @@
 			// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
 			if ((unSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 				perror("Error al crear socket");
-				return EXIT_FAILURE;
+				//Se usa el 0 para especificar error porque si se usa EXIT_FAILURE
+				//devuelve un 1 y eso podría entenderse como una respuesta correcta
+				return 0;
 			}
 
 			// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
@@ -144,7 +146,9 @@
 					!= 0) {
 
 				perror("Error al bindear socket escucha");
-				return EXIT_FAILURE;
+				//Se usa el 0 para especificar error porque si se usa EXIT_FAILURE
+				//devuelve un 1 y eso podría entenderse como una respuesta correcta
+				return 0;
 			}
 
 			return socketEscucha;
