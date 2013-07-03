@@ -105,14 +105,16 @@ int planificador (InfoP* infoP) {
 	t_queue *colaBloqueados=queue_create();
 
 	//TODO implementar handshake Conectarse con el nivel
-int socketNivel=quieroUnPutoSocketAndando(infoP->ipN,infoP->portN);
-
+//int socketNivel=quieroUnPutoSocketAndando(infoP->ipN,infoP->portN);
+printf("%s %d\n",infoP->ipN,infoP->portN);
 
 	// Abrir listener de Personajes (guardar socket e info del pj en la estructura)
 
 	Info *info;
+	info=malloc(sizeof(Info));
 	info->colaL=colaListos;
-	info->port=socketNivel;
+	//pasar puerto de la plataforma
+	info->port=5001;
 	pthread_t threadPersonaje;
 	pthread_create(&threadPersonaje, NULL, listenerP, (void *)info);
 
@@ -189,7 +191,7 @@ int orquestador (void) {
 	infoP=malloc(sizeof(InfoP));
 	strcpy(infoP->ipN,"127.0.0.1");
 	infoP->nivel=1;
-	infoP->portN=5000;
+	infoP->portN=5010;
 	pthread_t threadPersonaje;
 	pthread_create(&threadPersonaje, NULL, planificador, (void *)infoP);
 
