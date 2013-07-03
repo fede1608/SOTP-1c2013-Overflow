@@ -178,5 +178,5 @@ void liberar_memoria(t_memoria segmento) {
 t_list* particiones(t_memoria segmento) {
 	t_list* listaaux = list_create();
 	 list_add_all(listaaux,lista);
-	 return lista;
+	 return listaaux;
 	}
