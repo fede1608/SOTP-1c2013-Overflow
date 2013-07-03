@@ -281,11 +281,8 @@ int listenerP(Info* info){
 	                //Handshake en el que recibe la letra del personaje
 	                char* rec;
 	                if(recibirMensaje(socketNuevaConexion, (void**)&rec)>=0) {
-
 //	                	log_info(logger,"Llego el Personaje %c del nivel",*rec);
-
 	                    if (mandarMensaje(socketNuevaConexion,0 , 1,rec)) {
-
 //	                    	log_info(logger,"Mando mensaje al personaje %c",*rec);
 	                    	printf("sth");
 	                    }

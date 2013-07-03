@@ -171,10 +171,12 @@ int eliminar_particion(t_memoria segmento, char id) {
 }
 
 void liberar_memoria(t_memoria segmento) {
-	//list_destroy_and_destroy_elements(lista,NULL);
-	//free(segmento);
+	list_destroy_and_destroy_elements(lista,NULL);
+	free(segmento);
 }
 
 t_list* particiones(t_memoria segmento) {
+	t_list* listaaux = list_create();
+	 list_add_all(listaaux,lista);
 	 return lista;
 	}
