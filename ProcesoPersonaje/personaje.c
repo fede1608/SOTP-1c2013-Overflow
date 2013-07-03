@@ -52,11 +52,13 @@ int main(void){
 			veclong=lengthVecConfig(val);
 			pos.x=1;
 			pos.y=1;
+
 		//TODO conexion solicitud de ip:puerto al orquestator y cierre de esa conex
 
-			//conectar con nivel, y planificador
+			//conectar con nivel,
 			int unSocket;
 			unSocket = quieroUnPutoSocketAndando("127.0.0.1",5000);
+			//TODO conectar planificador
 
 			//esperar Primer movPermitido
 			char* charbuf;

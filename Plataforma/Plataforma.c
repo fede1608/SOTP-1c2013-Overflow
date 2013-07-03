@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include "collections/queue.h"
 #include  "socketsOv.h" //Librería compartida para sockects de overflow
 
 //----------------------------------------------------------------
@@ -31,12 +32,30 @@
 //************************* DEFINICIONES *************************
 
 //----------------------------------------------------------------
+//----------------------------------------------------------------
 
+//************************* Structs *************************
+
+typedef struct t_infomsj {
+	int port;
+	t_queue* colaL;
+} Info;
+typedef struct t_infomsj2 {
+	int nivel;
+	char ipN[20];
+	int portN;
+} InfoP;
+typedef struct t_nodoPer {//TODO completar segun las necesidades
+	char per;
+	int socket;
+} NodoPersonaje;
+//----------------------------------------------------------------
 //************************** PROTOTIPOS **************************
 
 //Prototipos de funciones a utilizar. Se definien luego de la función main.
-int planificador (int numeroDeNivel);
+int planificador (InfoP* infoP);
 int orquestador (void);
+int listenerP(Info* info);
 
 //----------------------------------------------------------------
 
@@ -64,7 +83,7 @@ int main (void) {
 //PLANIFICADOR:
 //Función que será ejecutada a través de un hilo para atender la planificación de cada nivel
 //Cardinalidad = 0 hasta N threads ejecutandose simultaneamente, uno por nivel
-int planificador (int numeroDeNivel) {
+int planificador (InfoP* infoP) {
 
 //	//Se informa del estado del thread por pantalla: inciado
 //	char* nombreDePlanificador = malloc(sizeof("THR Planificador Nivel ") + sizeof(int));
@@ -76,7 +95,9 @@ int planificador (int numeroDeNivel) {
 //	printf("%s: terminado\n", nombreDePlanificador);
 //return EXIT_SUCCESS;
 
-	//TODO Crear estructura de Cola para administrar listos y bloqueados
+
+	t_queue *colaListos=queue_create();
+	t_queue *colaBloqueados=queue_create();
 
 	//TODO Conectarse con el nivel
 
@@ -109,38 +130,128 @@ int planificador (int numeroDeNivel) {
 //proceso personaje que se conecte.
 //Cardinalidad = un único thread que atiende las solicitudes
 int orquestador (void) {
+	int socketNuevaConexion;
+	typedef struct t_infoNP {
+		char ipN[16];
+		int portN;
+		char ipP[16];
+		int portP;
+	} IPNivPlan;
+	IPNivPlan msj;
+	strcpy(msj.ipN,"127.0.0.1");
+	strcpy(msj.ipP,"127.0.0.1");
+	msj.portN=5000;
+	msj.portP=5001;
+	//	printf("THR Orquestador: iniciado.\n THR Orquestador: Esperando solicitudes de personajes...\n");
+	//
+	//	//Creamos un socket de esucha para el puerto 4999
+	int socketEscucha = quieroUnPutoSocketDeEscucha(4999);
+	while(1){
+		if (listen(socketEscucha, 1) != 0) {
+			perror("Error al poner a escuchar socket");
+			return EXIT_FAILURE;
+		}
+		if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
+		//	log_error(logger,"Error al aceptar conexion entrante");
+			return EXIT_FAILURE;
+		}
 
-	printf("THR Orquestador: iniciado.\n THR Orquestador: Esperando solicitudes de personajes...\n");
+		//Handshake en el que recibe la letra del personaje
+		char* rec;
+		if(recibirMensaje(socketNuevaConexion, (void**)&rec)>=0) {
+		if (mandarMensaje(socketNuevaConexion,0 , 1,rec)) {
+		//	log_info(logger,"Mando mensaje al personaje %c",*rec);
+			printf("%c",*rec);
+		}
+		Header unHeader;
+		int* intaux;
+		//esperar solicitud de info nivel/Planif
+		if(recibirHeader(socketNuevaConexion,&unHeader)){
+			if(recibirData(socketNuevaConexion,unHeader,(void**)&intaux)){
+			//Obtener info de ip & port
+				mandarMensaje(socketNuevaConexion,1,sizeof(IPNivPlan),msj);
+			}
+		}
 
-	//Creamos un socket de esucha para el puerto 5151
-	int socketEscucha = quieroUnPutoSocketDeEscucha(5151);
-
-	if (listen(socketEscucha, 10) != 0) {
-		perror("Error al poner a escuchar socket");
-		return EXIT_FAILURE;
 	}
+	//log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
+	//
+	//pthread_t threadPersonaje;
+	//
+	//pthread_create(&threadPersonaje, NULL, han, (void *)msj);
 
-//	//TEST:Creamos 5 threads a modo de prueba
-//	int i;
-//	pthread_t vectorDeThreads[4];
-//	for (i=0; i<5; i++){
-//
-//		int numeroDeNivel = i;
-//		printf("Creando THR Planificador para nivel %d...\n",numeroDeNivel);
-//
-//		pthread_create(&vectorDeThreads[i], NULL, planificador, numeroDeNivel);
-//	};
-//
-//	//Esperamos que termine cada thread de los planificadores creados
-//	for (i=0; i<5; i++){
-//		pthread_join(vectorDeThreads[i], NULL);
-//		pthread_detach(vectorDeThreads[i]);
-//
-//	}
 
-	printf("THR Orquestador: terminado\n");
-	return EXIT_SUCCESS;
-};
+	//	//TEST:Creamos 5 threads a modo de prueba
+	//	int i;
+	//	pthread_t vectorDeThreads[4];
+	//	for (i=0; i<5; i++){
+	//
+	//		int numeroDeNivel = i;
+	//		printf("Creando THR Planificador para nivel %d...\n",numeroDeNivel);
+	//
+	//		pthread_create(&vectorDeThreads[i], NULL, planificador, numeroDeNivel);
+	//	};
+	//
+	//	//Esperamos que termine cada thread de los planificadores creados
+	//	for (i=0; i<5; i++){
+	//		pthread_join(vectorDeThreads[i], NULL);
+	//		pthread_detach(vectorDeThreads[i]);
+	//
+	//	}
+
+	//	printf("THR Orquestador: terminado\n");
+		return EXIT_SUCCESS;
+}
 //FIN DE ORQUESTADOR
 
 //----------------------------------------------------------------
+int listenerP(Info* info){
+
+	    int socketEscucha,socketNuevaConexion;
+	    socketEscucha=quieroUnPutoSocketDeEscucha(info->port);
+
+	            while (1){
+	            	// Escuchar nuevas conexiones entrantes.
+	            if (listen(socketEscucha, 1) != 0) {
+//	                log_error(logger,"Error al bindear socket escucha");
+	                return EXIT_FAILURE;
+	            }
+//	            	log_info(logger,"Escuchando conexiones entrantes");
+
+	                // Aceptar una nueva conexion entrante. Se genera un nuevo socket con la nueva conexion.
+	                // La funcion accept es bloqueante, no sigue la ejecuci贸n hasta que se reciba algo
+	                if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
+//	                	log_error(logger,"Error al aceptar conexion entrante");
+	                    return EXIT_FAILURE;
+	                }
+
+	                //Handshake en el que recibe la letra del personaje
+	                char* rec;
+	                if(recibirMensaje(socketNuevaConexion, (void**)&rec)>=0) {
+
+//	                	log_info(logger,"Llego el Personaje %c del nivel",*rec);
+
+	                    if (mandarMensaje(socketNuevaConexion,0 , 1,rec)) {
+
+//	                    	log_info(logger,"Mando mensaje al personaje %c",*rec);
+	                    	printf("sth");
+	                    }
+	                    NodoPersonaje* nodo;
+	                    nodo->per=*rec;
+	                    nodo->socket=socketNuevaConexion;
+	                    queue_push(info->colaL,nodo);
+
+
+	                    //Agrega personaje a la lista y devuelve nodo
+
+//	                    log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
+
+
+
+	                }
+
+
+
+	            }
+	    return 1;
+	}
