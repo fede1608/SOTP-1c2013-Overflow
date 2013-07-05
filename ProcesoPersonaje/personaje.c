@@ -12,8 +12,10 @@
 #include <curses.h>
 #include <sys/ioctl.h>
 #include "socketsOv.h"
-#include "config.h"
-#include "log.h"
+#include "commons/config.h"
+#include "commons/log.h"
+#include <signal.h> //libreria de señales
+#include <sys/types.h>
 
 typedef struct t_posicion {
 	int8_t x;
@@ -39,6 +41,27 @@ int vidas;
 char recActual;
 char charPer;
 int lengthVecConfig(char * value);
+
+//El manejador de señales hay que ponerlo ACA ARRIBA.
+void manejador (int sig){
+	switch (sig){
+	case SIGTERM:
+		//Se debe notificar al nivel el motivo de la muerte y liberar recursos
+		if (vidas>0){
+			vidas--;
+		}
+		else
+		{
+			vidas++;
+			//Reiniciar el plan de niveles
+		}
+		break;
+	case SIGUSR1:
+		vidas++;
+		break;
+}
+}
+
 
 int main(void){
 	t_config* config=config_create("config.txt");
@@ -283,9 +306,18 @@ for(ii=0;ii<veclong;ii++){
 	}//fin while(llego)
 }//fin for each recurso
 
+
+
+
+
 }//fin for each nivel
 sleep(3);
 return 0;
+
+//Señales
+signal(SIGTERM,manejador);
+signal(SIGUSR1,manejador);
+
 }
 
 int lengthVecConfig(char * value){
@@ -298,3 +330,5 @@ int lengthVecConfig(char * value){
 
 return cont;
 }
+
+
