@@ -177,6 +177,7 @@ int orquestador (void) {
 		int portP;
 	} IPNivPlan;
 	IPNivPlan msj;
+	//todo Desharcodear
 	strcpy(msj.ipN,"127.0.0.1");
 	strcpy(msj.ipP,"127.0.0.1");
 	msj.portN=5000;
@@ -225,6 +226,8 @@ int orquestador (void) {
 				mandarMensaje(socketNuevaConexion,1,sizeof(IPNivPlan),&msj);
 			}
 		}
+		//cerrar socket
+		close(socketNuevaConexion);
 
 	}
 	//log_info(logger,"Mando el socket %d (Thread)", personaje->socket);

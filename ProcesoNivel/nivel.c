@@ -147,22 +147,23 @@ void handler(DataP* dataPer)
 	log_info(logger,"Llego el socket %d (Thread)", dataPer->socket);
 
 while(1){
-
-	recibirHeader(dataPer->socket,&unHeader);
+	// todos los returns son para handlear el tema de desconexion del cliente sin aviso
+	if(!recibirHeader(dataPer->socket,&unHeader)) {close(dataPer->socket);return;}
 	log_debug(logger,"Llego Msj tipo %d payload %d", unHeader.type,unHeader.payloadlength);
 	switch(unHeader.type){
 	case 0:
-		recibirData(dataPer->socket,unHeader, (void**)carAux);
+		if(!recibirData(dataPer->socket,unHeader, (void**)carAux)) {close(dataPer->socket);return;}
 		//TODO: borrar
 		//printf("Llego el Personaje %c al nivel",*carAux);
 		log_info(logger,"Llego el Personaje %c al nivel(Thread)", *carAux);
 		if (mandarMensaje(dataPer->socket,0 , 1,carAux))
 		{
 			printf("a");
-		}
+		}else {close(dataPer->socket);return;}
 			break;
 	case 1:
 		resp=recibirData(dataPer->socket,unHeader, (void**)carAux);
+		if(!resp) {close(dataPer->socket);return;}
 		log_debug(logger,"Resp del recData: %d",resp);
 		//TODO Borrar
 		//printf("El Personaje %c solicita la Posición del Recurso %c\n",dataPer.nodo->id,*carAux);
@@ -171,13 +172,14 @@ while(1){
 		posAux.x=nodoAux->posx;
 		posAux.y=nodoAux->posy;
 		buffer=&posAux;
-		if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer))
+		if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
 			//TODO Borrar
 			//printf("Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer.nodo->id);
 			log_info(logger,"Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer->nodo->id);
+		}else {close(dataPer->socket);return;}
 		break;
 	case 2:
-		recibirData(dataPer->socket, unHeader, (void**)&posAux);
+		if(!recibirData(dataPer->socket, unHeader, (void**)&posAux)) {close(dataPer->socket);return;}
 		dataPer->nodo->posx=posAux.x;
 		dataPer->nodo->posy=posAux.y;
 		//TODO Borrar
@@ -189,10 +191,10 @@ while(1){
 			//TODO Borrar
 			//printf("Se le aviso al Personaje %c que llego bien su Posición",dataPer.nodo->id);
 			log_info(logger,"Se le aviso al Personaje %c que llego bien su Posición",dataPer->nodo->id);
-		}
+		}else {close(dataPer->socket);return;}
 		break;
 	case 3:
-		recibirData(dataPer->socket, unHeader, (void**)carAux);
+		if(!recibirData(dataPer->socket, unHeader, (void**)carAux)) {close(dataPer->socket);return;}
 		//TODO Borrar
 		//printf("El Personaje %c solicita una Instancia del Recurso %c\n",dataPer.nodo->id,*carAux);
 		log_info(logger,"El Personaje %c solicita una Instancia del Recurso %c\n",dataPer->nodo->id,*carAux);
@@ -205,21 +207,24 @@ while(1){
 			posAux.x=nodoAux->posx;
 			posAux.y=nodoAux->posy;
 			buffer=&posAux;
-			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer))
+			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
 				//TODO Borrar
 				//printf("Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
 				log_info(logger,"Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
-			}else{
+			}else {close(dataPer->socket);return;}
+
+		}else{
 			//TODO Borrar
 			//printf("No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer.nodo->id);
 			log_info(logger,"No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
 			posAux.x=dataPer->nodo->posx;
 			posAux.y=dataPer->nodo->posy;
 			buffer=&posAux;
-			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer))
+			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
 				//TODO Borrar
 				//printf("Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id,dataPer.nodo->id);
 				log_info(logger,"Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id,dataPer->nodo->id);
+			} else {close(dataPer->socket);return;}
 		}
 		break;
 	case 4:

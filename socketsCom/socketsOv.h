@@ -52,21 +52,21 @@ typedef struct t_paquete {
 		//		return EXIT_FAILURE; }
 		//Nota: El socket de escucha generado se asocia a todas las interfaces
 		//      (IPs privadas del host) para ese puerto
-		int quieroUnPutoSocketDeEscucha (int puerto);
+		int quieroUnPutoSocketDeEscucha(int puerto);
 
 		//Función para uso interno de la librería.
 		//Permite simplificar y reutilizar código entre quieroUnPutoSocketAndando(...);
 		//y quieroUnPutoSocketDeEscucha(...);
 		//Devuelve un socket genérico y que libera sus recursos inmediatamente cuando
 		//recibe un close(socketGenerado);
-		int solicitarSocketAlSO ();
+		int solicitarSocketAlSO();
 
 		//Función para uso interno de la librería.
 		//Permite simplificar y reutilizar código entre quieroUnPutoSocketAndando(...);
 		//y quieroUnPutoSocketDeEscucha(...);
 		//Se le envía una dirección y un puerto y los deja configurados en un struct
 		//para ser utilizados en las funciones de sockets
-		struct sockaddr_in especificarSocketInfo (char* direccion, int puerto);
+		struct sockaddr_in especificarSocketInfo(char* direccion, int puerto);
 
 
 

@@ -15,50 +15,52 @@
 		int mandarMensaje(int unSocket, int8_t tipo, int tamanio, void *buffer) {
 
 			Header header;
-
+			int auxInt;
 			//Que el tamanio lo mande
 
 			header.type = tipo;
 			header.payloadlength = tamanio;
 
-			if (send(unSocket, &header, sizeof(Header), 0) >= 0){
-				if (send(unSocket, buffer, header.payloadlength, 0) >= 0) {
-					return 1;
+			if ((auxInt=send(unSocket, &header, sizeof(Header), 0)) >= 0){
+				if ((auxInt=send(unSocket, buffer, header.payloadlength, 0)) >= 0) {
+					return auxInt;
 				}
 
 			}
 
-			return 0;
+			return auxInt;
 		}
 
 		//Recibe un mensaje del servidor - Version Lucas
 		int recibirMensaje(int unSocket, void** buffer) {
 
 			Header header;
-
-			if((recv(unSocket, &header, sizeof(Header), 0))>=0) {
+			int auxInt;
+			if((auxInt=recv(unSocket, &header, sizeof(Header), 0))>=0) {
 				*buffer = malloc (header.payloadlength);
-				if ((recv(unSocket, *buffer, header.payloadlength, 0) >= 0)) {
-					return (int)header.type;
+				if ((auxInt=recv(unSocket, *buffer, header.payloadlength, 0)) >= 0) {
+					return  auxInt;
 				}
 			}
-			return -1;
+			return  auxInt;
 
 		}
 		//Recibe un mensaje del servidor - Version Lucas
 		int recibirHeader(int unSocket, Header* header) {
-				if((recv(unSocket, header, sizeof(Header), 0))>=0) {
-					return 1;
+			int auxInt;
+				if((auxInt=recv(unSocket, header, sizeof(Header), 0))>=0) {
+					return auxInt;
 					}
-					return 0;
+					return auxInt;
 				}
 
 		int recibirData(int unSocket, Header header, void** buffer){
+			int auxInt;
 			*buffer = malloc (header.payloadlength);
-					if ((recv(unSocket, buffer, header.payloadlength, 0) >= 0)) {
-						return 1;
+					if ((auxInt=recv(unSocket, buffer, header.payloadlength, 0)) >= 0) {
+						return auxInt;
 					}
-			return 0;
+			return auxInt;
 		}
 		//Recibe un mensaje del servidor - Version SO
 		int recv_variable(int socketReceptor, void* buffer) {
@@ -83,7 +85,7 @@
 
 		}
 
-		int solicitarSocketAlSO () {
+		int solicitarSocketAlSO() {
 
 			int unSocket;
 			int optval = 1;
@@ -94,9 +96,7 @@
 			// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
 			if ((unSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 				perror("Error al crear socket");
-				//Se usa el 0 para especificar error porque si se usa EXIT_FAILURE
-				//devuelve un 1 y eso podría entenderse como una respuesta correcta
-				return 0;
+				return EXIT_FAILURE;
 			}
 
 			// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
@@ -105,7 +105,7 @@
 			return unSocket;
 		}
 
-		struct sockaddr_in especificarSocketInfo (char* direccion, int puerto) {
+		struct sockaddr_in especificarSocketInfo(char* direccion, int puerto) {
 
 			struct sockaddr_in socketInfo;
 
@@ -135,7 +135,7 @@
 			return unSocket;
 		}
 
-		int quieroUnPutoSocketDeEscucha (int puerto) {
+		int quieroUnPutoSocketDeEscucha(int puerto) {
 
 			int socketEscucha = solicitarSocketAlSO();
 			//Se pasa la dirección 0.0.0.0 porque es el equivalente en string de INADDR_ANY
@@ -146,9 +146,7 @@
 					!= 0) {
 
 				perror("Error al bindear socket escucha");
-				//Se usa el 0 para especificar error porque si se usa EXIT_FAILURE
-				//devuelve un 1 y eso podría entenderse como una respuesta correcta
-				return 0;
+				return EXIT_FAILURE;
 			}
 
 			return socketEscucha;

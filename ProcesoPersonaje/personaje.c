@@ -4,7 +4,7 @@
  *  Created on: 29/04/2013
  *      Author: utnso
  */
-#include "config.h"
+
 #include <string.h>
 #include "string.h"
 #include <stdio.h>
@@ -12,12 +12,20 @@
 #include <curses.h>
 #include <sys/ioctl.h>
 #include "socketsOv.h"
-
+#include "config.h"
+#include "log.h"
 
 typedef struct t_posicion {
 	int8_t x;
 	int8_t y;
 } Posicion;
+
+typedef struct t_infoNP {
+		char ipN[16];
+		int portN;
+		char ipP[16];
+		int portP;
+	} IPNivPlan;
 
 //static int rows,cols;
 Posicion pos;
@@ -31,42 +39,75 @@ int main(void){
 	t_config* config=config_create("config.txt");
 
 	//Se inicializan las variables para el logueo
-	t_log_level * detail = LOG_LEVEL_INFO;
-	t_log * log = log_create("LogPersonaje","Personaje",false,detail);
+	t_log_level detail = LOG_LEVEL_INFO;
+	t_log * log = log_create("LogPersonaje.log","Personaje",false,detail);
 
 	//obtener recurso de config
-			char** obj,niveles;
-			char* val,aux;
-			char objNivel[14]="obj[Nivel1]";
-			char corchete[2]="]";
-			int veclong, llego, cantNiv,numNiv, c,ii;
-			Header h;
-			niveles=config_get_array_value(config,"planDeNiveles");
-			vidas=config_get_int_value(config,"vidas");
-			charPer=config_get_string_value(config,"simbolo")[0];
-			cantNiv=config_keys_amount(config)-5/*cant de keys fijas*/;
+		char** obj;
+		char** niveles;
+		char** ipPuertoOrq;
+		char* val;
+		char* aux;
+		char* aux1;
+		char objNivel[14]="obj[Nivel1]";
+		char corchete[2]="]";
+		int veclong, llego, cantNiv,numNiv, c,ii,puertoOrq;
+		Header h;
 
-			log_info(log,"Se obtuvieron los recursos del config");
+		niveles=config_get_array_value(config,"planDeNiveles");
+		vidas=config_get_int_value(config,"vidas");
+		charPer=config_get_string_value(config,"simbolo")[0];
+		cantNiv=config_keys_amount(config)-5/*cant de keys fijas*/;
+		log_info(log,"Se obtuvieron los recursos del config");
+		aux1=config_get_string_value(config,"orquestador");
+		ipPuertoOrq=string_split(aux1, ":");
+		puertoOrq=(int)strtol(ipPuertoOrq[1], &aux, 10);
+
 
 		for(c=0;c<cantNiv;c++){ //for each nivel
-
-			memcpy(&(objNivel[4]),niveles[c],strlen(niveles[c]));
-			memcpy(&(objNivel[4+strlen(niveles[c])]),corchete,2);
-			numNiv=(int)strtol(niveles[c][5], &aux, 10);
-
+			memcpy(objNivel+4,niveles[c],strlen(niveles[c]));
+			memcpy(objNivel+4+strlen(niveles[c]),corchete,2);
+			numNiv=(int)strtol(niveles[c]+5, &aux, 10);
 			obj=config_get_array_value(config,objNivel);
 			val=config_get_string_value(config,objNivel);
 			veclong=lengthVecConfig(val);
-			pos.x=1;
+			pos.x=0;
 			pos.y=1;
 
 		//TODO conexion solicitud de ip:puerto al orquestator y cierre de esa conex
+			int unSocketOrq;
+			unSocketOrq = quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
+			char* auxC;
+			auxC=malloc(sizeof(char));
+			*auxC=charPer;
+			if (mandarMensaje(unSocketOrq ,0 , 1,auxC)) {
+				if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
+					printf("msj recibido from handshake %c\n",*auxC);
+				}
+			}
+
+			Header unHeader;
+			int* intaux;
+			intaux=malloc(sizeof(int));
+			*intaux=numNiv;
+			IPNivPlan ipNivelPlanif;
+			//esperar solicitud de info nivel/Planif
+			mandarMensaje(unSocketOrq,1,sizeof(int),intaux);
+			if(recibirHeader(unSocketOrq,&unHeader)){
+				if(recibirData(unSocketOrq,unHeader,(void**)&ipNivelPlanif)){
+				//Obtener info de ip & port
+					printf("%s %d %s %d\n",ipNivelPlanif.ipN,ipNivelPlanif.portN,ipNivelPlanif.ipP,ipNivelPlanif.portP);
+				}
+			}
+
+			close(unSocketOrq);
+
 
 			//conectar con nivel,
 			int unSocket;
-			unSocket = quieroUnPutoSocketAndando("127.0.0.1",5000);
+			unSocket = quieroUnPutoSocketAndando(ipNivelPlanif.ipN,ipNivelPlanif.portN);
 			//TODO: hay que automatizar el numero de puerto y direccion
-			log_info(log,"Se creo un nuevo socket. Direccion: 127.0.0.1 // Puerto: 5000 // Socket: %d",unSocket);
+			log_info(log,"Se creo un nuevo socket. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipN,ipNivelPlanif.portN,unSocket);
 			//TODO conectar planificador
 
 			//esperar Primer movPermitido
