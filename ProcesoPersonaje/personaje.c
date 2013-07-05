@@ -26,6 +26,11 @@ typedef struct t_infoNP {
 		char ipP[16];
 		int portP;
 	} IPNivPlan;
+typedef struct t_msjPer {
+	int pidioRec;
+	int blocked;
+	int finNivel;
+} MsjPer;
 
 //static int rows,cols;
 Posicion pos;
@@ -64,7 +69,8 @@ int main(void){
 		puertoOrq=(int)strtol(ipPuertoOrq[1], &aux, 10);
 
 
-		for(c=0;c<cantNiv;c++){ //for each nivel
+	for(c=0;c<cantNiv;c++){ //for each nivel
+
 			memcpy(objNivel+4,niveles[c],strlen(niveles[c]));
 			memcpy(objNivel+4+strlen(niveles[c]),corchete,2);
 			numNiv=(int)strtol(niveles[c]+5, &aux, 10);
@@ -103,16 +109,31 @@ int main(void){
 			close(unSocketOrq);
 
 
-			//conectar con nivel,
-			int unSocket;
-			unSocket = quieroUnPutoSocketAndando(ipNivelPlanif.ipN,ipNivelPlanif.portN);
-			//TODO: hay que automatizar el numero de puerto y direccion
-			log_info(log,"Se creo un nuevo socket. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipN,ipNivelPlanif.portN,unSocket);
-			//TODO conectar planificador
-
-			//esperar Primer movPermitido
+			//conectar con Planificador
+			int unSocketPlanif;
+			unSocketPlanif = quieroUnPutoSocketAndando(ipNivelPlanif.ipP,ipNivelPlanif.portP);
+			log_info(log,"Se creo un nuevo socket con el Planificador. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipP,ipNivelPlanif.portP,unSocketPlanif);
 			char* charbuf;
 			charbuf=malloc(1);
+			*charbuf=charPer;
+			//handshake
+			if (mandarMensaje(unSocketPlanif,0 , 1,charbuf)) {
+				log_info(log,"Se envío el Handshake al planificador");
+				if(recibirMensaje(unSocketPlanif, (void**)&charbuf)>=0) {
+					log_info(log,"Llego el Handshake del Planificador: %c",*charbuf);
+				}
+				else {
+					log_error(log,"No llego al cliente la confirmacion del Planificador (handshake)");
+				}
+			} else {
+				log_error(log,"No llego al planif la confirmacion del personaje (handshake)");
+			}
+
+
+			//conectar con nivel
+			int unSocket;
+			unSocket = quieroUnPutoSocketAndando(ipNivelPlanif.ipN,ipNivelPlanif.portN);
+			log_info(log,"Se creo un nuevo socket. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipN,ipNivelPlanif.portN,unSocket);
 			*charbuf=charPer;
 
 			if (mandarMensaje(unSocket,0 , 1,charbuf)) {
@@ -166,7 +187,14 @@ for(ii=0;ii<veclong;ii++){
 
 	while(llego){
 
-		//TODO esperar mensaje de movPermitido para continuar
+		// esperar mensaje de movPermitido para continuar
+		char* charAux;
+		recibirHeader(unSocketPlanif,&unHeader);
+		if(unHeader.type==8) recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+		MsjPer respAlPlanf;
+		respAlPlanf.blocked=0;
+		respAlPlanf.pidioRec=0;
+		respAlPlanf.finNivel=0;
 		printf("pos %d %d \n",pos.x,pos.y);
 		if (pos.x!=rec.x) {
 			(rec.x-pos.x)>0?pos.x++:pos.x--;
@@ -219,7 +247,8 @@ for(ii=0;ii<veclong;ii++){
 			if(ii+1==veclong) {
 				//cerrar conexion con el nivel
 				mandarMensaje(unSocket,4 , sizeof(char),&recActual);
-				//exit(0); //todo settear variable de escape de nivel terminado
+				respAlPlanf.finNivel=1;
+				//exit(0);
 			}else {
 				recActual=*obj[ii+1];
 				buffer=&recActual;
@@ -248,8 +277,9 @@ for(ii=0;ii<veclong;ii++){
 			}
 
 		}
-		//esperar MovPermitido
-		sleep(1);//todo sacar
+		//mandar mensaje de resp al Planif
+		mandarMensaje(unSocketPlanif,8,sizeof(MsjPer),&respAlPlanf);
+//		sleep(1);//todo sacar
 	}//fin while(llego)
 }//fin for each recurso
 

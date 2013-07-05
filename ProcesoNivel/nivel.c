@@ -137,16 +137,17 @@ return 0;
 //handler de cada personaje recibe un struct con el socket y el puntero a su nodo
 void handler(DataP* dataPer)
 {
-	void* buffer;
-	int resp;
-	Posicion posAux;
-	char* carAux;
-	carAux=malloc(1);
-	Header unHeader;
-	ITEM_NIVEL* nodoAux;
-	log_info(logger,"Llego el socket %d (Thread)", dataPer->socket);
+void* buffer;
+int resp;
+Posicion posAux;
+char* carAux;
+carAux=malloc(1);
+Header unHeader;
+ITEM_NIVEL* nodoAux;
+log_info(logger,"Llego el socket %d (Thread)", dataPer->socket);
 
 while(1){
+
 	// todos los returns son para handlear el tema de desconexion del cliente sin aviso
 	if(!recibirHeader(dataPer->socket,&unHeader)) {close(dataPer->socket);return;}
 	log_debug(logger,"Llego Msj tipo %d payload %d", unHeader.type,unHeader.payloadlength);

@@ -53,6 +53,7 @@ typedef struct t_nodoPer {//TODO completar segun las necesidades
 typedef struct t_msjPer {
 	int pidioRec;
 	int blocked;
+	int finNivel;
 } MsjPer;
 //----------------------------------------------------------------
 //************************** PROTOTIPOS **************************
@@ -108,50 +109,64 @@ int planificador (InfoP* infoP) {
 //int socketNivel=quieroUnPutoSocketAndando(infoP->ipN,infoP->portN);
 printf("%s %d\n",infoP->ipN,infoP->portN);
 
-	// Abrir listener de Personajes (guardar socket e info del pj en la estructura)
+// Abrir listener de Personajes (guardar socket e info del pj en la estructura)
+void* nodoAux;
+Info *info;
+info=malloc(sizeof(Info));
+info->colaL=colaListos;
+//pasar puerto de la plataforma
+info->port=5001;
+pthread_t threadPersonaje;
+pthread_create(&threadPersonaje, NULL, listenerP, (void *)info);
 
-	Info *info;
-	info=malloc(sizeof(Info));
-	info->colaL=colaListos;
-	//pasar puerto de la plataforma
-	info->port=5001;
-	pthread_t threadPersonaje;
-	pthread_create(&threadPersonaje, NULL, listenerP, (void *)info);
+char* auxcar;
+auxcar=malloc(1);
+*auxcar='T';
 
-	char* auxcar;
-	auxcar=malloc(1);
-	*auxcar='T';
-
-	int quantum=varGlobalQuantum;
+int quantum=varGlobalQuantum;
 	while(1){
-//	si la lista no apunta a null{
+	//	si la lista no apunta a null{
 	if(!queue_is_empty(colaListos)){
 		if(quantum>0){
-	//Mandar mensaje de mov permitido al socket del personaje del nodo actual(primer nodo de la cola)}
+		//Mandar mensaje de mov permitido al socket del personaje del nodo actual(primer nodo de la cola)}
 		mandarMensaje(((NodoPersonaje*)queue_peek(colaListos))->socket,8,1,auxcar);
 		}
 
 		else {
 			quantum=varGlobalQuantum;
-	//buscar el primero de la cola de listos y mandarle un msj de mov permitido
+			//buscar el primero de la cola de listos y mandarle un msj de mov permitido
+			//todo Sincronizar colaListos con el Listener
+			nodoAux=queue_pop(colaListos);
+			queue_push(colaListos,nodoAux);
 			mandarMensaje(((NodoPersonaje*)queue_peek(colaListos))->socket,8,1,auxcar);
 
 		}
-	//esperar respuesta de turno terminado(con la info sobre si quedo bloqueado y si tomo recurso);
+		//esperar respuesta de turno terminado(con la info sobre si quedo bloqueado y si tomo recurso);
 		Header unHeader;
 		MsjPer msjP;
-		recibirHeader(((NodoPersonaje*)queue_peek(colaListos))->socket,&unHeader);
-		recibirData(((NodoPersonaje*)queue_peek(colaListos))->socket,unHeader,(void**)&msjP);
-	//si (tomo recurso& no quedo bloqueado) {quantum=varGlogalQuantum; poner al final de la cola}
-		if(msjP.pidioRec & !msjP.blocked){
+	recibirHeader(((NodoPersonaje*)queue_peek(colaListos))->socket,&unHeader);
+	recibirData(((NodoPersonaje*)queue_peek(colaListos))->socket,unHeader,(void**)&msjP);
+		//si (tomo recurso& no quedo bloqueado) {quantum=varGlogalQuantum; poner al final de la cola}
+	if(msjP.finNivel){
+		queue_pop(colaListos);
+	}
+	if(msjP.pidioRec & !msjP.blocked){
+			printf("%d",quantum);
 			quantum=varGlobalQuantum;
+			printf("%d",quantum);
 			queue_push(colaListos,queue_pop(colaListos));
 		}
-	//si (pidio recurso& quedo bloqueado){quatum=varGlogalQuantum; poner alfinal de la cola de bloquedados}
+		//si (pidio recurso& quedo bloqueado){quatum=varGlogalQuantum; poner alfinal de la cola de bloquedados}
 		if(msjP.pidioRec & msjP.blocked){
+			printf("%d",quantum);
 			quantum=varGlobalQuantum;
+			printf("%d",quantum);
 			queue_push(colaBloqueados,queue_pop(colaListos));
 		}
+
+		printf("Q %d\n",quantum);
+		quantum--;
+		printf("Q %d\n",quantum);
 	sleep(varGlobalSleep);
 		}
 	}
@@ -192,7 +207,7 @@ int orquestador (void) {
 	infoP=malloc(sizeof(InfoP));
 	strcpy(infoP->ipN,"127.0.0.1");
 	infoP->nivel=1;
-	infoP->portN=5010;
+	infoP->portN=5000;
 	pthread_t threadPersonaje;
 	pthread_create(&threadPersonaje, NULL, planificador, (void *)infoP);
 
