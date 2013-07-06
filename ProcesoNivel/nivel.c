@@ -229,6 +229,8 @@ while(1){
 		}
 		break;
 	case 4:
+		//todo sincronizar
+		BorrarItem(listaItems,dataPer->nodo->id);
 		close(dataPer->socket);
 		return;
 		break;
@@ -249,21 +251,17 @@ int listenear(void){
             while (1){
             	// Escuchar nuevas conexiones entrantes.
             if (listen(socketEscucha, 1) != 0) {
-                //TODO Borrar
-            	//perror("Error al poner a escuchar socket");
+
                 log_error(logger,"Error al bindear socket escucha");
                 return EXIT_FAILURE;
             }
-            	//TODO Borrar
-            	//printf("Escuchando conexiones entrantes.\n");
+
             	log_info(logger,"Escuchando conexiones entrantes");
 
                 // Aceptar una nueva conexion entrante. Se genera un nuevo socket con la nueva conexion.
                 // La funci贸n accept es bloqueante, no sigue la ejecuci贸n hasta que se reciba algo
                 if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
 
-                	//TODO Borrar
-                	//perror("Error al aceptar conexion entrante");
                 	log_error(logger,"Error al aceptar conexion entrante");
                     return EXIT_FAILURE;
                 }
@@ -272,14 +270,9 @@ int listenear(void){
                 char* rec;
                 if(recibirMensaje(socketNuevaConexion, (void**)&rec)>=0) {
 
-                    //TODO Borrar
-                	//printf("Llego el Personaje %c del nivel",*rec);
                 	log_info(logger,"Llego el Personaje %c del nivel",*rec);
 
                     if (mandarMensaje(socketNuevaConexion,0 , 1,rec)) {
-                    	//??????
-                    	//TODO Borrar
-                    	//printf("a");
                     	log_info(logger,"Mando mensaje al personaje %c",*rec);
 
                     }
@@ -290,7 +283,7 @@ int listenear(void){
                     personaje->socket = socketNuevaConexion;
 
                     //Agrega personaje a la lista y devuelve nodo
-                    personaje->nodo = CrearPersonaje(&listaItems, *rec, 0 ,0);
+                    personaje->nodo = CrearPersonaje(&listaItems, *rec, 1 ,1);
                     log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
                     //TODO Fede vos sabes que hacer
                     pthread_t threadPersonaje;

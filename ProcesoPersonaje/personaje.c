@@ -12,8 +12,8 @@
 #include <curses.h>
 #include <sys/ioctl.h>
 #include "socketsOv.h"
-#include "commons/config.h"
-#include "commons/log.h"
+#include "config.h"
+#include "log.h"
 #include <signal.h> //libreria de señales
 #include <sys/types.h>
 
@@ -45,10 +45,12 @@ int lengthVecConfig(char * value);
 //El manejador de señales hay que ponerlo ACA ARRIBA.
 void manejador (int sig){
 	switch (sig){
+	case SIGINT:
 	case SIGTERM:
 		//Se debe notificar al nivel el motivo de la muerte y liberar recursos
 		if (vidas>0){
 			vidas--;
+			printf("Has perdido una vida.\n Vidas restantes: %d\n",vidas);
 		}
 		else
 		{
@@ -64,6 +66,10 @@ void manejador (int sig){
 
 
 int main(void){
+	//Señales
+	signal(SIGTERM,manejador);
+	signal(SIGINT,manejador);
+	signal(SIGUSR1,manejador);
 	t_config* config=config_create("config.txt");
 
 	//Se inicializan las variables para el logueo
@@ -314,9 +320,7 @@ for(ii=0;ii<veclong;ii++){
 sleep(3);
 return 0;
 
-//Señales
-signal(SIGTERM,manejador);
-signal(SIGUSR1,manejador);
+
 
 }
 
