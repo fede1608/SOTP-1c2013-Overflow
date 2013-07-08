@@ -267,6 +267,7 @@ for(ii=0;ii<veclong;ii++){
 					log_info(log,"Llego header%d %d respuesta del nivel", unHeader.payloadlength,unHeader.type);
 					recibirData(unSocket,unHeader,(void**)&lifeSucks);
 					//rec=lifeSucks;
+					respAlPlanf.pidioRec=1;
 					printf("Llego la confirmacion del recurso del nivel %d  %d\n",rec.x,rec.y);
 					log_info(log,"Llego la confirmacion del recurso del nivel %d  %d",rec.x,rec.y);
 

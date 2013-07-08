@@ -230,8 +230,11 @@ while(1){
 		break;
 	case 4:
 		//todo sincronizar
-		BorrarItem(listaItems,dataPer->nodo->id);
+		log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
+		BorrarItem(listaItems,(dataPer->nodo)->id);
+		log_info(logger,"El personaje salio del Nivel.");
 		close(dataPer->socket);
+		log_debug(logger,"Se cerro el Socket: %d",dataPer->socket);
 		return;
 		break;
 	default:
