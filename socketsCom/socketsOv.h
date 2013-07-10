@@ -16,11 +16,13 @@ typedef struct t_paquete {
 		//buffer= &recActual;
 		//if (mandarMensaje(unSocket,1 , sizeof(recActual),buffer))
 		//o char* caracter; mandarMensaje(unSocket,1 , sizeof(recActual),caracter)
+		//Enviar String (mandar tamaño del string +1 para incluir el \0)
+		//mandarMensaje(unSocketOrq,1,strlen(nivelActual)+1,nivelActual);
 		int mandarMensaje(int unSocket, int8_t tipo, int tamanio, void *buffer);
 		//Recibe un mensaje el cual ya sabes lo que te va a llegar, recomiendo usar las otras funciones en 2 partes
-		//ej
-		//Posicion lifeSucks
-		//recibirData(unSocket,unHeader,(void**)&lifeSucks);
+		//ej (Recomendable al recibir char o un string)
+		//char* nivelDelPersonaje;
+		//if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
 		int recibirMensaje(int unSocket, void** buffer) ;
 		//recibe un header
 		//ej
@@ -31,6 +33,7 @@ typedef struct t_paquete {
 		//ej
 		//Recibir un string o char
 		//char * rec;
+		//rec=malloc(sizeof(char));
 		//recibirData(socketNuevaConexion, headMen, (void**)rec);
 //
 		//Recibir un struct
