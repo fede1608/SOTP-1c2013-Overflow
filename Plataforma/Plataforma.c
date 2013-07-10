@@ -32,10 +32,10 @@
 //----------------------------------------------------------------
 
 //******************** DEFINICIONES GLOBALES *********************
-//Variables estándar del sistema
+//Variables Globales del sistema
 int varGlobalQuantum=3;
 int varGlobalSleep=1* 1000000;
-
+char* nombreNivel;//se usa para la funcion que se manda al list_find
 //Structs propios de la plataforma
 
 typedef struct t_infoPlanificador {
@@ -44,9 +44,10 @@ typedef struct t_infoPlanificador {
 } InfoPlanificador;
 
 typedef struct t_infoNivel {
-	int numero;
+	char* nombre;
 	char ip[20];
 	int port;
+	int puertoPlanif;
 } InfoNivel;
 
 typedef struct t_nodoPersonaje {//TODO completar segun las necesidades
@@ -59,6 +60,7 @@ typedef struct t_nodoNivel {//TODO completar segun las necesidades
 	char* nombreNivel; //Ej: @ ! / % $ &
 	char ip[20];
 	int port;
+	int puertoPlanif;
 } NodoNivel;
 
 typedef struct t_msjPersonaje {
@@ -75,7 +77,8 @@ typedef struct t_msjPersonaje {
 int planificador (InfoNivel* nivel);
 int orquestador (void);
 int listenerPersonaje(InfoPlanificador* planificador);
-
+char* print_ip(int ip);
+int esMiNivel(NodoNivel* nodo);
 //----------------------------------------------------------------
 
 //******************** FUNCIONES PRINCIPALES *********************
@@ -213,7 +216,7 @@ int planificador (InfoNivel* nivel) {
 //Cardinalidad = un único thread que atiende las solicitudes
 int orquestador (void) {
 	t_list* listaNiveles=list_create();
-
+	int contadorPuerto=5000;
 	int socketNuevaConexion;
 	//Struct con info de conexión (IP y puerto) del nivel y el planificador asociado a ese nivel
 	typedef struct t_infoConxNivPlan {
@@ -225,21 +228,16 @@ int orquestador (void) {
 
 	ConxNivPlan msj;
 
-	//todo Desharcodear IPs de planificador y nivel
-	strcpy(msj.ipNivel,"127.0.0.1");
-	strcpy(msj.ipPlanificador,"127.0.0.1");
-	msj.portNivel=5000;
-	msj.portPlanificador=5001;
-	//printf("THR Orquestador: iniciado.\n THR Orquestador: Esperando solicitudes de personajes...\n");
+	printf("THR Orquestador: iniciado.\n THR Orquestador: Esperando conexiones de personajes o Niveles...\n");
 
 	//TODO llamar al handler de niveles
-	InfoNivel *nivel;
-	nivel=malloc(sizeof(InfoNivel));
-	strcpy(nivel->ip,"127.0.0.1");
-	nivel->numero=1;
-	nivel->port=5000;
-	pthread_t threadPersonaje;
-	pthread_create(&threadPersonaje, NULL, planificador, (void *)nivel);
+//	InfoNivel *nivel;
+//	nivel=malloc(sizeof(InfoNivel));
+//	strcpy(nivel->ip,"127.0.0.1");
+//	nivel->numero=1;
+//	nivel->port=5000;
+//	pthread_t threadPlanif;
+//	pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
 
 	//Creamos un socket de esucha para el puerto 4999
 	int socketEscucha = quieroUnPutoSocketDeEscucha(4999);
@@ -249,43 +247,110 @@ int orquestador (void) {
 			perror("Error al poner a escuchar socket");
 			return EXIT_FAILURE;
 		}
-		if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
+		struct sockaddr_in cli_addr;
+		int socklen=sizeof(cli_addr);
+		if ((socketNuevaConexion = accept(socketEscucha, &cli_addr, &socklen)) < 0) {
 			//log_error(logger,"Error al aceptar conexion entrante");
+			perror("Error al aceptar conexion");
 			return EXIT_FAILURE;
 		}
+		char* ipCliente;
+		ipCliente=print_ip(cli_addr.sin_addr.s_addr);
+		printf("Ip del cliente conectado: %d %s\n",cli_addr.sin_addr.s_addr,ipCliente);
 
 		//Handshake en el que recibe el simbolo del personaje
 		char *simboloRecibido; //Ej: @ ! / % $ &
 		simboloRecibido=malloc(1);
 		Header unHeader;
 		if(recibirHeader(socketNuevaConexion,&unHeader)){
+		switch(unHeader.type){
 
-		if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
+		case 0://case Personaje
 
-
-
-//		if(recibirMensaje(socketNuevaConexion, (void**) &simboloRecibido)>=0) {
-			if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
-				//log_info(logger,"Mando mensaje al personaje %c",*rec);
-				printf("Entro Personaje: %c\n",*simboloRecibido);
+			strcpy(msj.ipNivel,"127.0.0.1");
+			strcpy(msj.ipPlanificador,"127.0.0.1");
+			msj.portNivel=0;
+			msj.portPlanificador=0;
+			simboloRecibido=malloc(1);
+			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
+				if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
+					//log_info(logger,"Mando mensaje al personaje %c",*rec);
+					printf("Entro Personaje: %c\n",*simboloRecibido);
+				}
 			}
-		}
-		}
 
-		char* nivelDelPersonaje;
-		//Esperar solicitud de info de conexion de Nivel y Planifador
-		printf("Esperando solictud de nivel\n");
-//		if(recibirHeader(socketNuevaConexion,&unHeader)){
-//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
-//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
-		if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
-				printf("Nivel recibido: %s\n",nivelDelPersonaje);
-				//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
-				mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj);
-//			}
+
+			char* nivelDelPersonaje;
+			//Esperar solicitud de info de conexion de Nivel y Planifador
+			printf("Esperando solictud de nivel\n");
+	//		if(recibirHeader(socketNuevaConexion,&unHeader)){
+	//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
+	//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+			if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
+					printf("Nivel recibido: %s\n",nivelDelPersonaje);
+					//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
+
+					//settear variable global para usar en funcion q se manda a list_find
+					nombreNivel=nivelDelPersonaje;
+					NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
+					strcpy(msj.ipNivel,nivel->ip);
+					msj.portNivel=nivel->port;
+					msj.portPlanificador=nivel->puertoPlanif;
+
+					mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj);
+	//			}
+			}
+			//cerrar socket
+			close(socketNuevaConexion);
+			break;
+
+		case 2: //case Nivel
+			simboloRecibido=malloc(unHeader.payloadlength);
+			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
+				if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
+					//log_info(logger,"Mando mensaje al personaje %c",*rec);
+					printf("Entro Nivel: %s\n",simboloRecibido);
+				}
+			}
+
+			NodoNivel *nodoNivel;
+			nodoNivel=malloc(sizeof(NodoNivel));
+			strcpy(nodoNivel->ip,ipCliente);
+			nodoNivel->nombreNivel=simboloRecibido;
+			nodoNivel->port=contadorPuerto;
+			contadorPuerto++;
+			nodoNivel->puertoPlanif=contadorPuerto;
+
+			list_add(listaNiveles,nodoNivel);
+
+			InfoNivel *nivel;
+			nivel=malloc(sizeof(InfoNivel));
+			strcpy(nivel->ip,ipCliente);
+			nivel->nombre=simboloRecibido;
+			nivel->port=nodoNivel->port;
+			nivel->puertoPlanif=contadorPuerto;
+			contadorPuerto++;
+
+			int* aux;
+			aux=malloc(sizeof(int));
+			*aux=nodoNivel->port;
+			//manda el puerto asignado al nivel para que escuche conexiones.
+			if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux))
+				break; //TODO handlear desconexion
+			free(aux);
+			if(!recibirMensaje(socketNuevaConexion,(void**)&aux))
+				break; //TODO handlear desconexion
+			free(aux);
+
+			pthread_t threadPlanif;
+			pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
+
+
+			break;
+		default:
+			break;
 		}
-		//cerrar socket
-		close(socketNuevaConexion);
+	}
 
 	}//Cierra While(1)
 
@@ -336,7 +401,7 @@ int listenerPersonaje(InfoPlanificador* planificador){
 				//log_info(logger,"Llego el Personaje %c del nivel",*simboloRecibido);
 				if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
 					//log_info(logger,"Mando mensaje al personaje %c",*simboloRecibido);
-					printf("sth");
+					printf("Handshake Respondido\n");
 				}
 
 				//Agrega el nuevo personaje a la cola de listos del planificador
@@ -355,4 +420,19 @@ int listenerPersonaje(InfoPlanificador* planificador){
 	    return EXIT_SUCCESS;
 	}
 
+char* print_ip(int ip)
+{
+	char* aux;
+	aux=malloc(16);
+    unsigned char bytes[4];
+    bytes[0] = ip & 0xFF;
+    bytes[1] = (ip >> 8) & 0xFF;
+    bytes[2] = (ip >> 16) & 0xFF;
+    bytes[3] = (ip >> 24) & 0xFF;
+    snprintf(aux,16,"%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
+    return aux;
+}
+int esMiNivel(NodoNivel* nodo){
+return !strcmp(nodo->ip,nombreNivel);
+}
 //----------------------------------------------------------------
