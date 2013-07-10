@@ -26,6 +26,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "collections/queue.h"
+#include "collections/list.h"
 #include  "socketsOv.h" //Librería compartida para sockects de overflow
 
 //----------------------------------------------------------------
@@ -33,7 +34,7 @@
 //******************** DEFINICIONES GLOBALES *********************
 //Variables estándar del sistema
 int varGlobalQuantum=3;
-int varGlobalSleep=0.2* 1000000;
+int varGlobalSleep=1* 1000000;
 
 //Structs propios de la plataforma
 
@@ -51,7 +52,14 @@ typedef struct t_infoNivel {
 typedef struct t_nodoPersonaje {//TODO completar segun las necesidades
 	char simboloRepresentativo; //Ej: @ ! / % $ &
 	int socket;
+	char recursoPedido;
 } NodoPersonaje;
+
+typedef struct t_nodoNivel {//TODO completar segun las necesidades
+	char* nombreNivel; //Ej: @ ! / % $ &
+	char ip[20];
+	int port;
+} NodoNivel;
 
 typedef struct t_msjPersonaje {
 	int solicitaRecurso;
@@ -204,6 +212,7 @@ int planificador (InfoNivel* nivel) {
 //proceso personaje que se conecte.
 //Cardinalidad = un único thread que atiende las solicitudes
 int orquestador (void) {
+	t_list* listaNiveles=list_create();
 
 	int socketNuevaConexion;
 	//Struct con info de conexión (IP y puerto) del nivel y el planificador asociado a ese nivel
@@ -213,6 +222,7 @@ int orquestador (void) {
 		char ipPlanificador[16];
 		int portPlanificador;
 	} ConxNivPlan;
+
 	ConxNivPlan msj;
 
 	//todo Desharcodear IPs de planificador y nivel
@@ -246,20 +256,33 @@ int orquestador (void) {
 
 		//Handshake en el que recibe el simbolo del personaje
 		char *simboloRecibido; //Ej: @ ! / % $ &
-		if(recibirMensaje(socketNuevaConexion, (void**) &simboloRecibido)>=0) {
+		simboloRecibido=malloc(1);
+		Header unHeader;
+		if(recibirHeader(socketNuevaConexion,&unHeader)){
+
+		if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
+
+
+
+//		if(recibirMensaje(socketNuevaConexion, (void**) &simboloRecibido)>=0) {
 			if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
 				//log_info(logger,"Mando mensaje al personaje %c",*rec);
-				printf("%c",*simboloRecibido);
+				printf("Entro Personaje: %c\n",*simboloRecibido);
 			}
 		}
-		Header unHeader;
-		int* intaux;
+		}
+
+		char* nivelDelPersonaje;
 		//Esperar solicitud de info de conexion de Nivel y Planifador
-		if(recibirHeader(socketNuevaConexion,&unHeader)){
-			if(recibirData(socketNuevaConexion,unHeader,(void**)&intaux)){
+		printf("Esperando solictud de nivel\n");
+//		if(recibirHeader(socketNuevaConexion,&unHeader)){
+//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
+//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+		if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
+				printf("Nivel recibido: %s\n",nivelDelPersonaje);
 				//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 				mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj);
-			}
+//			}
 		}
 		//cerrar socket
 		close(socketNuevaConexion);
@@ -273,25 +296,7 @@ int orquestador (void) {
 	//pthread_create(&threadPersonaje, NULL, han, (void *)msj);
 
 
-	//	//TEST:Creamos 5 threads a modo de prueba
-	//	int i;
-	//	pthread_t vectorDeThreads[4];
-	//	for (i=0; i<5; i++){
-	//
-	//		int numeroDeNivel = i;
-	//		printf("Creando THR Planificador para nivel %d...\n",numeroDeNivel);
-	//
-	//		pthread_create(&vectorDeThreads[i], NULL, planificador, numeroDeNivel);
-	//	};
-	//
-	//	//Esperamos que termine cada thread de los planificadores creados
-	//	for (i=0; i<5; i++){
-	//		pthread_join(vectorDeThreads[i], NULL);
-	//		pthread_detach(vectorDeThreads[i]);
-	//
-	//	}
-
-	//	printf("THR Orquestador: terminado\n");
+	//	printf("THR Orquestador: terminado\n"); LLamar a Koopa
 
 	return EXIT_SUCCESS;
 }

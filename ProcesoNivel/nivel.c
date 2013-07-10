@@ -74,8 +74,7 @@ void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
 //chequee que un personaje este bloqueado (lo veremos despues esto)
 int main(void){
 	//	Leer el config y cargar los recursos
-	//	CrearCaja(&listaItems,'F',10,14,7);
-	//	CrearCaja(&listaItems,'H',17,6,3);
+
 	t_config* configNivel = config_create("config.txt");
 	char *varstr;
 	varstr=malloc(8);
@@ -134,31 +133,32 @@ nivel_gui_terminar();
 return 0;
 }
 
-void BorrarItem2(ITEM_NIVEL** ListaItems, char id) {
-        ITEM_NIVEL * temp = *ListaItems;
-        ITEM_NIVEL * oldtemp;
-        log_debug(logger,"BorrarItem2 puntero: %p",temp);
-        if ((temp != NULL) && (temp->id == id)) {
-        	log_debug(logger,"1BorrarItem2 puntero: %p id:%c",temp,temp->id);
-                *ListaItems = (*ListaItems)->next;
-		free(temp);
-		log_debug(logger,"1BorrarItem2: Se libero correctamente puntero %p",temp);
-        } else {
-                while((temp != NULL) && (temp->id != id)) {
-                        oldtemp = temp;
-                        log_debug(logger,"BorrarItem2 puntero: %p",temp);
-                        log_debug(logger,"2BorrarItem2 puntero: %p id:%c",temp,temp->id);
-                        temp = temp->next;
-                }
-                if ((temp != NULL) && (temp->id == id)) {
-                        oldtemp->next = temp->next;
-                        log_debug(logger,"3BorrarItem2 puntero: %d ip:%c",temp,temp->id);
-			free(temp);
-			log_debug(logger,"2BorrarItem2: Se libero correctamente puntero %d",temp);
-                }
-        }
-
-}
+//TODO Borrar
+//void BorrarItem2(ITEM_NIVEL** ListaItems, char id) {
+//        ITEM_NIVEL * temp = *ListaItems;
+//        ITEM_NIVEL * oldtemp;
+//        log_debug(logger,"BorrarItem2 puntero: %p",temp);
+//        if ((temp != NULL) && (temp->id == id)) {
+//        	log_debug(logger,"1BorrarItem2 puntero: %p id:%c",temp,temp->id);
+//                *ListaItems = (*ListaItems)->next;
+//		free(temp);
+//		log_debug(logger,"1BorrarItem2: Se libero correctamente puntero %p",temp);
+//        } else {
+//                while((temp != NULL) && (temp->id != id)) {
+//                        oldtemp = temp;
+//                        log_debug(logger,"BorrarItem2 puntero: %p",temp);
+//                        log_debug(logger,"2BorrarItem2 puntero: %p id:%c",temp,temp->id);
+//                        temp = temp->next;
+//                }
+//                if ((temp != NULL) && (temp->id == id)) {
+//                        oldtemp->next = temp->next;
+//                        log_debug(logger,"3BorrarItem2 puntero: %d ip:%c",temp,temp->id);
+//			free(temp);
+//			log_debug(logger,"2BorrarItem2: Se libero correctamente puntero %d",temp);
+//                }
+//        }
+//
+//}
 
 //handler de cada personaje recibe un struct con el socket y el puntero a su nodo
 void handler(DataP* dataPer)
@@ -180,8 +180,6 @@ while(1){
 	switch(unHeader.type){
 	case 0:
 		if(!recibirData(dataPer->socket,unHeader, (void**)carAux)) {close(dataPer->socket);return;}
-		//TODO: borrar
-		//printf("Llego el Personaje %c al nivel",*carAux);
 		log_info(logger,"Llego el Personaje %c al nivel(Thread)", *carAux);
 		if (mandarMensaje(dataPer->socket,0 , 1,carAux))
 		{
@@ -192,16 +190,12 @@ while(1){
 		resp=recibirData(dataPer->socket,unHeader, (void**)carAux);
 		if(!resp) {close(dataPer->socket);return;}
 		log_debug(logger,"Resp del recData: %d",resp);
-		//TODO Borrar
-		//printf("El Personaje %c solicita la Posición del Recurso %c\n",dataPer.nodo->id,*carAux);
 		log_info(logger,"El Personaje %c solicita la Posición del Recurso %c\n",dataPer->nodo->id,*carAux);
 		nodoAux=obtenerRecurso(listaItems, *carAux);
 		posAux.x=nodoAux->posx;
 		posAux.y=nodoAux->posy;
 		buffer=&posAux;
 		if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
-			//TODO Borrar
-			//printf("Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer.nodo->id);
 			log_info(logger,"Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer->nodo->id);
 		}else {close(dataPer->socket);return;}
 		break;
@@ -209,56 +203,42 @@ while(1){
 		if(!recibirData(dataPer->socket, unHeader, (void**)&posAux)) {close(dataPer->socket);return;}
 		dataPer->nodo->posx=posAux.x;
 		dataPer->nodo->posy=posAux.y;
-		//TODO Borrar
-		//printf("Se recibió la posición(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id);
-		log_info(logger,"Se recibió la posición(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id);
+		log_info(logger,"Se recibio la posicion(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id);
 		carAux=malloc(1);
 		carAux[0]='K';
 		if (mandarMensaje(dataPer->socket,4 , sizeof(char),(void*)carAux)) {
-			//TODO Borrar
-			//printf("Se le aviso al Personaje %c que llego bien su Posición",dataPer.nodo->id);
 			log_info(logger,"Se le aviso al Personaje %c que llego bien su Posición",dataPer->nodo->id);
 		}else {close(dataPer->socket);return;}
 		break;
 	case 3:
 		if(!recibirData(dataPer->socket, unHeader, (void**)carAux)) {close(dataPer->socket);return;}
-		//TODO Borrar
-		//printf("El Personaje %c solicita una Instancia del Recurso %c\n",dataPer.nodo->id,*carAux);
 		log_info(logger,"El Personaje %c solicita una Instancia del Recurso %c\n",dataPer->nodo->id,*carAux);
 		if(restarRecurso(listaItems, *carAux)>0)
 		{
-			//TODO Borrar
-			//printf("Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer.nodo->id);
 			log_info(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer->nodo->id);
 			nodoAux=obtenerRecurso(listaItems, *carAux);
 			posAux.x=nodoAux->posx;
 			posAux.y=nodoAux->posy;
 			buffer=&posAux;
 			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
-				//TODO Borrar
-				//printf("Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
 				log_info(logger,"Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
 			}else {close(dataPer->socket);return;}
 
 		}else{
-			//TODO Borrar
-			//printf("No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer.nodo->id);
 			log_info(logger,"No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
 			posAux.x=dataPer->nodo->posx;
 			posAux.y=dataPer->nodo->posy;
 			buffer=&posAux;
 			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
-				//TODO Borrar
-				//printf("Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer.nodo->id,dataPer.nodo->id);
 				log_info(logger,"Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id,dataPer->nodo->id);
 			} else {close(dataPer->socket);return;}
 		}
 		break;
 	case 4:
-		//todo sincronizar
+		//todo sincronizar con los demas threads y con el listener cuando crea un personaje nuevo!
 		log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
 		log_debug(logger,"Case 4 puntero del personaje: %p",dataPer->nodo);
-		BorrarItem2(&listaItems,(dataPer->nodo)->id);
+		BorrarItem(&listaItems,(dataPer->nodo)->id);
 		log_info(logger,"El personaje salio del Nivel.");
 		close(dataPer->socket);
 		log_debug(logger,"Se cerro el Socket: %d",dataPer->socket);
@@ -289,7 +269,7 @@ int listenear(void){
             	log_info(logger,"Escuchando conexiones entrantes");
 
                 // Aceptar una nueva conexion entrante. Se genera un nuevo socket con la nueva conexion.
-                // La funci贸n accept es bloqueante, no sigue la ejecuci贸n hasta que se reciba algo
+                // La funcion accept es bloqueante, no sigue la ejecuci贸n hasta que se reciba algo
                 if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
 
                 	log_error(logger,"Error al aceptar conexion entrante");
@@ -313,7 +293,7 @@ int listenear(void){
                     personaje->socket = socketNuevaConexion;
 
                     //Agrega personaje a la lista y devuelve nodo
-                    personaje->nodo = CrearPersonaje(&listaItems, *rec, 1 ,1);
+                    personaje->nodo = CrearPersonaje(&listaItems, *rec, 0 ,1);
                     log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
                     //TODO Fede vos sabes que hacer
                     pthread_t threadPersonaje;
@@ -334,7 +314,7 @@ void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant)
 	char* aux;
 	vecStr=string_split(caja, ",");
 	*id=*vecStr[1];
-	*x=(int)strtol(vecStr[2], &aux, 10);
-	*y=(int)strtol(vecStr[3], &aux, 10);
-	*cant=(int)strtol(vecStr[4], &aux, 10);
+	*x=(int)strtol(vecStr[3], &aux, 10);
+	*y=(int)strtol(vecStr[4], &aux, 10);
+	*cant=(int)strtol(vecStr[2], &aux, 10);
 	}

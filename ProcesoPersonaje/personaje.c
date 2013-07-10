@@ -74,7 +74,7 @@ int main(void){
 	t_config* config=config_create("config.txt");
 
 	//Se inicializan las variables para el logueo
-	t_log_level detail = LOG_LEVEL_INFO;
+	t_log_level detail = LOG_LEVEL_TRACE;
 	t_log * log = log_create("LogPersonaje.log","Personaje",false,detail);
 
 	//obtener recurso de config
@@ -84,9 +84,10 @@ int main(void){
 		char* val;
 		char* aux;
 		char* aux1;
-		char objNivel[14]="obj[Nivel1]";
+		char* nivelActual;
+		char objNivel[20]="obj[Nivel1]";
 		char corchete[2]="]";
-		int veclong, llego, cantNiv,numNiv, c,ii,puertoOrq;
+		int veclong, llego, cantNiv,c,ii,puertoOrq;
 		Header h;
 
 		niveles=config_get_array_value(config,"planDeNiveles");
@@ -103,7 +104,9 @@ int main(void){
 
 			memcpy(objNivel+4,niveles[c],strlen(niveles[c]));
 			memcpy(objNivel+4+strlen(niveles[c]),corchete,2);
-			numNiv=(int)strtol(niveles[c]+5, &aux, 10);
+
+//			numNiv=(int)strtol(niveles[c]+5, &aux, 10);
+			nivelActual=niveles[c];
 			obj=config_get_array_value(config,objNivel);
 			val=config_get_string_value(config,objNivel);
 			veclong=lengthVecConfig(val);
@@ -116,6 +119,7 @@ int main(void){
 			char* auxC;
 			auxC=malloc(sizeof(char));
 			*auxC=charPer;
+			//handshake Orquestador-Personaje
 			if (mandarMensaje(unSocketOrq ,0 , 1,auxC)) {
 				if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
 					printf("msj recibido from handshake %c\n",*auxC);
@@ -123,12 +127,15 @@ int main(void){
 			}
 
 			Header unHeader;
-			int* intaux;
-			intaux=malloc(sizeof(int));
-			*intaux=numNiv;
+//			int* intaux;
+//			intaux=malloc(sizeof(int));
+//			*intaux=numNiv;
 			ConxNivPlan ipNivelPlanif;
 			//esperar solicitud de info nivel/Planif
-			mandarMensaje(unSocketOrq,1,sizeof(int),intaux);
+//			mandarMensaje(unSocketOrq,1,sizeof(int),intaux);
+			mandarMensaje(unSocketOrq,1,strlen(nivelActual)+1,nivelActual);
+			printf("%s",nivelActual);
+			log_debug(log,"nivelActual: %s",nivelActual);
 			if(recibirHeader(unSocketOrq,&unHeader)){
 				if(recibirData(unSocketOrq,unHeader,(void**)&ipNivelPlanif)){
 				//Obtener info de ip & port
