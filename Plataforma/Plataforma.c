@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "collections/queue.h"
 #include  "socketsOv.h" //Librería compartida para sockects de overflow
 
@@ -32,7 +33,7 @@
 //******************** DEFINICIONES GLOBALES *********************
 //Variables estándar del sistema
 int varGlobalQuantum=3;
-int varGlobalSleep=1;
+int varGlobalSleep=0.2* 1000000;
 
 //Structs propios de la plataforma
 
@@ -95,15 +96,6 @@ int main (void) {
 //Cardinalidad = 0 hasta N threads ejecutandose simultaneamente, uno por nivel
 int planificador (InfoNivel* nivel) {
 
-//	//Se informa del estado del thread por pantalla: inciado
-//	char* nombreDePlanificador = malloc(sizeof("THR Planificador Nivel ") + sizeof(int));
-//	strcpy(nombreDePlanificador, "THR Planificador Nivel ");
-//	sprintf(nombreDePlanificador + (strlen(nombreDePlanificador)), "%d", numeroDeNivel);
-//	printf("%s: iniciado\n", nombreDePlanificador);
-//
-//	//Se informa del estado del thread por pantalla: terminado
-//	printf("%s: terminado\n", nombreDePlanificador);
-//return EXIT_SUCCESS;
 
 	//cola de personajes listos y bloqueados
 	t_queue *colaListos=queue_create();
@@ -127,69 +119,79 @@ int planificador (InfoNivel* nivel) {
 	//Se necesita algun char (cualquiera) para poder usar la función de enviar mensaje más adelante
 	char* auxcar;
 	auxcar=malloc(1);
-	*auxcar='T';
+	*auxcar='P';
 
 	int quantum=varGlobalQuantum;
 
 	while(1){
 		//Si la no esta vacia
 		if(!queue_is_empty(colaListos)){
-
+			printf("La lista no esta vacia\n");
 			NodoPersonaje *personajeActual; //todo Revisar que los punteros de personajeActual anden bien
 
 			if(quantum>0){
+				printf("Quantum > 0\n");
 				//Mandar mensaje de movimiento permitido al socket del personaje del nodo actual (primer nodo de la cola)
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
 				mandarMensaje(personajeActual->socket, 8, 1, auxcar);
+				printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
 			}
 			else {
 				quantum=varGlobalQuantum;
-
+				printf("Se acabo el quantum");
 				//Sacar el nodo actual (primer nodo de la cola) y enviarlo al fondo de la misma
 				//todo Sincronizar colaListos con el Listener
 				nodoAux=queue_pop(colaListos);
+				printf("Se saco de la cola de listos");
 				queue_push(colaListos,nodoAux);
-
+				printf("Se puso al final de la cola de listos");
 				//Buscar el primero de la cola de listos y mandarle un mensaje de movimiento permitido
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
+				printf("Se saco al primer personaje de la cola");
 				mandarMensaje(personajeActual->socket, 8, 1, auxcar);
-
+				printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
 			}
 
 			//Esperar respuesta de turno terminado (con la info sobre si quedo bloqueado y si tomo recurso)
 			Header headerMsjPersonaje;
 			MensajePersonaje msjPersonaje;
+			printf("Esperando respuesta de turno concluido\n");
 			recibirHeader(personajeActual->socket, &headerMsjPersonaje);
 			recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje);
-
+			printf("Respuesta recibida\n");
 			//Comportamientos según el mensaje que se recibe del personaje
 
 			//Si informa de fin de nivel se lo retira de la cola de listos
 			if(msjPersonaje.finNivel){
+				printf("El personaje termino el Nivel\n");
 				queue_pop(colaListos);
+				msjPersonaje.solicitaRecurso=0;
+				msjPersonaje.bloqueado=0;
+				quantum=varGlobalQuantum+1;
+				printf("Se retiro al personaje de la cola\n");
 			}
 
 			//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
 			if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
-				printf("%d",quantum);
-				quantum=varGlobalQuantum;
-				printf("%d",quantum);
+				printf("Rec no bloq1 %d\n",quantum);
+				quantum=varGlobalQuantum+1;
 				queue_push(colaListos,queue_pop(colaListos));
+				printf("Rec no bloq2 %d\n",quantum);
 			}
 
 			//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
 			if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
-				printf("%d",quantum);
-				quantum=varGlobalQuantum;
-				printf("%d",quantum);
+				printf("Rec bloq1 %d",quantum);
+				quantum=varGlobalQuantum+1;
 				queue_push(colaBloqueados,queue_pop(colaListos));
+				printf("Rec bloq2 %d",quantum);
 			}
 
 			printf("Q %d\n",quantum);
 			quantum--;
 			printf("Q %d\n",quantum);
-			sleep(varGlobalSleep);
-		}
+			usleep(varGlobalSleep);
+		}else usleep(10000); //para que no quede en espera activa
 	}//Cierra While(1)
 
 	return EXIT_SUCCESS;

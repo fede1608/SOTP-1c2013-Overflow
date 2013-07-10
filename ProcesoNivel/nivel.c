@@ -6,6 +6,7 @@
  */
 #include "config.h"
 #include "log.h"
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>
@@ -124,15 +125,40 @@ int main(void){
 		while(1){
 
 			nivel_gui_dibujar(listaItems);
-			sleep(1);
+			usleep(200000);
 
 		}
 
-		sleep(3);
+		usleep(2000000);
 nivel_gui_terminar();
 return 0;
 }
 
+void BorrarItem2(ITEM_NIVEL** ListaItems, char id) {
+        ITEM_NIVEL * temp = *ListaItems;
+        ITEM_NIVEL * oldtemp;
+        log_debug(logger,"BorrarItem2 puntero: %p",temp);
+        if ((temp != NULL) && (temp->id == id)) {
+        	log_debug(logger,"1BorrarItem2 puntero: %p id:%c",temp,temp->id);
+                *ListaItems = (*ListaItems)->next;
+		free(temp);
+		log_debug(logger,"1BorrarItem2: Se libero correctamente puntero %p",temp);
+        } else {
+                while((temp != NULL) && (temp->id != id)) {
+                        oldtemp = temp;
+                        log_debug(logger,"BorrarItem2 puntero: %p",temp);
+                        log_debug(logger,"2BorrarItem2 puntero: %p id:%c",temp,temp->id);
+                        temp = temp->next;
+                }
+                if ((temp != NULL) && (temp->id == id)) {
+                        oldtemp->next = temp->next;
+                        log_debug(logger,"3BorrarItem2 puntero: %d ip:%c",temp,temp->id);
+			free(temp);
+			log_debug(logger,"2BorrarItem2: Se libero correctamente puntero %d",temp);
+                }
+        }
+
+}
 
 //handler de cada personaje recibe un struct con el socket y el puntero a su nodo
 void handler(DataP* dataPer)
@@ -231,7 +257,8 @@ while(1){
 	case 4:
 		//todo sincronizar
 		log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
-		BorrarItem(listaItems,(dataPer->nodo)->id);
+		log_debug(logger,"Case 4 puntero del personaje: %p",dataPer->nodo);
+		BorrarItem2(&listaItems,(dataPer->nodo)->id);
 		log_info(logger,"El personaje salio del Nivel.");
 		close(dataPer->socket);
 		log_debug(logger,"Se cerro el Socket: %d",dataPer->socket);

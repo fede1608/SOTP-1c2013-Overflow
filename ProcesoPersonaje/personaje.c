@@ -219,8 +219,10 @@ for(ii=0;ii<veclong;ii++){
 
 		// esperar mensaje de movPermitido para continuar
 		char* charAux;
+		printf("Esperando permiso de moviemiento...");
 		recibirHeader(unSocketPlanif,&unHeader);
 		if(unHeader.type==8) recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+		printf("Permiso Recibido");
 		MensajePersonaje respAlPlanf;
 		respAlPlanf.bloqueado=0;
 		respAlPlanf.solicitaRecurso=0;
@@ -310,7 +312,7 @@ for(ii=0;ii<veclong;ii++){
 		}
 		//mandar mensaje de resp al Planif
 		mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
-//		sleep(1);//todo sacar
+		printf("Se envio respuesta de turno cloncluido al Planificador\n");
 	}//fin while(llego)
 }//fin for each recurso
 
