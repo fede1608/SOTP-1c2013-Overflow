@@ -1,6 +1,6 @@
 nombre=Mario
 simbolo=#
-planDeNiveles=[Nivel3,Nivel4,Nivel1]
+planDeNiveles=[Nivel1,Nivel4,Nivel3]
 obj[Nivel1]=[F,H,F,H]
 obj[Nivel3]=[H,M,F]
 obj[Nivel4]=[M,F,M]

@@ -20,6 +20,7 @@
 #include <socketsOv.h>
 #include <pthread.h>
 #include "tad_items.h" //aca ya se incluye el #include "nivel.h"
+#include "collections/list.h"
 
 static int rows,cols;
 int puertoEscuchaGlobal=0;
@@ -34,13 +35,26 @@ int socket;
 ITEM_NIVEL * nodo;
 } DataP;
 
-ITEM_NIVEL * listaItems = NULL;
+typedef struct t_nodoPers {
+char id;
+t_list * listaRecursosAsignados;//lista de nodos recursos
+char recBloqueado;
+int personajeBloqueado;
+} NodoPersonaje;
 
+typedef struct t_nodoRec {
+char id;
+int cantAsignada;
+} NodoRecurso;
+
+ITEM_NIVEL * listaItems = NULL;
+t_list * listaPersonajes;
 t_log * logger;
 
 void handler(DataP* dataPer);
 int listenear(void);
 void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
+t_list* inicializarListaRecursos(void);
 //1) El proceso nivel crea 1 lista (global)
 //que tiene personajes e items
 
@@ -85,6 +99,8 @@ int main(void){
 	//false = Que no aparezca en pantalla los logs
 	//detail = Detalle con el que se va a loguear (TRACE,INFO,DEBUG,etc)
 	logger = log_create("LogNivel.log","ProcesoNivel",false,detail);
+
+
 
 	t_config* configNivel = config_create("config.txt");
 	char *varstr;
@@ -285,6 +301,8 @@ while(1){
 
 int listenear(void){
 
+	listaPersonajes= list_create();
+
     int socketEscucha,socketNuevaConexion;
     socketEscucha=quieroUnPutoSocketDeEscucha(puertoEscuchaGlobal);
 
@@ -307,23 +325,29 @@ int listenear(void){
                 }
 
                 //Handshake en el que recibe la letra del personaje
-                char* rec;
-                if(recibirMensaje(socketNuevaConexion, (void**)&rec)>=0) {
+                char* per;
+                if(recibirMensaje(socketNuevaConexion, (void**)&per)>=0) {
 
-                	log_info(logger,"Llego el Personaje %c del nivel",*rec);
+                	log_info(logger,"Llego el Personaje %c del nivel",*per);
 
-                    if (mandarMensaje(socketNuevaConexion,0 , 1,rec)) {
-                    	log_info(logger,"Mando mensaje al personaje %c",*rec);
+                    if (mandarMensaje(socketNuevaConexion,0 , 1,per)) {
+                    	log_info(logger,"Mando mensaje al personaje %c",*per);
 
                     }
 
+                    NodoPersonaje* nodoPer;
+                    nodoPer = malloc(sizeof(NodoPersonaje));
+                    nodoPer->id=*per;
+                    nodoPer->personajeBloqueado=0;
+                    nodoPer->recBloqueado='0';
+                    nodoPer->listaRecursosAsignados=inicializarListaRecursos();
+                    list_add(listaPersonajes,nodoPer);
+
                     DataP* personaje;
                     personaje=malloc(sizeof(DataP));
-
                     personaje->socket = socketNuevaConexion;
-
                     //Agrega personaje a la lista y devuelve nodo
-                    personaje->nodo = CrearPersonaje(&listaItems, *rec, 0 ,1);
+                    personaje->nodo = CrearPersonaje(&listaItems, *per, 0 ,1);
                     log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
                     //TODO Fede vos sabes que hacer
                     pthread_t threadPersonaje;
@@ -348,3 +372,29 @@ void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant)
 	*y=(int)strtol(vecStr[4], &aux, 10);
 	*cant=(int)strtol(vecStr[2], &aux, 10);
 	}
+t_list* inicializarListaRecursos(void){
+	t_list* lista;
+	lista=list_create();
+	NodoRecurso* nodoRec;
+	ITEM_NIVEL * temp = listaItems;
+	ITEM_NIVEL * oldtemp;
+
+	if ((temp != NULL) && (temp->item_type == RECURSO_ITEM_TYPE)) {
+		nodoRec=malloc(sizeof(NodoRecurso));
+		nodoRec->cantAsignada=0;
+		nodoRec->id=temp->id;
+		list_add(lista,nodoRec);
+	} else {
+			while((temp != NULL) && (temp->item_type != RECURSO_ITEM_TYPE)) {
+					oldtemp = temp;
+					temp = temp->next;
+			}
+			if ((temp != NULL) && (temp->item_type == RECURSO_ITEM_TYPE)) {
+					nodoRec=malloc(sizeof(NodoRecurso));
+					nodoRec->cantAsignada=0;
+					nodoRec->id=temp->id;
+					list_add(lista,nodoRec);
+			}
+	}
+	return lista;
+}

@@ -1,0 +1,8 @@
+Nombre=Nivel1
+# CajaX=[Nombre],[Simbolo],[Instancias],[PosX],[PosY]
+Caja1=Flores,F,12,7,5
+Caja2=Hongos,H,3,9,9
+Caja3=Monedas,M,9,4,7
+orquestador=127.0.0.1:4999
+TiempoChequeoDeadlock=10000
+Recovery=1

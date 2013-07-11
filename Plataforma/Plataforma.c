@@ -35,7 +35,7 @@
 //******************** DEFINICIONES GLOBALES *********************
 //Variables Globales del sistema
 int varGlobalQuantum=3;
-int varGlobalSleep=1* 1000000;
+int varGlobalSleep=0.5* 1000000;
 char* nombreNivel;//se usa para la funcion que se manda al list_find
 //Structs propios de la plataforma
 
@@ -123,7 +123,7 @@ int planificador (InfoNivel* nivel) {
 	planificadorActual=malloc(sizeof(InfoPlanificador));
 	planificadorActual->colaListos=colaListos;
 	//pasar puerto de la plataforma
-	planificadorActual->port=5001;
+	planificadorActual->port=nivel->puertoPlanif;
 	//Este thread se encargará de esuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
 	pthread_t threadPersonaje;
 	pthread_create(&threadPersonaje, NULL, listenerPersonaje, (void *)planificadorActual);
