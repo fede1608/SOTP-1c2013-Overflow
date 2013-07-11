@@ -1,4 +1,4 @@
-//ATENCIÓN: Este archivo contiene la función de logeo vieja echa por Juan M.
+//ATENCIÓN: Este archivo contiene la función de logeo vieja echa por Juan M. Uypu Ssy
 //			Actualmente no tiene utilidad dado que fue reemplazada por la
 //			función provista por la cátedrea en la so-commons para el mismo fin.
 
