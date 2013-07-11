@@ -148,7 +148,7 @@ while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y 
 			}
 
 			close(unSocketOrq);
-			usleep(0.1*1000000);
+			usleep(1*1000000);
 	}
 			//conectar con Planificador
 			int unSocketPlanif;

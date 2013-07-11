@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "collections/queue.h"
@@ -78,7 +79,7 @@ int planificador (InfoNivel* nivel);
 int orquestador (void);
 int listenerPersonaje(InfoPlanificador* planificador);
 char* print_ip(int ip);
-int esMiNivel(NodoNivel* nodo);
+bool esMiNivel(NodoNivel* nodo);
 //----------------------------------------------------------------
 
 //******************** FUNCIONES PRINCIPALES *********************
@@ -293,7 +294,9 @@ int orquestador (void) {
 					//settear variable global para usar en funcion q se manda a list_find
 					nombreNivel=nivelDelPersonaje;
 					printf("Se busca el nivel \n");
+
 					NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
+
 					printf("Se encontro el nivel %p\n",nivel);
 					if(nivel!=NULL){
 					strcpy(msj.ipNivel,nivel->ip);
@@ -435,7 +438,11 @@ char* print_ip(int ip)
     snprintf(aux,16,"%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
     return aux;
 }
-int esMiNivel(NodoNivel* nodo){
-return !strcmp(nodo->ip,nombreNivel);
+bool esMiNivel(NodoNivel* nodo){
+	printf("%s %s\n",nodo->nombreNivel,nombreNivel);
+
+	if(strcmp(nodo->nombreNivel,nombreNivel)==0)
+		return true;
+	return false;
 }
 //----------------------------------------------------------------
