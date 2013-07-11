@@ -3,6 +3,6 @@ Nombre=Nivel1
 Caja1=Flores,F,3,8,5
 Caja2=Hongos,H,2,4,9
 Caja3=Monedas,M,4,12,2
-orquestador=127.0.0.1:5000
+orquestador=127.0.0.1:4999
 TiempoChequeoDeadlock=10000
 Recovery=1

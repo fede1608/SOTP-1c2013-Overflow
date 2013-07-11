@@ -22,6 +22,7 @@
 #include "tad_items.h" //aca ya se incluye el #include "nivel.h"
 
 static int rows,cols;
+int puertoEscuchaGlobal=0;
 
 typedef struct t_posicion {
 	int8_t x;
@@ -74,6 +75,16 @@ void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
 //chequee que un personaje este bloqueado (lo veremos despues esto)
 int main(void){
 	//	Leer el config y cargar los recursos
+	//Crea archivo log
+	//Si existe lo abre, sino, lo crea
+	//Con trace va a poder loguear t-o-d-o
+	t_log_level detail = LOG_LEVEL_TRACE;
+
+	//LogNivel = Nombre de archivo log
+	//ProcesoNivel = Nombre del proceso
+	//false = Que no aparezca en pantalla los logs
+	//detail = Detalle con el que se va a loguear (TRACE,INFO,DEBUG,etc)
+	logger = log_create("LogNivel.log","ProcesoNivel",false,detail);
 
 	t_config* configNivel = config_create("config.txt");
 	char *varstr;
@@ -96,18 +107,37 @@ int main(void){
 			}
 		}
 
-	//Crea archivo log
-	//Si existe lo abre, sino, lo crea
-	//Con trace va a poder loguear t-o-d-o
-	t_log_level detail = LOG_LEVEL_TRACE;
+	char* aux1;
+	char** ipPuertoOrq;
+	char* nombreNivel;
+	nombreNivel=config_get_string_value(configNivel,"Nombre");
+	aux1=config_get_string_value(configNivel,"orquestador");
+	ipPuertoOrq=string_split(aux1, ":");
+	int puertoOrq=(int)strtol(ipPuertoOrq[1], NULL, 10);
 
-	//LogNivel = Nombre de archivo log
-	//ProcesoNivel = Nombre del proceso
-	//false = Que no aparezca en pantalla los logs
-	//detail = Detalle con el que se va a loguear (TRACE,INFO,DEBUG,etc)
-	logger = log_create("LogNivel.log","ProcesoNivel",false,detail);
+	int socketOrq= quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
 
-//	t_config* config=config_create("config.txt");
+	//handshake Orquestador-Nivel
+	if (mandarMensaje(socketOrq,2,strlen(nombreNivel)+1,nombreNivel)) {
+		if(recibirMensaje(socketOrq,(void**)&aux1)>=0) {
+			printf("msj recibido from handshake %c\n",*aux1);
+		}
+	}
+	Header unHeader;
+	int* puerto;
+	puerto=malloc(sizeof(int));
+	if(recibirHeader(socketOrq,&unHeader)){
+		printf("Se recibio el header\n");
+		if(recibirData(socketOrq,unHeader,(void**)puerto)){
+			printf("Se recibio el puerto\n");
+			puertoEscuchaGlobal=*puerto;
+			mandarMensaje(socketOrq,1,sizeof(int),puerto);
+		}
+	}
+
+
+
+
 	nivel_gui_inicializar();
 	nivel_gui_get_area_nivel(&rows, &cols);
 
@@ -256,7 +286,7 @@ while(1){
 int listenear(void){
 
     int socketEscucha,socketNuevaConexion;
-    socketEscucha=quieroUnPutoSocketDeEscucha(5000);
+    socketEscucha=quieroUnPutoSocketDeEscucha(puertoEscuchaGlobal);
 
             while (1){
             	// Escuchar nuevas conexiones entrantes.

@@ -292,11 +292,14 @@ int orquestador (void) {
 
 					//settear variable global para usar en funcion q se manda a list_find
 					nombreNivel=nivelDelPersonaje;
+					printf("Se busca el nivel \n");
 					NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
+					printf("Se encontro el nivel %p\n",nivel);
+					if(nivel!=NULL){
 					strcpy(msj.ipNivel,nivel->ip);
 					msj.portNivel=nivel->port;
 					msj.portPlanificador=nivel->puertoPlanif;
-
+					}
 					mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj);
 	//			}
 			}

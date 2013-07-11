@@ -9,6 +9,7 @@
 #include "string.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <curses.h>
 #include <sys/ioctl.h>
 #include "socketsOv.h"
@@ -113,7 +114,10 @@ int main(void){
 			pos.x=0;
 			pos.y=1;
 
-		//TODO conexion solicitud de ip:puerto al orquestator y cierre de esa conex
+		ConxNivPlan ipNivelPlanif;
+		ipNivelPlanif.portNivel=0;
+while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y sino entra en un ciclo hasta que entre
+		//conexion solicitud de ip:puerto al orquestator y cierre de esa conex
 			int unSocketOrq;
 			unSocketOrq = quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
 			char* auxC;
@@ -130,7 +134,7 @@ int main(void){
 //			int* intaux;
 //			intaux=malloc(sizeof(int));
 //			*intaux=numNiv;
-			ConxNivPlan ipNivelPlanif;
+
 			//esperar solicitud de info nivel/Planif
 //			mandarMensaje(unSocketOrq,1,sizeof(int),intaux);
 			mandarMensaje(unSocketOrq,1,strlen(nivelActual)+1,nivelActual);
@@ -144,12 +148,12 @@ int main(void){
 			}
 
 			close(unSocketOrq);
-
-
+			usleep(0.1*1000000);
+	}
 			//conectar con Planificador
 			int unSocketPlanif;
-			unSocketPlanif = quieroUnPutoSocketAndando(ipNivelPlanif.ipPlanificador,ipNivelPlanif.portPlanificador);
-			log_info(log,"Se creo un nuevo socket con el Planificador. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipPlanificador,ipNivelPlanif.portPlanificador,unSocketPlanif);
+			unSocketPlanif = quieroUnPutoSocketAndando(ipPuertoOrq[0],ipNivelPlanif.portPlanificador);
+			log_info(log,"Se creo un nuevo socket con el Planificador. Direccion: %s // Puerto: %d // Socket: %d",ipPuertoOrq[0],ipNivelPlanif.portPlanificador,unSocketPlanif);
 			char* charbuf;
 			charbuf=malloc(1);
 			*charbuf=charPer;
@@ -223,7 +227,7 @@ for(ii=0;ii<veclong;ii++){
 	llego=1;
 
 	while(llego){
-
+		Header unHeader;
 		// esperar mensaje de movPermitido para continuar
 		char* charAux;
 		printf("Esperando permiso de moviemiento...");

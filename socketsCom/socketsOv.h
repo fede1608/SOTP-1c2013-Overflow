@@ -36,6 +36,10 @@ typedef struct t_paquete {
 		//rec=malloc(sizeof(char));
 		//recibirData(socketNuevaConexion, headMen, (void**)rec);
 //
+		//recibir un in
+		//int * aux;
+		//aux=malloc(sizeof(int));
+		//recibirData(socketNuevaConexion, headMen, (void**)aux);
 		//Recibir un struct
 		//Posicion lifeSucks;
 		//recibirData(unSocket,unHeader,(void**)&lifeSucks);
