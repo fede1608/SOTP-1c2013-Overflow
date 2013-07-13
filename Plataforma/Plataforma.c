@@ -145,7 +145,7 @@ int planificador (InfoNivel* nivel) {
 				printf("Quantum > 0\n");
 				//Mandar mensaje de movimiento permitido al socket del personaje del nodo actual (primer nodo de la cola)
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
-				mandarMensaje(personajeActual->socket, 8, 1, auxcar);
+				mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar);
 				printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
 			}
 			else {
@@ -160,7 +160,7 @@ int planificador (InfoNivel* nivel) {
 				//Buscar el primero de la cola de listos y mandarle un mensaje de movimiento permitido
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
 				printf("Se saco al primer personaje de la cola");
-				mandarMensaje(personajeActual->socket, 8, 1, auxcar);
+				mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar);
 				printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
 			}
 
@@ -274,7 +274,7 @@ int orquestador (void) {
 			msj.portPlanificador=0;
 			simboloRecibido=malloc(1);
 			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
-				if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
+				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido)) {
 					//log_info(logger,"Mando mensaje al personaje %c",*rec);
 					printf("Entro Personaje: %c\n",*simboloRecibido);
 				}
@@ -313,7 +313,7 @@ int orquestador (void) {
 		case 2: //case Nivel
 			simboloRecibido=malloc(unHeader.payloadlength);
 			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
-				if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
+				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido)) {
 					//log_info(logger,"Mando mensaje al personaje %c",*rec);
 					printf("Entro Nivel: %s\n",simboloRecibido);
 				}

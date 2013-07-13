@@ -55,6 +55,7 @@ void handler(DataP* dataPer);
 int listenear(void);
 void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
 t_list* inicializarListaRecursos(void);
+void liberarRecursos(t_list* listaPer,char personaje);
 //1) El proceso nivel crea 1 lista (global)
 //que tiene personajes e items
 
@@ -219,6 +220,19 @@ ITEM_NIVEL* nodoAux;
 log_info(logger,"Llego el socket %d (Thread)", dataPer->socket);
 
 while(1){
+	char idPer;
+	char idRec;
+	bool esPersonaje(NodoPersonaje* nodo){
+					if(nodo->id==idPer)
+						return true;
+					return false;
+				}
+	bool esRecurso(NodoRecurso* nodo){
+		if(nodo->id==idRec)
+			return true;
+		return false;
+	}
+
 
 	// todos los returns son para handlear el tema de desconexion del cliente sin aviso
 	if(!recibirHeader(dataPer->socket,&unHeader)) {close(dataPer->socket);return;}
@@ -257,33 +271,52 @@ while(1){
 		}else {close(dataPer->socket);return;}
 		break;
 	case 3:
+		//Personaje solicita recurso
 		if(!recibirData(dataPer->socket, unHeader, (void**)carAux)) {close(dataPer->socket);return;}
 		log_info(logger,"El Personaje %c solicita una Instancia del Recurso %c\n",dataPer->nodo->id,*carAux);
 		if(restarRecurso(listaItems, *carAux)>0)
 		{
+			log_debug(logger,"test1");
+			idPer=dataPer->nodo->id;
+			log_debug(logger,"test2");
+			NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
+			log_debug(logger,"test3");
+			idRec=*carAux;
+			log_debug(logger,"test4 %c %d",nodoPerAux->id,list_size(nodoPerAux->listaRecursosAsignados));
+			NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
+			log_debug(logger,"test5 %p",nodoRecAux);
+			nodoRecAux->cantAsignada++;
+			log_debug(logger,"test6");
 			log_info(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer->nodo->id);
-			nodoAux=obtenerRecurso(listaItems, *carAux);
-			posAux.x=nodoAux->posx;
-			posAux.y=nodoAux->posy;
-			buffer=&posAux;
-			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
-				log_info(logger,"Se mando la pos(%d,%d) del Rec %c\n",posAux.x,posAux.y,*carAux);
+//			nodoAux=obtenerRecurso(listaItems, *carAux);
+			int*respRec;
+			respRec=malloc(sizeof(int));
+			*respRec=1;
+			if (mandarMensaje(dataPer->socket,4 , sizeof(int),(void*)respRec)) {
+				log_info(logger,"Se mando la confirmacion %d del pedido de Recurso\n",*respRec);
 			}else {close(dataPer->socket);return;}
+			free(respRec);
 
 		}else{
+			idPer=dataPer->nodo->id;
+			NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
+			nodoPerAux->personajeBloqueado=1;
+			nodoPerAux->recBloqueado=*carAux;
 			log_info(logger,"No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
-			posAux.x=dataPer->nodo->posx;
-			posAux.y=dataPer->nodo->posy;
-			buffer=&posAux;
-			if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
-				log_info(logger,"Se mando la posActual(%d,%d) del Personaje %c al Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id,dataPer->nodo->id);
+			int*respRec;
+			respRec=malloc(sizeof(int));
+			*respRec=0;
+			if (mandarMensaje(dataPer->socket,4 , sizeof(int),(void*)respRec)) {
+				log_info(logger,"Se mando la confirmacion %d del pedido de Recurso\n",*respRec);
 			} else {close(dataPer->socket);return;}
+			free(respRec);
 		}
 		break;
 	case 4:
 		//todo sincronizar con los demas threads y con el listener cuando crea un personaje nuevo!
 		log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
 		log_debug(logger,"Case 4 puntero del personaje: %p",dataPer->nodo);
+		liberarRecursos(listaPersonajes,(dataPer->nodo)->id);
 		BorrarItem(&listaItems,(dataPer->nodo)->id);
 		log_info(logger,"El personaje salio del Nivel.");
 		close(dataPer->socket);
@@ -377,16 +410,16 @@ t_list* inicializarListaRecursos(void){
 	lista=list_create();
 	NodoRecurso* nodoRec;
 	ITEM_NIVEL * temp = listaItems;
-	ITEM_NIVEL * oldtemp;
 
-	if ((temp != NULL) && (temp->item_type == RECURSO_ITEM_TYPE)) {
-		nodoRec=malloc(sizeof(NodoRecurso));
-		nodoRec->cantAsignada=0;
-		nodoRec->id=temp->id;
-		list_add(lista,nodoRec);
-	} else {
+
+//	if ((temp != NULL) && (temp->item_type == RECURSO_ITEM_TYPE)) {
+//		nodoRec=malloc(sizeof(NodoRecurso));
+//		nodoRec->cantAsignada=0;
+//		nodoRec->id=temp->id;
+//		list_add(lista,nodoRec);
+//	}
+		while(temp != NULL){
 			while((temp != NULL) && (temp->item_type != RECURSO_ITEM_TYPE)) {
-					oldtemp = temp;
 					temp = temp->next;
 			}
 			if ((temp != NULL) && (temp->item_type == RECURSO_ITEM_TYPE)) {
@@ -394,7 +427,29 @@ t_list* inicializarListaRecursos(void){
 					nodoRec->cantAsignada=0;
 					nodoRec->id=temp->id;
 					list_add(lista,nodoRec);
+
+					temp = temp->next;
 			}
-	}
+		}
+
 	return lista;
+}
+void liberarRecursos(t_list* listaPer,char personaje){
+	char idPer;
+	char idRec;
+	bool esPersonaje(NodoPersonaje* nodo){
+					if(nodo->id==idPer)
+						return true;
+					return false;
+				}
+	void liberarInstancias(NodoRecurso* nodo){
+		sumarRecurso(listaItems,nodo->id,nodo->cantAsignada);
+		free(nodo);
+	}
+
+	idPer=personaje;
+	NodoPersonaje* nodoPerAux = list_remove_by_condition(listaPer,esPersonaje);
+	list_destroy_and_destroy_elements(nodoPerAux->listaRecursosAsignados,liberarInstancias);
+	free(nodoPerAux);
+
 }

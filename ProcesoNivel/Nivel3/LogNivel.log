@@ -3107,3 +3107,644 @@
 [DEBUG] 14:12:25:186 ProcesoNivel/(13090:13299): Case 4 puntero del personaje: 0xb6c00560
 [INFO] 14:12:25:186 ProcesoNivel/(13090:13299): El personaje salio del Nivel.
 [DEBUG] 14:12:25:186 ProcesoNivel/(13090:13299): Se cerro el Socket: 7
+[INFO] 21:59:39:856 ProcesoNivel/(17702:17703): Escuchando conexiones entrantes
+[INFO] 22:09:16:418 ProcesoNivel/(17871:17872): Escuchando conexiones entrantes
+[INFO] 22:12:03:698 ProcesoNivel/(17997:17998): Escuchando conexiones entrantes
+[INFO] 22:22:49:930 ProcesoNivel/(18356:18357): Escuchando conexiones entrantes
+[INFO] 22:27:47:59 ProcesoNivel/(18508:18509): Escuchando conexiones entrantes
+[INFO] 22:27:51:159 ProcesoNivel/(18508:18509): Llego el Personaje @ del nivel
+[INFO] 22:27:51:159 ProcesoNivel/(18508:18509): Mando mensaje al personaje @
+[INFO] 22:27:51:159 ProcesoNivel/(18508:18509): Mando el socket 6 (Thread)
+[INFO] 22:27:51:160 ProcesoNivel/(18508:18509): Escuchando conexiones entrantes
+[INFO] 22:27:51:161 ProcesoNivel/(18508:18518): Llego el socket 6 (Thread)
+[DEBUG] 22:27:51:163 ProcesoNivel/(18508:18518): Llego Msj tipo 1 payload 1
+[DEBUG] 22:27:51:200 ProcesoNivel/(18508:18518): Resp del recData: 1
+[INFO] 22:27:51:201 ProcesoNivel/(18508:18518): El Personaje @ solicita la Posición del Recurso H
+
+[INFO] 22:27:51:201 ProcesoNivel/(18508:18518): Se mando la pos(4,9) del Rec H al Personaje @
+
+[DEBUG] 22:27:51:242 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:51:281 ProcesoNivel/(18508:18518): Se recibio la posicion(1,1) del Personaje @
+
+[INFO] 22:27:51:281 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:51:862 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:51:900 ProcesoNivel/(18508:18518): Se recibio la posicion(2,1) del Personaje @
+
+[INFO] 22:27:51:901 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:52:404 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:52:445 ProcesoNivel/(18508:18518): Se recibio la posicion(3,1) del Personaje @
+
+[INFO] 22:27:52:446 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:52:951 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:52:988 ProcesoNivel/(18508:18518): Se recibio la posicion(4,1) del Personaje @
+
+[INFO] 22:27:52:989 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:53:493 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:53:532 ProcesoNivel/(18508:18518): Se recibio la posicion(4,2) del Personaje @
+
+[INFO] 22:27:53:533 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:54:37 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:54:76 ProcesoNivel/(18508:18518): Se recibio la posicion(4,3) del Personaje @
+
+[INFO] 22:27:54:77 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:54:580 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:54:620 ProcesoNivel/(18508:18518): Se recibio la posicion(4,4) del Personaje @
+
+[INFO] 22:27:54:621 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:55:124 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:55:164 ProcesoNivel/(18508:18518): Se recibio la posicion(4,5) del Personaje @
+
+[INFO] 22:27:55:165 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:55:668 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:55:708 ProcesoNivel/(18508:18518): Se recibio la posicion(4,6) del Personaje @
+
+[INFO] 22:27:55:709 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:56:212 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:56:252 ProcesoNivel/(18508:18518): Se recibio la posicion(4,7) del Personaje @
+
+[INFO] 22:27:56:253 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:56:758 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:56:797 ProcesoNivel/(18508:18518): Se recibio la posicion(4,8) del Personaje @
+
+[INFO] 22:27:56:797 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:57:301 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:57:340 ProcesoNivel/(18508:18518): Se recibio la posicion(4,9) del Personaje @
+
+[INFO] 22:27:57:341 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:57:342 ProcesoNivel/(18508:18518): Llego Msj tipo 3 payload 1
+[INFO] 22:27:57:382 ProcesoNivel/(18508:18518): El Personaje @ solicita una Instancia del Recurso H
+
+[DEBUG] 22:27:57:382 ProcesoNivel/(18508:18518): test1
+[DEBUG] 22:27:57:382 ProcesoNivel/(18508:18518): test2
+[DEBUG] 22:27:57:382 ProcesoNivel/(18508:18518): test3
+[DEBUG] 22:27:57:382 ProcesoNivel/(18508:18518): test4 @ 3
+[DEBUG] 22:27:57:382 ProcesoNivel/(18508:18518): test5 0xb6b005c0
+[DEBUG] 22:27:57:382 ProcesoNivel/(18508:18518): test6
+[INFO] 22:27:57:382 ProcesoNivel/(18508:18518): Hay instancias del recurso H y se le dio una al Personaje @
+
+[INFO] 22:27:57:383 ProcesoNivel/(18508:18518): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:27:57:421 ProcesoNivel/(18508:18518): Llego Msj tipo 1 payload 1
+[DEBUG] 22:27:57:460 ProcesoNivel/(18508:18518): Resp del recData: 1
+[INFO] 22:27:57:461 ProcesoNivel/(18508:18518): El Personaje @ solicita la Posición del Recurso M
+
+[INFO] 22:27:57:461 ProcesoNivel/(18508:18518): Se mando la pos(10,7) del Rec M al Personaje @
+
+[DEBUG] 22:27:58:7 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:58:44 ProcesoNivel/(18508:18518): Se recibio la posicion(5,9) del Personaje @
+
+[INFO] 22:27:58:45 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:58:548 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:58:588 ProcesoNivel/(18508:18518): Se recibio la posicion(6,9) del Personaje @
+
+[INFO] 22:27:58:589 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:59:93 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:59:132 ProcesoNivel/(18508:18518): Se recibio la posicion(7,9) del Personaje @
+
+[INFO] 22:27:59:133 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:27:59:636 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:27:59:677 ProcesoNivel/(18508:18518): Se recibio la posicion(8,9) del Personaje @
+
+[INFO] 22:27:59:677 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:00:181 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:00:220 ProcesoNivel/(18508:18518): Se recibio la posicion(9,9) del Personaje @
+
+[INFO] 22:28:00:221 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:00:725 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:00:764 ProcesoNivel/(18508:18518): Se recibio la posicion(10,9) del Personaje @
+
+[INFO] 22:28:00:765 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:01:268 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:01:309 ProcesoNivel/(18508:18518): Se recibio la posicion(10,8) del Personaje @
+
+[INFO] 22:28:01:310 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:01:814 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:01:853 ProcesoNivel/(18508:18518): Se recibio la posicion(10,7) del Personaje @
+
+[INFO] 22:28:01:853 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:01:854 ProcesoNivel/(18508:18518): Llego Msj tipo 3 payload 1
+[INFO] 22:28:01:892 ProcesoNivel/(18508:18518): El Personaje @ solicita una Instancia del Recurso M
+
+[DEBUG] 22:28:01:893 ProcesoNivel/(18508:18518): test1
+[DEBUG] 22:28:01:893 ProcesoNivel/(18508:18518): test2
+[DEBUG] 22:28:01:893 ProcesoNivel/(18508:18518): test3
+[DEBUG] 22:28:01:893 ProcesoNivel/(18508:18518): test4 @ 3
+[DEBUG] 22:28:01:893 ProcesoNivel/(18508:18518): test5 0xb6b005a0
+[DEBUG] 22:28:01:893 ProcesoNivel/(18508:18518): test6
+[INFO] 22:28:01:893 ProcesoNivel/(18508:18518): Hay instancias del recurso M y se le dio una al Personaje @
+
+[INFO] 22:28:01:893 ProcesoNivel/(18508:18518): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:28:01:934 ProcesoNivel/(18508:18518): Llego Msj tipo 1 payload 1
+[DEBUG] 22:28:01:972 ProcesoNivel/(18508:18518): Resp del recData: 1
+[INFO] 22:28:01:973 ProcesoNivel/(18508:18518): El Personaje @ solicita la Posición del Recurso F
+
+[INFO] 22:28:01:973 ProcesoNivel/(18508:18518): Se mando la pos(8,5) del Rec F al Personaje @
+
+[DEBUG] 22:28:02:516 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:02:556 ProcesoNivel/(18508:18518): Se recibio la posicion(9,7) del Personaje @
+
+[INFO] 22:28:02:557 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:03:61 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:03:100 ProcesoNivel/(18508:18518): Se recibio la posicion(8,7) del Personaje @
+
+[INFO] 22:28:03:101 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:03:604 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:03:644 ProcesoNivel/(18508:18518): Se recibio la posicion(8,6) del Personaje @
+
+[INFO] 22:28:03:645 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:04:148 ProcesoNivel/(18508:18518): Llego Msj tipo 2 payload 2
+[INFO] 22:28:04:189 ProcesoNivel/(18508:18518): Se recibio la posicion(8,5) del Personaje @
+
+[INFO] 22:28:04:190 ProcesoNivel/(18508:18518): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:28:04:191 ProcesoNivel/(18508:18518): Llego Msj tipo 3 payload 1
+[INFO] 22:28:04:228 ProcesoNivel/(18508:18518): El Personaje @ solicita una Instancia del Recurso F
+
+[DEBUG] 22:28:04:229 ProcesoNivel/(18508:18518): test1
+[DEBUG] 22:28:04:229 ProcesoNivel/(18508:18518): test2
+[DEBUG] 22:28:04:229 ProcesoNivel/(18508:18518): test3
+[DEBUG] 22:28:04:229 ProcesoNivel/(18508:18518): test4 @ 3
+[DEBUG] 22:28:04:229 ProcesoNivel/(18508:18518): test5 0xb6b005e0
+[DEBUG] 22:28:04:229 ProcesoNivel/(18508:18518): test6
+[INFO] 22:28:04:229 ProcesoNivel/(18508:18518): Hay instancias del recurso F y se le dio una al Personaje @
+
+[INFO] 22:28:04:229 ProcesoNivel/(18508:18518): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:28:04:270 ProcesoNivel/(18508:18518): Llego Msj tipo 4 payload 1
+[INFO] 22:28:04:270 ProcesoNivel/(18508:18518): El Personaje @ solicita salir del nivel.
+[DEBUG] 22:28:04:270 ProcesoNivel/(18508:18518): Case 4 puntero del personaje: 0xb6b00620
+[INFO] 22:28:04:270 ProcesoNivel/(18508:18518): El personaje salio del Nivel.
+[DEBUG] 22:28:04:271 ProcesoNivel/(18508:18518): Se cerro el Socket: 6
+[INFO] 22:28:47:351 ProcesoNivel/(18508:18509): Llego el Personaje % del nivel
+[INFO] 22:28:47:351 ProcesoNivel/(18508:18509): Mando mensaje al personaje %
+[INFO] 22:28:47:351 ProcesoNivel/(18508:18509): Mando el socket 7 (Thread)
+[INFO] 22:28:47:352 ProcesoNivel/(18508:18509): Escuchando conexiones entrantes
+[INFO] 22:28:47:352 ProcesoNivel/(18508:18524): Llego el socket 7 (Thread)
+[DEBUG] 22:28:47:356 ProcesoNivel/(18508:18524): Llego Msj tipo 1 payload 1
+[DEBUG] 22:28:47:393 ProcesoNivel/(18508:18524): Resp del recData: 1
+[INFO] 22:28:47:393 ProcesoNivel/(18508:18524): El Personaje % solicita la Posición del Recurso F
+
+[INFO] 22:28:47:393 ProcesoNivel/(18508:18524): Se mando la pos(8,5) del Rec F al Personaje %
+
+[DEBUG] 22:28:47:434 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:47:473 ProcesoNivel/(18508:18524): Se recibio la posicion(1,1) del Personaje %
+
+[INFO] 22:28:47:473 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:48:54 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:48:94 ProcesoNivel/(18508:18524): Se recibio la posicion(2,1) del Personaje %
+
+[INFO] 22:28:48:94 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:48:597 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:48:638 ProcesoNivel/(18508:18524): Se recibio la posicion(3,1) del Personaje %
+
+[INFO] 22:28:48:638 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:49:142 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:49:180 ProcesoNivel/(18508:18524): Se recibio la posicion(4,1) del Personaje %
+
+[INFO] 22:28:49:181 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:49:685 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:49:725 ProcesoNivel/(18508:18524): Se recibio la posicion(5,1) del Personaje %
+
+[INFO] 22:28:49:725 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:50:229 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:50:270 ProcesoNivel/(18508:18524): Se recibio la posicion(6,1) del Personaje %
+
+[INFO] 22:28:50:270 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:50:775 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:50:813 ProcesoNivel/(18508:18524): Se recibio la posicion(7,1) del Personaje %
+
+[INFO] 22:28:50:813 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:51:316 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:51:357 ProcesoNivel/(18508:18524): Se recibio la posicion(8,1) del Personaje %
+
+[INFO] 22:28:51:357 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:51:861 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:51:901 ProcesoNivel/(18508:18524): Se recibio la posicion(8,2) del Personaje %
+
+[INFO] 22:28:51:901 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:52:405 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:52:445 ProcesoNivel/(18508:18524): Se recibio la posicion(8,3) del Personaje %
+
+[INFO] 22:28:52:445 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:52:949 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:52:988 ProcesoNivel/(18508:18524): Se recibio la posicion(8,4) del Personaje %
+
+[INFO] 22:28:52:989 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:53:493 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:53:533 ProcesoNivel/(18508:18524): Se recibio la posicion(8,5) del Personaje %
+
+[INFO] 22:28:53:533 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:53:535 ProcesoNivel/(18508:18524): Llego Msj tipo 3 payload 1
+[INFO] 22:28:53:572 ProcesoNivel/(18508:18524): El Personaje % solicita una Instancia del Recurso F
+
+[DEBUG] 22:28:53:573 ProcesoNivel/(18508:18524): test1
+[DEBUG] 22:28:53:573 ProcesoNivel/(18508:18524): test2
+[DEBUG] 22:28:53:573 ProcesoNivel/(18508:18524): test3
+[DEBUG] 22:28:53:573 ProcesoNivel/(18508:18524): test4 % 3
+[DEBUG] 22:28:53:573 ProcesoNivel/(18508:18524): test5 0xb6b004a8
+[DEBUG] 22:28:53:573 ProcesoNivel/(18508:18524): test6
+[INFO] 22:28:53:573 ProcesoNivel/(18508:18524): Hay instancias del recurso F y se le dio una al Personaje %
+
+[INFO] 22:28:53:573 ProcesoNivel/(18508:18524): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:28:53:613 ProcesoNivel/(18508:18524): Llego Msj tipo 1 payload 1
+[DEBUG] 22:28:53:653 ProcesoNivel/(18508:18524): Resp del recData: 1
+[INFO] 22:28:53:653 ProcesoNivel/(18508:18524): El Personaje % solicita la Posición del Recurso M
+
+[INFO] 22:28:53:653 ProcesoNivel/(18508:18524): Se mando la pos(10,7) del Rec M al Personaje %
+
+[DEBUG] 22:28:54:195 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:54:232 ProcesoNivel/(18508:18524): Se recibio la posicion(9,5) del Personaje %
+
+[INFO] 22:28:54:233 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:54:737 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:54:777 ProcesoNivel/(18508:18524): Se recibio la posicion(10,5) del Personaje %
+
+[INFO] 22:28:54:778 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:55:282 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:55:321 ProcesoNivel/(18508:18524): Se recibio la posicion(10,6) del Personaje %
+
+[INFO] 22:28:55:322 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:55:825 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:55:865 ProcesoNivel/(18508:18524): Se recibio la posicion(10,7) del Personaje %
+
+[INFO] 22:28:55:865 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:55:866 ProcesoNivel/(18508:18524): Llego Msj tipo 3 payload 1
+[INFO] 22:28:55:905 ProcesoNivel/(18508:18524): El Personaje % solicita una Instancia del Recurso M
+
+[DEBUG] 22:28:55:905 ProcesoNivel/(18508:18524): test1
+[DEBUG] 22:28:55:905 ProcesoNivel/(18508:18524): test2
+[DEBUG] 22:28:55:905 ProcesoNivel/(18508:18524): test3
+[DEBUG] 22:28:55:905 ProcesoNivel/(18508:18524): test4 % 3
+[DEBUG] 22:28:55:905 ProcesoNivel/(18508:18524): test5 0xb6b00648
+[DEBUG] 22:28:55:905 ProcesoNivel/(18508:18524): test6
+[INFO] 22:28:55:906 ProcesoNivel/(18508:18524): Hay instancias del recurso M y se le dio una al Personaje %
+
+[INFO] 22:28:55:906 ProcesoNivel/(18508:18524): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:28:55:946 ProcesoNivel/(18508:18524): Llego Msj tipo 1 payload 1
+[DEBUG] 22:28:55:985 ProcesoNivel/(18508:18524): Resp del recData: 1
+[INFO] 22:28:55:985 ProcesoNivel/(18508:18524): El Personaje % solicita la Posición del Recurso F
+
+[INFO] 22:28:55:985 ProcesoNivel/(18508:18524): Se mando la pos(8,5) del Rec F al Personaje %
+
+[DEBUG] 22:28:56:528 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:56:564 ProcesoNivel/(18508:18524): Se recibio la posicion(9,7) del Personaje %
+
+[INFO] 22:28:56:565 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:57:69 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:57:109 ProcesoNivel/(18508:18524): Se recibio la posicion(8,7) del Personaje %
+
+[INFO] 22:28:57:109 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:57:613 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:57:653 ProcesoNivel/(18508:18524): Se recibio la posicion(8,6) del Personaje %
+
+[INFO] 22:28:57:653 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:58:157 ProcesoNivel/(18508:18524): Llego Msj tipo 2 payload 2
+[INFO] 22:28:58:197 ProcesoNivel/(18508:18524): Se recibio la posicion(8,5) del Personaje %
+
+[INFO] 22:28:58:197 ProcesoNivel/(18508:18524): Se le aviso al Personaje % que llego bien su Posición
+[DEBUG] 22:28:58:199 ProcesoNivel/(18508:18524): Llego Msj tipo 3 payload 1
+[INFO] 22:28:58:237 ProcesoNivel/(18508:18524): El Personaje % solicita una Instancia del Recurso F
+
+[DEBUG] 22:28:58:237 ProcesoNivel/(18508:18524): test1
+[DEBUG] 22:28:58:237 ProcesoNivel/(18508:18524): test2
+[DEBUG] 22:28:58:237 ProcesoNivel/(18508:18524): test3
+[DEBUG] 22:28:58:237 ProcesoNivel/(18508:18524): test4 % 3
+[DEBUG] 22:28:58:237 ProcesoNivel/(18508:18524): test5 0xb6b004a8
+[DEBUG] 22:28:58:237 ProcesoNivel/(18508:18524): test6
+[INFO] 22:28:58:237 ProcesoNivel/(18508:18524): Hay instancias del recurso F y se le dio una al Personaje %
+
+[INFO] 22:28:58:238 ProcesoNivel/(18508:18524): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:28:58:278 ProcesoNivel/(18508:18524): Llego Msj tipo 4 payload 1
+[INFO] 22:28:58:278 ProcesoNivel/(18508:18524): El Personaje % solicita salir del nivel.
+[DEBUG] 22:28:58:278 ProcesoNivel/(18508:18524): Case 4 puntero del personaje: 0xb6b005a0
+[INFO] 22:28:58:278 ProcesoNivel/(18508:18524): El personaje salio del Nivel.
+[DEBUG] 22:28:58:281 ProcesoNivel/(18508:18524): Se cerro el Socket: 7
+[INFO] 22:29:23:585 ProcesoNivel/(18508:18509): Llego el Personaje @ del nivel
+[INFO] 22:29:23:586 ProcesoNivel/(18508:18509): Mando mensaje al personaje @
+[INFO] 22:29:23:586 ProcesoNivel/(18508:18509): Mando el socket 6 (Thread)
+[INFO] 22:29:23:586 ProcesoNivel/(18508:18509): Escuchando conexiones entrantes
+[INFO] 22:29:23:587 ProcesoNivel/(18508:18535): Llego el socket 6 (Thread)
+[DEBUG] 22:29:23:589 ProcesoNivel/(18508:18535): Llego Msj tipo 1 payload 1
+[DEBUG] 22:29:23:628 ProcesoNivel/(18508:18535): Resp del recData: 1
+[INFO] 22:29:23:628 ProcesoNivel/(18508:18535): El Personaje @ solicita la Posición del Recurso H
+
+[INFO] 22:29:23:629 ProcesoNivel/(18508:18535): Se mando la pos(4,9) del Rec H al Personaje @
+
+[DEBUG] 22:29:23:669 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:23:708 ProcesoNivel/(18508:18535): Se recibio la posicion(1,1) del Personaje @
+
+[INFO] 22:29:23:709 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:24:290 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:24:329 ProcesoNivel/(18508:18535): Se recibio la posicion(2,1) del Personaje @
+
+[INFO] 22:29:24:329 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:24:833 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:24:872 ProcesoNivel/(18508:18535): Se recibio la posicion(3,1) del Personaje @
+
+[INFO] 22:29:24:873 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:25:377 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:25:417 ProcesoNivel/(18508:18535): Se recibio la posicion(4,1) del Personaje @
+
+[INFO] 22:29:25:417 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:25:921 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:25:960 ProcesoNivel/(18508:18535): Se recibio la posicion(4,2) del Personaje @
+
+[INFO] 22:29:25:961 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:26:467 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:26:506 ProcesoNivel/(18508:18535): Se recibio la posicion(4,3) del Personaje @
+
+[INFO] 22:29:26:506 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:27:12 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:27:53 ProcesoNivel/(18508:18535): Se recibio la posicion(4,4) del Personaje @
+
+[INFO] 22:29:27:53 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:27:556 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:27:596 ProcesoNivel/(18508:18535): Se recibio la posicion(4,5) del Personaje @
+
+[INFO] 22:29:27:597 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:28:100 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:28:140 ProcesoNivel/(18508:18535): Se recibio la posicion(4,6) del Personaje @
+
+[INFO] 22:29:28:141 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:28:644 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:28:684 ProcesoNivel/(18508:18535): Se recibio la posicion(4,7) del Personaje @
+
+[INFO] 22:29:28:685 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:29:189 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:29:228 ProcesoNivel/(18508:18535): Se recibio la posicion(4,8) del Personaje @
+
+[INFO] 22:29:29:229 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:29:732 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:29:772 ProcesoNivel/(18508:18535): Se recibio la posicion(4,9) del Personaje @
+
+[INFO] 22:29:29:773 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:29:774 ProcesoNivel/(18508:18535): Llego Msj tipo 3 payload 1
+[INFO] 22:29:29:812 ProcesoNivel/(18508:18535): El Personaje @ solicita una Instancia del Recurso H
+
+[DEBUG] 22:29:29:813 ProcesoNivel/(18508:18535): test1
+[DEBUG] 22:29:29:813 ProcesoNivel/(18508:18535): test2
+[DEBUG] 22:29:29:813 ProcesoNivel/(18508:18535): test3
+[DEBUG] 22:29:29:813 ProcesoNivel/(18508:18535): test4 @ 3
+[DEBUG] 22:29:29:813 ProcesoNivel/(18508:18535): test5 0xb6b00550
+[DEBUG] 22:29:29:813 ProcesoNivel/(18508:18535): test6
+[INFO] 22:29:29:813 ProcesoNivel/(18508:18535): Hay instancias del recurso H y se le dio una al Personaje @
+
+[INFO] 22:29:29:813 ProcesoNivel/(18508:18535): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:29:29:854 ProcesoNivel/(18508:18535): Llego Msj tipo 1 payload 1
+[DEBUG] 22:29:29:893 ProcesoNivel/(18508:18535): Resp del recData: 1
+[INFO] 22:29:29:893 ProcesoNivel/(18508:18535): El Personaje @ solicita la Posición del Recurso M
+
+[INFO] 22:29:29:893 ProcesoNivel/(18508:18535): Se mando la pos(10,7) del Rec M al Personaje @
+
+[DEBUG] 22:29:30:436 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:30:473 ProcesoNivel/(18508:18535): Se recibio la posicion(5,9) del Personaje @
+
+[INFO] 22:29:30:474 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:30:980 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:31:20 ProcesoNivel/(18508:18535): Se recibio la posicion(6,9) del Personaje @
+
+[INFO] 22:29:31:21 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:31:524 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:31:564 ProcesoNivel/(18508:18535): Se recibio la posicion(7,9) del Personaje @
+
+[INFO] 22:29:31:565 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:32:68 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:32:109 ProcesoNivel/(18508:18535): Se recibio la posicion(8,9) del Personaje @
+
+[INFO] 22:29:32:110 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:32:613 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:32:652 ProcesoNivel/(18508:18535): Se recibio la posicion(9,9) del Personaje @
+
+[INFO] 22:29:32:653 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:33:157 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:33:196 ProcesoNivel/(18508:18535): Se recibio la posicion(10,9) del Personaje @
+
+[INFO] 22:29:33:197 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:33:701 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:33:740 ProcesoNivel/(18508:18535): Se recibio la posicion(10,8) del Personaje @
+
+[INFO] 22:29:33:741 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:34:246 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:34:284 ProcesoNivel/(18508:18535): Se recibio la posicion(10,7) del Personaje @
+
+[INFO] 22:29:34:285 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:34:286 ProcesoNivel/(18508:18535): Llego Msj tipo 3 payload 1
+[INFO] 22:29:34:324 ProcesoNivel/(18508:18535): El Personaje @ solicita una Instancia del Recurso M
+
+[DEBUG] 22:29:34:325 ProcesoNivel/(18508:18535): test1
+[DEBUG] 22:29:34:325 ProcesoNivel/(18508:18535): test2
+[DEBUG] 22:29:34:325 ProcesoNivel/(18508:18535): test3
+[DEBUG] 22:29:34:325 ProcesoNivel/(18508:18535): test4 @ 3
+[DEBUG] 22:29:34:325 ProcesoNivel/(18508:18535): test5 0xb6b00630
+[DEBUG] 22:29:34:325 ProcesoNivel/(18508:18535): test6
+[INFO] 22:29:34:325 ProcesoNivel/(18508:18535): Hay instancias del recurso M y se le dio una al Personaje @
+
+[INFO] 22:29:34:325 ProcesoNivel/(18508:18535): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:29:34:365 ProcesoNivel/(18508:18535): Llego Msj tipo 1 payload 1
+[DEBUG] 22:29:34:404 ProcesoNivel/(18508:18535): Resp del recData: 1
+[INFO] 22:29:34:405 ProcesoNivel/(18508:18535): El Personaje @ solicita la Posición del Recurso F
+
+[INFO] 22:29:34:405 ProcesoNivel/(18508:18535): Se mando la pos(8,5) del Rec F al Personaje @
+
+[DEBUG] 22:29:34:949 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:34:988 ProcesoNivel/(18508:18535): Se recibio la posicion(9,7) del Personaje @
+
+[INFO] 22:29:34:989 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:35:493 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:35:532 ProcesoNivel/(18508:18535): Se recibio la posicion(8,7) del Personaje @
+
+[INFO] 22:29:35:533 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:36:36 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:36:77 ProcesoNivel/(18508:18535): Se recibio la posicion(8,6) del Personaje @
+
+[INFO] 22:29:36:77 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:36:582 ProcesoNivel/(18508:18535): Llego Msj tipo 2 payload 2
+[INFO] 22:29:36:620 ProcesoNivel/(18508:18535): Se recibio la posicion(8,5) del Personaje @
+
+[INFO] 22:29:36:621 ProcesoNivel/(18508:18535): Se le aviso al Personaje @ que llego bien su Posición
+[DEBUG] 22:29:36:622 ProcesoNivel/(18508:18535): Llego Msj tipo 3 payload 1
+[INFO] 22:29:36:661 ProcesoNivel/(18508:18535): El Personaje @ solicita una Instancia del Recurso F
+
+[DEBUG] 22:29:36:662 ProcesoNivel/(18508:18535): test1
+[DEBUG] 22:29:36:662 ProcesoNivel/(18508:18535): test2
+[DEBUG] 22:29:36:662 ProcesoNivel/(18508:18535): test3
+[DEBUG] 22:29:36:662 ProcesoNivel/(18508:18535): test4 @ 3
+[DEBUG] 22:29:36:662 ProcesoNivel/(18508:18535): test5 0xb6b00570
+[DEBUG] 22:29:36:662 ProcesoNivel/(18508:18535): test6
+[INFO] 22:29:36:662 ProcesoNivel/(18508:18535): Hay instancias del recurso F y se le dio una al Personaje @
+
+[INFO] 22:29:36:663 ProcesoNivel/(18508:18535): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:29:36:702 ProcesoNivel/(18508:18535): Llego Msj tipo 4 payload 1
+[INFO] 22:29:36:702 ProcesoNivel/(18508:18535): El Personaje @ solicita salir del nivel.
+[DEBUG] 22:29:36:702 ProcesoNivel/(18508:18535): Case 4 puntero del personaje: 0xb6b004a8
+[INFO] 22:29:36:702 ProcesoNivel/(18508:18535): El personaje salio del Nivel.
+[DEBUG] 22:29:36:703 ProcesoNivel/(18508:18535): Se cerro el Socket: 6
+[INFO] 22:29:49:86 ProcesoNivel/(18508:18509): Llego el Personaje # del nivel
+[INFO] 22:29:49:87 ProcesoNivel/(18508:18509): Mando mensaje al personaje #
+[INFO] 22:29:49:87 ProcesoNivel/(18508:18509): Mando el socket 7 (Thread)
+[INFO] 22:29:49:87 ProcesoNivel/(18508:18509): Escuchando conexiones entrantes
+[INFO] 22:29:49:88 ProcesoNivel/(18508:18537): Llego el socket 7 (Thread)
+[DEBUG] 22:29:49:90 ProcesoNivel/(18508:18537): Llego Msj tipo 1 payload 1
+[DEBUG] 22:29:49:128 ProcesoNivel/(18508:18537): Resp del recData: 1
+[INFO] 22:29:49:129 ProcesoNivel/(18508:18537): El Personaje # solicita la Posición del Recurso H
+
+[INFO] 22:29:49:129 ProcesoNivel/(18508:18537): Se mando la pos(4,9) del Rec H al Personaje #
+
+[DEBUG] 22:29:49:171 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:49:209 ProcesoNivel/(18508:18537): Se recibio la posicion(1,1) del Personaje #
+
+[INFO] 22:29:49:209 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:49:791 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:49:828 ProcesoNivel/(18508:18537): Se recibio la posicion(2,1) del Personaje #
+
+[INFO] 22:29:49:829 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:50:332 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:50:373 ProcesoNivel/(18508:18537): Se recibio la posicion(3,1) del Personaje #
+
+[INFO] 22:29:50:373 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:50:878 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:50:916 ProcesoNivel/(18508:18537): Se recibio la posicion(4,1) del Personaje #
+
+[INFO] 22:29:50:917 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:51:420 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:51:461 ProcesoNivel/(18508:18537): Se recibio la posicion(4,2) del Personaje #
+
+[INFO] 22:29:51:461 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:51:964 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:52:5 ProcesoNivel/(18508:18537): Se recibio la posicion(4,3) del Personaje #
+
+[INFO] 22:29:52:5 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:52:509 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:52:550 ProcesoNivel/(18508:18537): Se recibio la posicion(4,4) del Personaje #
+
+[INFO] 22:29:52:550 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:53:54 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:53:93 ProcesoNivel/(18508:18537): Se recibio la posicion(4,5) del Personaje #
+
+[INFO] 22:29:53:94 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:53:597 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:53:636 ProcesoNivel/(18508:18537): Se recibio la posicion(4,6) del Personaje #
+
+[INFO] 22:29:53:637 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:54:140 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:54:180 ProcesoNivel/(18508:18537): Se recibio la posicion(4,7) del Personaje #
+
+[INFO] 22:29:54:181 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:54:685 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:54:724 ProcesoNivel/(18508:18537): Se recibio la posicion(4,8) del Personaje #
+
+[INFO] 22:29:54:725 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:55:228 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:55:268 ProcesoNivel/(18508:18537): Se recibio la posicion(4,9) del Personaje #
+
+[INFO] 22:29:55:269 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:55:270 ProcesoNivel/(18508:18537): Llego Msj tipo 3 payload 1
+[INFO] 22:29:55:310 ProcesoNivel/(18508:18537): El Personaje # solicita una Instancia del Recurso H
+
+[DEBUG] 22:29:55:310 ProcesoNivel/(18508:18537): test1
+[DEBUG] 22:29:55:310 ProcesoNivel/(18508:18537): test2
+[DEBUG] 22:29:55:310 ProcesoNivel/(18508:18537): test3
+[DEBUG] 22:29:55:311 ProcesoNivel/(18508:18537): test4 # 3
+[DEBUG] 22:29:55:311 ProcesoNivel/(18508:18537): test5 0xb6b004a8
+[DEBUG] 22:29:55:311 ProcesoNivel/(18508:18537): test6
+[INFO] 22:29:55:311 ProcesoNivel/(18508:18537): Hay instancias del recurso H y se le dio una al Personaje #
+
+[INFO] 22:29:55:311 ProcesoNivel/(18508:18537): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:29:55:350 ProcesoNivel/(18508:18537): Llego Msj tipo 1 payload 1
+[DEBUG] 22:29:55:388 ProcesoNivel/(18508:18537): Resp del recData: 1
+[INFO] 22:29:55:389 ProcesoNivel/(18508:18537): El Personaje # solicita la Posición del Recurso M
+
+[INFO] 22:29:55:389 ProcesoNivel/(18508:18537): Se mando la pos(10,7) del Rec M al Personaje #
+
+[DEBUG] 22:29:55:934 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:55:973 ProcesoNivel/(18508:18537): Se recibio la posicion(5,9) del Personaje #
+
+[INFO] 22:29:55:974 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:56:478 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:56:516 ProcesoNivel/(18508:18537): Se recibio la posicion(6,9) del Personaje #
+
+[INFO] 22:29:56:517 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:57:20 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:57:60 ProcesoNivel/(18508:18537): Se recibio la posicion(7,9) del Personaje #
+
+[INFO] 22:29:57:61 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:57:565 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:57:604 ProcesoNivel/(18508:18537): Se recibio la posicion(8,9) del Personaje #
+
+[INFO] 22:29:57:605 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:58:108 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:58:148 ProcesoNivel/(18508:18537): Se recibio la posicion(9,9) del Personaje #
+
+[INFO] 22:29:58:149 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:58:654 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:58:693 ProcesoNivel/(18508:18537): Se recibio la posicion(10,9) del Personaje #
+
+[INFO] 22:29:58:694 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:59:199 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:59:237 ProcesoNivel/(18508:18537): Se recibio la posicion(10,8) del Personaje #
+
+[INFO] 22:29:59:238 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:59:741 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:29:59:781 ProcesoNivel/(18508:18537): Se recibio la posicion(10,7) del Personaje #
+
+[INFO] 22:29:59:781 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:29:59:783 ProcesoNivel/(18508:18537): Llego Msj tipo 3 payload 1
+[INFO] 22:29:59:821 ProcesoNivel/(18508:18537): El Personaje # solicita una Instancia del Recurso M
+
+[DEBUG] 22:29:59:821 ProcesoNivel/(18508:18537): test1
+[DEBUG] 22:29:59:821 ProcesoNivel/(18508:18537): test2
+[DEBUG] 22:29:59:822 ProcesoNivel/(18508:18537): test3
+[DEBUG] 22:29:59:822 ProcesoNivel/(18508:18537): test4 # 3
+[DEBUG] 22:29:59:822 ProcesoNivel/(18508:18537): test5 0xb6b00630
+[DEBUG] 22:29:59:822 ProcesoNivel/(18508:18537): test6
+[INFO] 22:29:59:822 ProcesoNivel/(18508:18537): Hay instancias del recurso M y se le dio una al Personaje #
+
+[INFO] 22:29:59:822 ProcesoNivel/(18508:18537): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:29:59:862 ProcesoNivel/(18508:18537): Llego Msj tipo 1 payload 1
+[DEBUG] 22:29:59:901 ProcesoNivel/(18508:18537): Resp del recData: 1
+[INFO] 22:29:59:901 ProcesoNivel/(18508:18537): El Personaje # solicita la Posición del Recurso F
+
+[INFO] 22:29:59:901 ProcesoNivel/(18508:18537): Se mando la pos(8,5) del Rec F al Personaje #
+
+[DEBUG] 22:30:00:443 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:30:00:480 ProcesoNivel/(18508:18537): Se recibio la posicion(9,7) del Personaje #
+
+[INFO] 22:30:00:481 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:30:00:984 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:30:01:25 ProcesoNivel/(18508:18537): Se recibio la posicion(8,7) del Personaje #
+
+[INFO] 22:30:01:25 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:30:01:529 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:30:01:568 ProcesoNivel/(18508:18537): Se recibio la posicion(8,6) del Personaje #
+
+[INFO] 22:30:01:569 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:30:02:72 ProcesoNivel/(18508:18537): Llego Msj tipo 2 payload 2
+[INFO] 22:30:02:113 ProcesoNivel/(18508:18537): Se recibio la posicion(8,5) del Personaje #
+
+[INFO] 22:30:02:113 ProcesoNivel/(18508:18537): Se le aviso al Personaje # que llego bien su Posición
+[DEBUG] 22:30:02:114 ProcesoNivel/(18508:18537): Llego Msj tipo 3 payload 1
+[INFO] 22:30:02:153 ProcesoNivel/(18508:18537): El Personaje # solicita una Instancia del Recurso F
+
+[DEBUG] 22:30:02:153 ProcesoNivel/(18508:18537): test1
+[DEBUG] 22:30:02:153 ProcesoNivel/(18508:18537): test2
+[DEBUG] 22:30:02:153 ProcesoNivel/(18508:18537): test3
+[DEBUG] 22:30:02:153 ProcesoNivel/(18508:18537): test4 # 3
+[DEBUG] 22:30:02:153 ProcesoNivel/(18508:18537): test5 0xb6b004c8
+[DEBUG] 22:30:02:153 ProcesoNivel/(18508:18537): test6
+[INFO] 22:30:02:153 ProcesoNivel/(18508:18537): Hay instancias del recurso F y se le dio una al Personaje #
+
+[INFO] 22:30:02:154 ProcesoNivel/(18508:18537): Se mando la confirmacion 1 del pedido de Recurso
+
+[DEBUG] 22:30:02:194 ProcesoNivel/(18508:18537): Llego Msj tipo 4 payload 1
+[INFO] 22:30:02:194 ProcesoNivel/(18508:18537): El Personaje # solicita salir del nivel.
+[DEBUG] 22:30:02:194 ProcesoNivel/(18508:18537): Case 4 puntero del personaje: 0xb6b005a0
+[INFO] 22:30:02:194 ProcesoNivel/(18508:18537): El personaje salio del Nivel.
+[DEBUG] 22:30:02:194 ProcesoNivel/(18508:18537): Se cerro el Socket: 7

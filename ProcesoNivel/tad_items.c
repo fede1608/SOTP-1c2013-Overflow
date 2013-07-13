@@ -82,6 +82,22 @@ int restarRecurso(ITEM_NIVEL* ListaItems, char id) {
         }
         return -1;
 }
+int sumarRecurso(ITEM_NIVEL* ListaItems, char id,int cant) {
+
+        ITEM_NIVEL * temp;
+        temp = ListaItems;
+
+        while ((temp != NULL) && (temp->id != id)) {
+                temp = temp->next;
+        }
+        if ((temp != NULL) && (temp->id == id)) {
+                if ((temp->item_type)) {
+                        temp->quantity+=cant;
+                        return 1;
+                } else return 0;
+        }
+        return -1;
+}
 
 ITEM_NIVEL* obtenerRecurso(ITEM_NIVEL* ListaItems, char id) {
 

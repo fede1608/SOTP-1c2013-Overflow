@@ -277,13 +277,23 @@ for(ii=0;ii<veclong;ii++){
 				Posicion lifeSucks;
 
 				if (recibirHeader(unSocket,&unHeader)) {
-					printf("Llego header%d %d respuesta del nivel\n", unHeader.payloadlength,unHeader.type);
-					log_info(log,"Llego header%d %d respuesta del nivel", unHeader.payloadlength,unHeader.type);
-					recibirData(unSocket,unHeader,(void**)&lifeSucks);
+					int * respRec;
+					respRec=malloc(sizeof(int));
+					recibirData(unSocket,unHeader,(void**)respRec);
+					printf("Llego respuesta %d del nivel\n", *respRec);
+					log_info(log,"Llego respuesta %d del nivel",*respRec);
 					//rec=lifeSucks;
 					respAlPlanf.solicitaRecurso=1;
-					printf("Llego la confirmacion del recurso del nivel %d  %d\n",rec.x,rec.y);
-					log_info(log,"Llego la confirmacion del recurso del nivel %d  %d",rec.x,rec.y);
+					if(*respRec){
+						respAlPlanf.bloqueado=0;
+						printf("Se entrego una instancia del Recurso %c\n",recActual);
+						log_info(log,"Se entrego una instancia del Recurso %c",recActual);
+					}else{
+						respAlPlanf.bloqueado=1;
+						printf("No se entrego una instancia del Recurso %c\n",recActual);
+						log_info(log,"No se entrego una instancia del Recurso %c",recActual);
+					}
+					free(respRec);
 
 				}
 			}
