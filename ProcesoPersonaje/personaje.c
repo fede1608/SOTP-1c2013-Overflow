@@ -36,15 +36,17 @@ typedef struct t_msjPersonaje {
 	int finNivel;
 } MensajePersonaje;
 
-//static int rows,cols;
+//Var Globales;
 Posicion pos;
 Posicion rec;
 int vidas;
 char recActual;
 char charPer;
 int lengthVecConfig(char * value);
+int seMurio=0;
+t_config* config;
 
-//El manejador de señales hay que ponerlo ACA ARRIBA.
+//El manejador de señales
 void manejador (int sig){
 	switch (sig){
 	case SIGINT:
@@ -53,10 +55,12 @@ void manejador (int sig){
 		if (vidas>0){
 			vidas--;
 			printf("Has perdido una vida.\n Vidas restantes: %d\n",vidas);
+			seMurio=1;
 		}
 		else
 		{
-			vidas++;
+			vidas=config_get_int_value(config,"vidas");
+			seMurio=2;
 			//Reiniciar el plan de niveles
 		}
 		break;
@@ -72,7 +76,7 @@ int main(void){
 	signal(SIGTERM,manejador);
 	signal(SIGINT,manejador);
 	signal(SIGUSR1,manejador);
-	t_config* config=config_create("config.txt");
+	config=config_create("config.txt");
 
 	//Se inicializan las variables para el logueo
 	t_log_level detail = LOG_LEVEL_TRACE;
@@ -116,7 +120,7 @@ int main(void){
 
 		ConxNivPlan ipNivelPlanif;
 		ipNivelPlanif.portNivel=0;
-while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y sino entra en un ciclo hasta que entre
+		while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y sino entra en un ciclo hasta que entre
 		//conexion solicitud de ip:puerto al orquestator y cierre de esa conex
 			int unSocketOrq;
 			unSocketOrq = quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
@@ -194,7 +198,7 @@ while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y 
 			}
 
 
-//for(ii=0;ii<veclong;ii++)printf("recurso %c",*obj[ii]);
+
 
 void* buffer;
 recActual=*obj[0];
@@ -224,16 +228,20 @@ for(ii=0;ii<veclong;ii++){
 	recActual=*obj[ii];
 	//solicitar posicion recurso Recurso: recactual
 	//esperar posicion del recurso posicion : rec
-	llego=1;
 
+	llego=1;
 	while(llego){
 		Header unHeader;
 		// esperar mensaje de movPermitido para continuar
 		char* charAux;
+
 		printf("Esperando permiso de moviemiento...");
-		recibirHeader(unSocketPlanif,&unHeader);
-		if(unHeader.type==8) recibirData(unSocketPlanif,unHeader,(void**)&charAux);
-		printf("Permiso Recibido");
+		if(recibirHeader(unSocketPlanif,&unHeader)>0){
+		if(unHeader.type==8)
+			recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+		printf("Permiso data Recibido");
+		}
+
 		MensajePersonaje respAlPlanf;
 		respAlPlanf.bloqueado=0;
 		respAlPlanf.solicitaRecurso=0;
@@ -298,10 +306,11 @@ for(ii=0;ii<veclong;ii++){
 				}
 			}
 
-			if(ii+1==veclong) {
+			if((ii+1==veclong)) {
 				//cerrar conexion con el nivel
 				mandarMensaje(unSocket,4 , sizeof(char),&recActual);
 				respAlPlanf.finNivel=1;
+				if(seMurio) {c--;ii=veclong;llego=0;seMurio=0;} //reiniciar el mismo nivel
 				//exit(0);
 			}else {
 				recActual=*obj[ii+1];
@@ -332,9 +341,22 @@ for(ii=0;ii<veclong;ii++){
 
 		}
 		//mandar mensaje de resp al Planif
+		if(seMurio>0) {
+		//cerrar conexion con el nivel
+		mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+		respAlPlanf.finNivel=1;
+		c--;
+		if(seMurio==2) c=-1;
+		llego=0;
+		printf("Se murio %d %d %d\n",ii,c,llego);
+		ii=veclong;
+		printf("Se murio %d\n",ii);
+		seMurio=0;
+		}
 		mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
 		printf("Se envio respuesta de turno cloncluido al Planificador\n");
 	}//fin while(llego)
+	printf("Fin for\n");
 }//fin for each recurso
 
 

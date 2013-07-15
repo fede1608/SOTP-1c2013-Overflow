@@ -3748,3 +3748,17 @@
 [DEBUG] 22:30:02:194 ProcesoNivel/(18508:18537): Case 4 puntero del personaje: 0xb6b005a0
 [INFO] 22:30:02:194 ProcesoNivel/(18508:18537): El personaje salio del Nivel.
 [DEBUG] 22:30:02:194 ProcesoNivel/(18508:18537): Se cerro el Socket: 7
+[INFO] 17:15:23:827 ProcesoNivel/(22609:22610): Escuchando conexiones entrantes
+[INFO] 17:18:08:825 ProcesoNivel/(22855:22856): Escuchando conexiones entrantes
+[INFO] 17:20:38:285 ProcesoNivel/(22882:22883): Escuchando conexiones entrantes
+[INFO] 17:23:08:902 ProcesoNivel/(22907:22908): Escuchando conexiones entrantes
+[INFO] 23:16:04:616 ProcesoNivel/(2858:2859): Escuchando conexiones entrantes
+[INFO] 23:34:16:172 ProcesoNivel/(3119:3120): Escuchando conexiones entrantes
+[INFO] 23:45:36:760 ProcesoNivel/(3580:3581): Escuchando conexiones entrantes
+[INFO] 00:06:45:808 ProcesoNivel/(3845:3846): Escuchando conexiones entrantes
+[INFO] 00:12:22:915 ProcesoNivel/(4067:4068): Escuchando conexiones entrantes
+[INFO] 00:18:45:153 ProcesoNivel/(4310:4311): Escuchando conexiones entrantes
+[INFO] 00:22:14:279 ProcesoNivel/(4586:4587): Escuchando conexiones entrantes
+[INFO] 00:24:07:941 ProcesoNivel/(4986:4987): Escuchando conexiones entrantes
+[INFO] 00:25:36:969 ProcesoNivel/(5059:5060): Escuchando conexiones entrantes
+[INFO] 00:28:12:666 ProcesoNivel/(5294:5295): Escuchando conexiones entrantes
