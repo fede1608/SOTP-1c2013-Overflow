@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include "collections/queue.h"
 #include "collections/list.h"
+#include "log.h"
 #include  "socketsOv.h" //Librería compartida para sockects de overflow
 
 //----------------------------------------------------------------
@@ -72,6 +73,15 @@ typedef struct t_msjPersonaje {
 
 //----------------------------------------------------------------
 
+//************************** LOGUEO **************************
+
+t_log_level * detail = LOG_LEVEL_INFO;
+t_log * logOrquestador = log_create("LogOrquestador","Orquestador",true,detail);
+//TODO: Necesita ser sincronizado porque hay muchas instancias de planificador
+t_log * logPlanificador = log_create("LogPlanificador","Planificador",true,detail);
+
+//----------------------------------------------------------------
+
 //************************** PROTOTIPOS **************************
 
 //Prototipos de funciones a utilizar. Se definien luego de la función main.
@@ -90,9 +100,12 @@ bool esMiNivel(NodoNivel* nodo);
 int main (void) {
 
 	printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
+	log_info(logOrquestador,"Proceso plataforma iniciado");
+	log_info(logOrquestador,"Creando THR Orquestador");
 
 	pthread_t thr_orquestador;
 	pthread_create(&thr_orquestador, NULL, orquestador, NULL);
+	log_info(logOrquestador,"THR Orquestador creado correctamente");
 
 	pthread_join(thr_orquestador, NULL); //Esperamos que termine el thread orquestador
 	pthread_detach(thr_orquestador);
@@ -105,7 +118,7 @@ int main (void) {
 
 //PLANIFICADOR:
 //Función que será ejecutada a través de un hilo para atender la planificación de cada nivel
-//Cardinalidad = 0 hasta N threads ejecutandose simultaneamente, uno por nivel
+//Cardinalidad = 0 hasta N threads ejecutándose simultáneamente, uno por nivel
 int planificador (InfoNivel* nivel) {
 
 
@@ -116,6 +129,7 @@ int planificador (InfoNivel* nivel) {
 	//TODO implementar handshake Conectarse con el nivel
 	//int socketNivel=quieroUnPutoSocketAndando(nivel->ipN,nivek->portN);
 	printf("%s %d\n",nivel->ip,nivel->port);
+	log_info(logPlanificador,"IP: %s // Puerto: %d",nivel->ip,nivel->port);
 
 	// Creamos el listener de personajes del planificador (guardar socket e info del pj en la estructura)
 	void* nodoAux;
@@ -124,9 +138,10 @@ int planificador (InfoNivel* nivel) {
 	planificadorActual->colaListos=colaListos;
 	//pasar puerto de la plataforma
 	planificadorActual->port=nivel->puertoPlanif;
-	//Este thread se encargará de esuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
+	//Este thread se encargará de escuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
 	pthread_t threadPersonaje;
 	pthread_create(&threadPersonaje, NULL, listenerPersonaje, (void *)planificadorActual);
+	log_info(logPlanificador,"THR de escucha del planificador de puerto %d creado correctamente",nivel->port);
 
 	//Se necesita algun char (cualquiera) para poder usar la función de enviar mensaje más adelante
 	char* auxcar;
@@ -136,74 +151,104 @@ int planificador (InfoNivel* nivel) {
 	int quantum=varGlobalQuantum;
 
 	while(1){
-		//Si la no esta vacia
+		//Si la cola no esta vacia
 		if(!queue_is_empty(colaListos)){
 			printf("La lista no esta vacia\n");
+			log_info(logPlanificador,"La lista no esta vacia");
 			NodoPersonaje *personajeActual; //todo Revisar que los punteros de personajeActual anden bien
 
 			if(quantum>0){
 				printf("Quantum > 0\n");
+				log_info(logPlanificador,"El Quantum es mayor a 0");
 				//Mandar mensaje de movimiento permitido al socket del personaje del nodo actual (primer nodo de la cola)
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
-				mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar);
-				printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
+				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
+					printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
+					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+				}
+				else {
+					log_error(logPlanificador,"No se pudo enviar un Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+				}
+
 			}
 			else {
 				quantum=varGlobalQuantum;
 				printf("Se acabo el quantum");
+				log_info(logPlanificador,"Se acabo el quantum");
 				//Sacar el nodo actual (primer nodo de la cola) y enviarlo al fondo de la misma
 				//todo Sincronizar colaListos con el Listener
 				nodoAux=queue_pop(colaListos);
 				printf("Se saco de la cola de listos");
+				log_info(logPlanificador,"Se saco de la cola de listos");
 				queue_push(colaListos,nodoAux);
 				printf("Se puso al final de la cola de listos");
+				log_info(logPlanificador,"Se puso al final de la cola de listos");
 				//Buscar el primero de la cola de listos y mandarle un mensaje de movimiento permitido
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
 				printf("Se saco al primer personaje de la cola");
-				mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar);
-				printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
+				log_info(logPlanificador,"Se saco al primer personaje de la cola");
+				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
+					printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
+					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+				}
+				else {
+					log_error(logPlanificador,"No se pudo enviar Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+				}
 			}
 
 			//Esperar respuesta de turno terminado (con la info sobre si quedo bloqueado y si tomo recurso)
 			Header headerMsjPersonaje;
 			MensajePersonaje msjPersonaje;
 			printf("Esperando respuesta de turno concluido\n");
+			log_info(logPlanificador,"Esperando respuesta de turno concluido");
 			recibirHeader(personajeActual->socket, &headerMsjPersonaje);
 			recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje);
 			printf("Respuesta recibida\n");
+			log_info(logPlanificador,"Respuesta recibida");
 			//Comportamientos según el mensaje que se recibe del personaje
 
 			//Si informa de fin de nivel se lo retira de la cola de listos
 			if(msjPersonaje.finNivel){
 				printf("El personaje termino el Nivel\n");
+				log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
 				queue_pop(colaListos);
 				msjPersonaje.solicitaRecurso=0;
 				msjPersonaje.bloqueado=0;
 				quantum=varGlobalQuantum+1;
 				printf("Se retiro al personaje de la cola\n");
+				log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
 			}
 
 			//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
 			if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
 				printf("Rec no bloq1 %d\n",quantum);
+				log_info(logPlanificador,"Rec no bloq1 %d",quantum);
 				quantum=varGlobalQuantum+1;
 				queue_push(colaListos,queue_pop(colaListos));
 				printf("Rec no bloq2 %d\n",quantum);
+				log_info(logPlanificador,"Rec no bloq2 %d", quantum);
 			}
 
 			//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
 			if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
 				printf("Rec bloq1 %d",quantum);
+				log_info(logPlanificador,"Rec no bloq1 %d",quantum);
 				quantum=varGlobalQuantum+1;
 				queue_push(colaBloqueados,queue_pop(colaListos));
 				printf("Rec bloq2 %d",quantum);
+				log_info(logPlanificador,"Rec no bloq2 %d", quantum);
 			}
 
 			printf("Q %d\n",quantum);
+			log_info(logPlanificador,"Q %d",quantum);
 			quantum--;
 			printf("Q %d\n",quantum);
+			log_info(logPlanificador,"Q %d",quantum);
 			usleep(varGlobalSleep);
-		}else usleep(10000); //para que no quede en espera activa
+		}else{
+			log_info(logPlanificador,"Cola vacia --> Sleep");
+			usleep(10000); //para que no quede en espera activa
+		}
 	}//Cierra While(1)
 
 	return EXIT_SUCCESS;
@@ -230,6 +275,8 @@ int orquestador (void) {
 	ConxNivPlan msj;
 
 	printf("THR Orquestador: iniciado.\n THR Orquestador: Esperando conexiones de personajes o Niveles...\n");
+	log_info(logOrquestador,"THR Orquestador: iniciado");
+	log_info(logOrquestador,"THR Orquestador: Esperando conexiones de personajes o Niveles...");
 
 	//TODO llamar al handler de niveles
 //	InfoNivel *nivel;
@@ -240,12 +287,22 @@ int orquestador (void) {
 //	pthread_t threadPlanif;
 //	pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
 
-	//Creamos un socket de esucha para el puerto 4999
-	int socketEscucha = quieroUnPutoSocketDeEscucha(4999);
+	//Creamos un socket de escucha para el puerto 4999
+	int socketEscucha;
+	if ((socketEscucha = quieroUnPutoSocketDeEscucha(4999)) != 1){
+		//TODO: Des-hardcodear el puerto 4999
+		log_info(logOrquestador,"Socket de escucha para el puerto 4999 creado");
+	}
+	else {
+		log_error(logOrquestador,"No se pudo crear el socket de escucha para el puerto 4999");
+	}
+	//TODO: Supongo que el while(1) debería estar dentro del else
+	//Chequear eso
 	while(1){
 
 		if (listen(socketEscucha, 1) != 0) {
 			perror("Error al poner a escuchar socket");
+			log_error(logOrquestador,"Error al poner a escuchar socket");
 			return EXIT_FAILURE;
 		}
 		struct sockaddr_in cli_addr;
@@ -253,69 +310,95 @@ int orquestador (void) {
 		if ((socketNuevaConexion = accept(socketEscucha, &cli_addr, &socklen)) < 0) {
 			//log_error(logger,"Error al aceptar conexion entrante");
 			perror("Error al aceptar conexion");
+			log_error(logOrquestador,"Error al aceptar conexion");
 			return EXIT_FAILURE;
 		}
 		char* ipCliente;
 		ipCliente=print_ip(cli_addr.sin_addr.s_addr);
 		printf("Ip del cliente conectado: %d %s\n",cli_addr.sin_addr.s_addr,ipCliente);
+		log_info(logOrquestador,"Ip del cliente conectado: %d %s",cli_addr.sin_addr.s_addr, ipCliente);
 
 		//Handshake en el que recibe el simbolo del personaje
 		char *simboloRecibido; //Ej: @ ! / % $ &
 		simboloRecibido=malloc(1);
 		Header unHeader;
 		if(recibirHeader(socketNuevaConexion,&unHeader)){
+
+		log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
+
 		switch(unHeader.type){
 
+		//TODO: colocar una pequenia descripción de cada tipo
+
 		case 0://case Personaje
+
+			log_info(logOrquestador,"Header tipo 0");
 
 			strcpy(msj.ipNivel,"127.0.0.1");
 			strcpy(msj.ipPlanificador,"127.0.0.1");
 			msj.portNivel=0;
 			msj.portPlanificador=0;
 			simboloRecibido=malloc(1);
-			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
-				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido)) {
+
+			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido) >= 0){
+				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
 					//log_info(logger,"Mando mensaje al personaje %c",*rec);
 					printf("Entro Personaje: %c\n",*simboloRecibido);
+					log_info(logOrquestador,"Entro Personaje: %c",*simboloRecibido);
 				}
 			}
 
 
 			char* nivelDelPersonaje;
 			//Esperar solicitud de info de conexion de Nivel y Planifador
-			printf("Esperando solictud de nivel\n");
+			printf("Esperando solicitud de nivel\n");
+			log_info(logOrquestador,"Esperando solicitud de nivel...");
 	//		if(recibirHeader(socketNuevaConexion,&unHeader)){
 	//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
 	//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
 			if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
 					printf("Nivel recibido: %s\n",nivelDelPersonaje);
+					log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
 					//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 
 					//settear variable global para usar en funcion q se manda a list_find
 					nombreNivel=nivelDelPersonaje;
 					printf("Se busca el nivel \n");
+					log_info(logOrquestador,"Se busca el nivel");
 
 					NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
 
 					printf("Se encontro el nivel %p\n",nivel);
+					log_info(logOrquestador,"Se encontro el nivel %p",nivel);
+
 					if(nivel!=NULL){
-					strcpy(msj.ipNivel,nivel->ip);
-					msj.portNivel=nivel->port;
-					msj.portPlanificador=nivel->puertoPlanif;
+						log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
+						strcpy(msj.ipNivel,nivel->ip);
+						msj.portNivel=nivel->port;
+						msj.portPlanificador=nivel->puertoPlanif;
+						log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
 					}
-					mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj);
+					//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje
+					if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+						log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
+					}
+					else {
+						log_error(logOrquestador,"No se pudo enviar los datos del nivel al Personaje %c",*simboloRecibido);
+					}
 	//			}
 			}
 			//cerrar socket
 			close(socketNuevaConexion);
+			log_info(logOrquestador,"Se cerro el socket %d",socketNuevaConexion);
 			break;
 
 		case 2: //case Nivel
 			simboloRecibido=malloc(unHeader.payloadlength);
 			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
-				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido)) {
+				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
 					//log_info(logger,"Mando mensaje al personaje %c",*rec);
 					printf("Entro Nivel: %s\n",simboloRecibido);
+					log_info(logOrquestador,"Entro Nivel: %s",simboloRecibido);
 				}
 			}
 
@@ -328,6 +411,7 @@ int orquestador (void) {
 			nodoNivel->puertoPlanif=contadorPuerto;
 
 			list_add(listaNiveles,nodoNivel);
+			log_info(logOrquestador,"Se anadio el nivel %s a la lista de Niveles",simboloRecibido);
 
 			InfoNivel *nivel;
 			nivel=malloc(sizeof(InfoNivel));
@@ -341,16 +425,19 @@ int orquestador (void) {
 			aux=malloc(sizeof(int));
 			*aux=nodoNivel->port;
 			//manda el puerto asignado al nivel para que escuche conexiones.
+			//TODO: y si es -1 de qué nos pintamos?
 			if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux))
+				log_error(logOrquestador,"No se pudo enviar un mensaje al nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
 				break; //TODO handlear desconexion
 			free(aux);
 			if(!recibirMensaje(socketNuevaConexion,(void**)&aux))
+				log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
 				break; //TODO handlear desconexion
 			free(aux);
 
 			pthread_t threadPlanif;
 			pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
-
+			log_info(logOrquestador,"Se creo el THR del planificador correspondiente al nivel %s",simboloRecibido);
 
 			break;
 		default:
@@ -378,11 +465,17 @@ int orquestador (void) {
 //listenerPersonaje:
 //Función que escucha nuevas conexiones de personajes y
 //será ejecutada a través de un hilo por un planificador
-//Cardinalidad = 0 hasta N threads ejecutandose simultaneamente, uno por planificador
+//Cardinalidad = 0 hasta N threads ejecutándose simultaneamente, uno por planificador
 int listenerPersonaje(InfoPlanificador* planificador){
 
 	    int socketEscucha,socketNuevaConexion;
-	    socketEscucha=quieroUnPutoSocketDeEscucha(planificador->port);
+	    if((socketEscucha=quieroUnPutoSocketDeEscucha(planificador->port)) != 1){
+	    	log_info(logPlanificador,"Se creo el socket de escucha %d",planificador->port);
+	    }
+	    //TODO: el while(1) debería estar adentro del if
+	    else {
+	    	log_error(logPlanificador,"No se pudo crear el socket de escucha");
+	    }
 
 	    //Ciclo While(1) para escuchar nuevos personajes indefinidamente
 		while (1){
@@ -390,14 +483,17 @@ int listenerPersonaje(InfoPlanificador* planificador){
 			// Escuchar nuevas conexiones entrantes.
 			if (listen(socketEscucha, 1) != 0) {
 				//log_error(logger,"Error al bindear socket escucha");
+				log_error(logPlanificador,"Error al bindear socket escuchar");
 				return EXIT_FAILURE;
 			}
 			//log_info(logger,"Escuchando conexiones entrantes");
+			log_info(logPlanificador,"Escuchando conexiones entrantes");
 
 			// Aceptar una nueva conexion entrante. Se genera un nuevo socket con la nueva conexion.
 			// La funcion accept es bloqueante, no sigue la ejecución hasta que se reciba algo
 			if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
 				//log_error(logger,"Error al aceptar conexion entrante");
+				log_error(logPlanificador,"Error al aceptar conexion entrante");
 				return EXIT_FAILURE;
 			}
 
@@ -408,6 +504,7 @@ int listenerPersonaje(InfoPlanificador* planificador){
 				if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
 					//log_info(logger,"Mando mensaje al personaje %c",*simboloRecibido);
 					printf("Handshake Respondido\n");
+					log_info(logPlanificador,"Handshake respondido al Personaje %c", *simboloRecibido);
 				}
 
 				//Agrega el nuevo personaje a la cola de listos del planificador
@@ -416,6 +513,8 @@ int listenerPersonaje(InfoPlanificador* planificador){
 				personaje->simboloRepresentativo=*simboloRecibido; //Ej: @ ! / % $ &
 				personaje->socket=socketNuevaConexion;
 				queue_push(planificador->colaListos,personaje);
+
+				log_info(logPlanificador,"Se agrego al Personaje %c a la cola de listos",*simboloRecibido);
 
 				//log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
 
