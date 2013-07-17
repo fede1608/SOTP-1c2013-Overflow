@@ -30,13 +30,17 @@
 #include "collections/list.h"
 #include "log.h"
 #include  "socketsOv.h" //Librería compartida para sockects de overflow
+#include <sys/inotify.h> //Libreria inotify
+#include "config.h"
 
 //----------------------------------------------------------------
 
 //******************** DEFINICIONES GLOBALES *********************
 //Variables Globales del sistema
-int varGlobalQuantum=3;
-int varGlobalSleep=0.5* 1000000;
+//int varGlobalQuantum=3;
+//int varGlobalSleep=0.5* 1000000;
+int varGlobalQuantum;
+int varGlobalSleep;
 char* nombreNivel;//se usa para la funcion que se manda al list_find
 //Structs propios de la plataforma
 
@@ -75,7 +79,7 @@ typedef struct t_msjPersonaje {
 
 //************************** LOGUEO **************************
 
-t_log_level * detail = LOG_LEVEL_INFO;
+t_log_level detail = LOG_LEVEL_INFO;
 t_log * logOrquestador = log_create("LogOrquestador","Orquestador",true,detail);
 //TODO: Necesita ser sincronizado porque hay muchas instancias de planificador
 t_log * logPlanificador = log_create("LogPlanificador","Planificador",true,detail);
@@ -98,8 +102,20 @@ bool esMiNivel(NodoNivel* nodo);
 //Función principal del proceso, es la encargada de crear al orquestador y al planificador
 //Cardinalidad = un único thread
 int main (void) {
+	t_config* configNivel = config_create("config.txt");
+	varGlobalQuantum=config_get_int_value(configNivel,"Quantum");
+	varGlobalSleep=(config_get_int_value(configNivel,"TiempoDeRetardoDelQuantum"))* 1000000;
 
-	printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
+
+	//******************** inicio inotify *********************
+	// Al inicializar inotify este nos devuelve un descriptor de archivo
+		int file_descriptor = inotify_init();
+		if (file_descriptor < 0) {
+			perror("inotify_init");
+		}
+	//******************** fin inotify *********************
+
+		printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
 	log_info(logOrquestador,"Proceso plataforma iniciado");
 	log_info(logOrquestador,"Creando THR Orquestador");
 
