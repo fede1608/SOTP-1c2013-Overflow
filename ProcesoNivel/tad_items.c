@@ -130,4 +130,14 @@ ITEM_NIVEL* obtenerPersonaje(ITEM_NIVEL* ListaItems, char id) {
         }
 return NULL;
 }
-
+int cantidadItems(ITEM_NIVEL* ListaItems,int tipo){
+	 ITEM_NIVEL * temp = ListaItems;
+	        int cant=0;
+	        while(temp != NULL){
+	        	if (temp->item_type == tipo){
+	        		cant++;
+	        	}
+	        	temp = temp->next;
+	        }
+	        return cant;
+}

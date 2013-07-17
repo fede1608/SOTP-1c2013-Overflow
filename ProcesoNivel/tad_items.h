@@ -9,3 +9,4 @@ ITEM_NIVEL* CrearCaja(ITEM_NIVEL** i, char id, int x , int y, int cant);
 ITEM_NIVEL* CrearItem(ITEM_NIVEL** i, char id, int x, int y, char tipo, int cant);
 ITEM_NIVEL* obtenerRecurso(ITEM_NIVEL* ListaItems, char id);
 ITEM_NIVEL* obtenerPersonaje(ITEM_NIVEL* ListaItems, char id);
+int cantidadItems(ITEM_NIVEL* ListaItems,int tipo);

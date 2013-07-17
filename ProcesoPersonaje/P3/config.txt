@@ -1,8 +1,6 @@
-nombre=Mario
-simbolo=#
-planDeNiveles=[Nivel1,Nivel4,Nivel3]
-obj[Nivel1]=[F,H,F,H]
-obj[Nivel3]=[H,M,F]
-obj[Nivel4]=[M,F,M]
+nombre=Tortuga
+simbolo=&
+planDeNiveles=[DeadLock]
+obj[DeadLock]=[B,H]
 vidas=5
 orquestador=127.0.0.1:4999

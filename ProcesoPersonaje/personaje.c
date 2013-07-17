@@ -34,6 +34,7 @@ typedef struct t_msjPersonaje {
 	int solicitaRecurso;
 	int bloqueado;
 	int finNivel;
+	char recursoSolicitado;
 } MensajePersonaje;
 
 //Var Globales;
@@ -116,7 +117,9 @@ int main(void){
 			val=config_get_string_value(config,objNivel);
 			veclong=lengthVecConfig(val);
 			pos.x=0;
-			pos.y=1;
+			pos.y=0;
+			rec.x=-1;
+			rec.y=-1;
 
 		ConxNivPlan ipNivelPlanif;
 		ipNivelPlanif.portNivel=0;
@@ -195,171 +198,175 @@ int main(void){
 
 
 
-void* buffer;
-recActual=*obj[0];
-buffer= &recActual;
 
-if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
-//	printf("Llego el header de la posicion a recurso al nivel\n");
-	log_info(log,"Llego el header de la posicion a recurso al nivel");
-//	printf("Llego el recurso actual necesario al nivel\n");
-	log_info(log,"Llego el recurso actual necesario al nivel");
-	Header unHeader;
-	if (recibirHeader(unSocket,&unHeader)) {
-//		printf("pos %d %d %d %d\n",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
-		log_info(log,"pos %d %d %d %d",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
-		Posicion lifeSucks;
-		recibirData(unSocket,unHeader,(void**)&lifeSucks);
-		rec=lifeSucks;
-//		printf("Llego %c header respuesta del nivel: %d %d\n",recActual,rec.x,rec.y);
-		log_info(log,"Llego %c header respuesta del nivel: %d %d",recActual,rec.x,rec.y);
-//		printf("Llego la posicion del recurso solicitado del nivel\n");
-		log_info(log,"Llego el header de la posicion a recurso al nivel");
-	}
-}
+			void* buffer;
 
+	for(ii=0;ii<veclong;ii++){
+		recActual=*obj[ii];
+		//solicitar posicion recurso Recurso: recactual
+		//esperar posicion del recurso posicion : rec
 
-for(ii=0;ii<veclong;ii++){
-	recActual=*obj[ii];
-	//solicitar posicion recurso Recurso: recactual
-	//esperar posicion del recurso posicion : rec
-
-	llego=1;
-	while(llego){
-		Header unHeader;
-		// esperar mensaje de movPermitido para continuar
-		char* charAux;
-
-		printf("Esperando permiso de moviemiento...");
-		if(recibirHeader(unSocketPlanif,&unHeader)>0){
-		if(unHeader.type==8)
-			recibirData(unSocketPlanif,unHeader,(void**)&charAux);
-		printf("Permiso data Recibido");
-		}
-
-		MensajePersonaje respAlPlanf;
-		respAlPlanf.bloqueado=0;
-		respAlPlanf.solicitaRecurso=0;
-		respAlPlanf.finNivel=0;
-		printf("pos %d %d \n",pos.x,pos.y);
-		if (pos.x!=rec.x) {
-			(rec.x-pos.x)>0?pos.x++:pos.x--;
-		}
-		else if (pos.y!=rec.y) {
-			(rec.y-pos.y)>0?pos.y++:pos.y--;
-		}
-
-		//aviso posicion pos al nivel
-		h.type = 2;
-		buffer=&pos;
-		char* sth;
-
-		if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)) {
-//			printf("Llego el header de la posicion del personaje %d %d\n",pos.x,pos.y);
-			log_info(log,"Llego el header de la posicion del personaje %d %d",pos.x,pos.y);
-			if (recibirMensaje(unSocket, (void**)&sth)>=0) {
-//				printf("Llego header respuesta: %c del nivel\n",*sth);
-				log_info(log,"Llego header respuesta: %c del nivel",*sth);
-			}
-		}
-
-		if((pos.y==rec.y)&(pos.x==rec.x)) {
-			//Solicitar instancia del recActual
-			//esperar OK
-			h.type = 3;
-			h.payloadlength = 1;
-			llego=0;
-			buffer = &recActual;
-
-			if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
-//				printf("Llego el header de peticion de recurso %c al nivel\n",recActual);
-				log_info(log,"Llego el header de peticion de recurso %c al nivel",recActual);
-//				printf("Llego el buffer del recurso necesario al nivel\n");
-				log_info(log,"Llego el buffer del recurso necesario al nivel");
-				Header unHeader;
-				Posicion lifeSucks;
-
-				if (recibirHeader(unSocket,&unHeader)) {
-					int * respRec;
-					respRec=malloc(sizeof(int));
-					recibirData(unSocket,unHeader,(void**)respRec);
-//					printf("Llego respuesta %d del nivel\n", *respRec);
-					log_info(log,"Llego respuesta %d del nivel",*respRec);
-
-					respAlPlanf.solicitaRecurso=1;
-					if(*respRec){
-						respAlPlanf.bloqueado=0;
-//						printf("Se entrego una instancia del Recurso %c\n",recActual);
-						log_info(log,"Se entrego una instancia del Recurso %c",recActual);
-					}else{
-						respAlPlanf.bloqueado=1;
-//						printf("No se entrego una instancia del Recurso %c\n",recActual);
-						log_info(log,"No se entrego una instancia del Recurso %c",recActual);
-					}
-					free(respRec);
-
+		llego=1;
+		while(llego){
+			Header unHeader;
+			// esperar mensaje de movPermitido para continuar
+			char* charAux;
+			log_info(log,"Esperando permiso de movimiento...");
+			if(recibirHeader(unSocketPlanif,&unHeader)>0){
+			if(unHeader.type==8){
+				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+				log_info(log,"Permiso de Movimiento Recibido");
 				}
 			}
 
-			if((ii+1==veclong)) {
-				//cerrar conexion con el nivel
-				mandarMensaje(unSocket,4 , sizeof(char),&recActual);
-				respAlPlanf.finNivel=1;
-				if(seMurio) {c--;ii=veclong;llego=0;seMurio=0;} //reiniciar el mismo nivel
-				//exit(0);
-			}else {
-				recActual=*obj[ii+1];
-				buffer=&recActual;
 
+			if((rec.x==-1)&&(rec.y==-1)){ //si no tiene asignada un destino solicitar uno
+				buffer= &recActual;
+				//solicitar Posicion del recurso recActual
 				if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
-//					printf("Llego el header de la posicion a recurso al nivel\n");
-					log_info(log,"Llego el header de la posicion a recurso al nivel");
-//					printf("Llego el recurso actual necesario al nivel\n");
-					log_info(log,"Llego el recurso actual necesario al nivel");
+					log_info(log,"Solicitada la posicion del recurso actual necesario al nivel");
 					Header unHeader;
-
 					if (recibirHeader(unSocket,&unHeader)) {
-//						printf("pos %d %d %d %d\n",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
-						log_info(log,"pos %d %d %d %d",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
+						log_debug(log,"pos %d %d %d %d",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
 						Posicion lifeSucks;
 						recibirData(unSocket,unHeader,(void**)&lifeSucks);
 						rec=lifeSucks;
-//						printf("Llego %c header respuesta del nivel: %d \n",recActual,rec.x,rec.y);
-						log_info(log,"Llego %c header respuesta del nivel: %d",recActual,rec.x,rec.y);
-//						printf("Llego la posicion del recurso solicitado del nivel\n");
-						log_info(log,"Llego la posicion del recurso solicitado del nivel");
+						log_info(log,"Llego la posicion del Recurso %c: X:%d Y:%d",recActual,rec.x,rec.y);
+
 					}
-
 				}
-
 			}
 
-		}
-		//mandar mensaje de resp al Planif
-		if(seMurio>0) {
-		//cerrar conexion con el nivel
-		mandarMensaje(unSocket,4 , sizeof(char),&recActual);
-		respAlPlanf.finNivel=1;
-		c--;
-		if(seMurio==2) c=-1;
-		llego=0;
-		printf("Se murio %d %d %d\n",ii,c,llego);
-		ii=veclong;
-		printf("Se murio %d\n",ii);
-		seMurio=0;
-		}
-		mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
-		printf("Se envio respuesta de turno cloncluido al Planificador\n");
-	}//fin while(llego)
-	printf("Fin for\n");
-}//fin for each recurso
+			MensajePersonaje respAlPlanf;
+			respAlPlanf.bloqueado=0;
+			respAlPlanf.solicitaRecurso=0;
+			respAlPlanf.finNivel=0;
+			respAlPlanf.recursoSolicitado='0';
+			printf("pos %d %d \n",pos.x,pos.y);
+			if (pos.x!=rec.x) {
+				(rec.x-pos.x)>0?pos.x++:pos.x--;
+			}
+			else if (pos.y!=rec.y) {
+				(rec.y-pos.y)>0?pos.y++:pos.y--;
+			}
 
+			//aviso posicion pos al nivel
+			h.type = 2;
+			buffer=&pos;
+			char* sth;
 
+			if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)) {
+	//			printf("Llego el header de la posicion del personaje %d %d\n",pos.x,pos.y);
+				log_info(log,"Llego el header de la posicion del personaje %d %d",pos.x,pos.y);
+				if (recibirMensaje(unSocket, (void**)&sth)>=0) {
+	//				printf("Llego header respuesta: %c del nivel\n",*sth);
+					log_debug(log,"Llego header respuesta");
+					log_info(log,"Llego header respuesta: %c del nivel",*sth);
+				}
+			}
 
+			if((pos.y==rec.y)&(pos.x==rec.x)) {
+				//Solicitar instancia del recActual
+				//esperar OK
+				h.type = 3;
+				h.payloadlength = 1;
+				llego=0;
+				buffer = &recActual;
 
+				if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
+	//				printf("Llego el header de peticion de recurso %c al nivel\n",recActual);
+					log_info(log,"Llego el header de peticion de recurso %c al nivel",recActual);
+	//				printf("Llego el buffer del recurso necesario al nivel\n");
+					log_info(log,"Llego el buffer del recurso necesario al nivel");
+					Header unHeader;
+					Posicion lifeSucks;
+					respAlPlanf.recursoSolicitado=recActual;
+					if (recibirHeader(unSocket,&unHeader)) {
+						int * respRec;
+						respRec=malloc(sizeof(int));
+						recibirData(unSocket,unHeader,(void**)respRec);
+	//					printf("Llego respuesta %d del nivel\n", *respRec);
+						log_info(log,"Llego respuesta %d del nivel",*respRec);
 
+						respAlPlanf.solicitaRecurso=1;
+						if(*respRec){
+							respAlPlanf.bloqueado=0;
+							rec.x=-1;
+							rec.y=-1;
+	//						printf("Se entrego una instancia del Recurso %c\n",recActual);
+							log_info(log,"Se entrego una instancia del Recurso %c",recActual);
+						}else{
+							respAlPlanf.bloqueado=1;
+	//						printf("No se entrego una instancia del Recurso %c\n",recActual);
+							log_info(log,"No se entrego una instancia del Recurso %c",recActual);
+						}
+						free(respRec);
+
+					}
+				}
+
+				if((ii+1==veclong)) {
+					//cerrar conexion con el nivel
+					mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+					respAlPlanf.finNivel=1;
+//					close(unSocket);
+					if(seMurio>0) {//Muerte del personaje
+						//cerrar conexion con el nivel
+						respAlPlanf.finNivel=1;
+						c--;
+						if(seMurio==2) c=-1;//reiniciar plan de niveles
+						llego=0;
+						printf("Se murio %d %d %d\n",ii,c,llego);
+						ii=veclong;
+						printf("Se murio %d\n",ii);
+						seMurio=0;
+						}
+					//exit(0);
+				}
+	//			else {
+	//				recActual=*obj[ii+1];
+	//				buffer=&recActual;
+	//
+	//				if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
+	//					log_info(log,"Llego el header de la posicion a recurso al nivel");
+	//					log_info(log,"Llego el recurso actual necesario al nivel");
+	//					Header unHeader;
+	//
+	//					if (recibirHeader(unSocket,&unHeader)) {
+	//						log_info(log,"pos %d %d %d %d",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
+	//						Posicion lifeSucks;
+	//						recibirData(unSocket,unHeader,(void**)&lifeSucks);
+	//						rec=lifeSucks;
+	//						log_info(log,"Llego %c header respuesta del nivel: %d",recActual,rec.x,rec.y);
+	//						log_info(log,"Llego la posicion del recurso solicitado del nivel");
+	//					}
+	//				}
+	//			}
+
+			}
+			//mandar mensaje de resp al Planif
+			if(seMurio>0) {
+			//cerrar conexion con el nivel
+			mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+			respAlPlanf.finNivel=1;
+			c--;
+			if(seMurio==2) c=-1;
+			llego=0;
+			printf("Se murio %d %d %d\n",ii,c,llego);
+			ii=veclong;
+			printf("Se murio %d\n",ii);
+			seMurio=0;
+			}
+			mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
+			printf("Se envio respuesta de turno concluido al Planificador\n");
+		}//fin while(llego)
+		printf("Fin for\n");
+	}//fin for each recurso
 }//fin for each nivel
-sleep(3);
+
+log_info(log,"Finalizado Plan de Niveles");
+//todo avisar al orquestador
+sleep(1);
 return 0;
 
 

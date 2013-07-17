@@ -4563,3 +4563,438 @@
 [DEBUG] 10:50:58:930 ProcesoNivel/(13576:13585): Case 4 puntero del personaje: 0xb6c00620
 [INFO] 10:50:58:930 ProcesoNivel/(13576:13585): El personaje salio del Nivel.
 [DEBUG] 10:50:58:930 ProcesoNivel/(13576:13585): Se cerro el Socket: 6
+[INFO] 16:07:57:859 ProcesoNivel/(15154:15154): Escuchando conexiones entrantes
+[INFO] 16:57:02:459 ProcesoNivel/(15404:15404): Escuchando conexiones entrantes
+[INFO] 16:58:56:340 ProcesoNivel/(15512:15512): Escuchando conexiones entrantes
+[INFO] 17:01:43:735 ProcesoNivel/(15659:15659): Escuchando conexiones entrantes
+[INFO] 17:02:02:581 ProcesoNivel/(15659:15659): Llego el Personaje $ del nivel
+[INFO] 17:02:02:581 ProcesoNivel/(15659:15659): Mando mensaje al personaje $
+[INFO] 17:02:02:582 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:02:582 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:02:582 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:03:582 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:03:582 ProcesoNivel/(15659:15659): Llego Msj tipo 1 payload 1
+[DEBUG] 17:02:03:582 ProcesoNivel/(15659:15659): Resp del recData: 1
+[INFO] 17:02:03:582 ProcesoNivel/(15659:15659): El Personaje $ solicita la Posición del Recurso H
+
+[INFO] 17:02:03:583 ProcesoNivel/(15659:15659): Se mando la pos(14,9) del Rec H al Personaje $
+
+[INFO] 17:02:03:583 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:03:583 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:03:583 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:04:584 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:04:584 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:04:584 ProcesoNivel/(15659:15659): Se recibio la posicion(1,1) del Personaje $
+
+[INFO] 17:02:04:584 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:04:584 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:04:584 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:04:584 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:05:585 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:05:585 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:05:585 ProcesoNivel/(15659:15659): Se recibio la posicion(2,1) del Personaje $
+
+[INFO] 17:02:05:585 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:05:585 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:05:585 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:05:585 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:06:586 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:06:586 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:06:586 ProcesoNivel/(15659:15659): Se recibio la posicion(3,1) del Personaje $
+
+[INFO] 17:02:06:586 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:06:586 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:06:586 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:06:586 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:07:586 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:07:587 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:07:587 ProcesoNivel/(15659:15659): Se recibio la posicion(4,1) del Personaje $
+
+[INFO] 17:02:07:587 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:07:587 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:07:587 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:07:587 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:08:587 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:08:587 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:08:587 ProcesoNivel/(15659:15659): Se recibio la posicion(5,1) del Personaje $
+
+[INFO] 17:02:08:588 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:08:588 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:08:588 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:08:588 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:09:589 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:09:589 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:09:589 ProcesoNivel/(15659:15659): Se recibio la posicion(6,1) del Personaje $
+
+[INFO] 17:02:09:590 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:09:590 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:09:590 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:09:590 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:10:590 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:10:590 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:10:590 ProcesoNivel/(15659:15659): Se recibio la posicion(7,1) del Personaje $
+
+[INFO] 17:02:10:591 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:10:593 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:10:593 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:10:593 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:11:593 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:11:593 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:11:593 ProcesoNivel/(15659:15659): Se recibio la posicion(8,1) del Personaje $
+
+[INFO] 17:02:11:593 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:11:593 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:11:594 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:11:594 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:12:594 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:12:594 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:12:594 ProcesoNivel/(15659:15659): Se recibio la posicion(9,1) del Personaje $
+
+[INFO] 17:02:12:594 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:12:594 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:12:594 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:12:594 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:13:595 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:13:595 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:13:595 ProcesoNivel/(15659:15659): Se recibio la posicion(10,1) del Personaje $
+
+[INFO] 17:02:13:595 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:13:595 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:13:595 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:13:595 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:14:596 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:14:596 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:14:596 ProcesoNivel/(15659:15659): Se recibio la posicion(11,1) del Personaje $
+
+[INFO] 17:02:14:596 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:14:596 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:14:596 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:14:596 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:15:597 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:15:597 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:15:597 ProcesoNivel/(15659:15659): Se recibio la posicion(12,1) del Personaje $
+
+[INFO] 17:02:15:597 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:15:597 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:15:597 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:15:597 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:16:598 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:16:598 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:16:598 ProcesoNivel/(15659:15659): Se recibio la posicion(13,1) del Personaje $
+
+[INFO] 17:02:16:598 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:16:598 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:16:598 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:16:598 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:17:598 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:17:599 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:17:599 ProcesoNivel/(15659:15659): Se recibio la posicion(14,1) del Personaje $
+
+[INFO] 17:02:17:599 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:17:599 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:17:599 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:17:599 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:18:599 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:18:600 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:18:600 ProcesoNivel/(15659:15659): Se recibio la posicion(14,2) del Personaje $
+
+[INFO] 17:02:18:600 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:18:600 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:18:600 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:18:600 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:19:601 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:19:602 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:19:602 ProcesoNivel/(15659:15659): Se recibio la posicion(14,3) del Personaje $
+
+[INFO] 17:02:19:602 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:19:602 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:19:602 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:19:602 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:20:602 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:20:602 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:20:602 ProcesoNivel/(15659:15659): Se recibio la posicion(14,4) del Personaje $
+
+[INFO] 17:02:20:603 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:20:603 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:20:603 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:20:603 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:21:603 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:21:603 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:21:603 ProcesoNivel/(15659:15659): Se recibio la posicion(14,5) del Personaje $
+
+[INFO] 17:02:21:604 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:21:604 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:21:604 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:21:604 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:22:604 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:22:604 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:22:604 ProcesoNivel/(15659:15659): Se recibio la posicion(14,6) del Personaje $
+
+[INFO] 17:02:22:604 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:22:605 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:22:605 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:22:605 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:23:605 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:23:605 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:23:605 ProcesoNivel/(15659:15659): Se recibio la posicion(14,7) del Personaje $
+
+[INFO] 17:02:23:605 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:23:606 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:23:606 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:23:606 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:24:606 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:24:606 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:24:606 ProcesoNivel/(15659:15659): Se recibio la posicion(14,8) del Personaje $
+
+[INFO] 17:02:24:606 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:24:606 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:24:606 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:24:606 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:25:607 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:25:607 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:25:607 ProcesoNivel/(15659:15659): Se recibio la posicion(14,9) del Personaje $
+
+[INFO] 17:02:25:607 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:25:607 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:25:607 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:25:607 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:26:608 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:26:608 ProcesoNivel/(15659:15659): Llego Msj tipo 3 payload 1
+[INFO] 17:02:26:608 ProcesoNivel/(15659:15659): El Personaje $ solicita una Instancia del Recurso H
+
+[INFO] 17:02:26:608 ProcesoNivel/(15659:15659): Hay instancias del recurso H y se le dio una al Personaje $
+
+[INFO] 17:02:26:608 ProcesoNivel/(15659:15659): Se mando la confirmacion 1 del pedido de Recurso
+
+[INFO] 17:02:26:608 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:26:608 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:26:608 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:27:609 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:27:609 ProcesoNivel/(15659:15659): Llego Msj tipo 1 payload 1
+[DEBUG] 17:02:27:609 ProcesoNivel/(15659:15659): Resp del recData: 1
+[INFO] 17:02:27:609 ProcesoNivel/(15659:15659): El Personaje $ solicita la Posición del Recurso M
+
+[INFO] 17:02:27:609 ProcesoNivel/(15659:15659): Se mando la pos(10,7) del Rec M al Personaje $
+
+[INFO] 17:02:27:609 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:27:609 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:27:609 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:28:610 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:28:610 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:28:610 ProcesoNivel/(15659:15659): Se recibio la posicion(13,9) del Personaje $
+
+[INFO] 17:02:28:610 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:28:610 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:28:610 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:28:610 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:29:611 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:29:611 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:29:611 ProcesoNivel/(15659:15659): Se recibio la posicion(12,9) del Personaje $
+
+[INFO] 17:02:29:611 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:29:611 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:29:611 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:29:612 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:30:612 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:30:612 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:30:612 ProcesoNivel/(15659:15659): Se recibio la posicion(11,9) del Personaje $
+
+[INFO] 17:02:30:612 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:30:612 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:30:612 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:30:613 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:31:613 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:31:613 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:31:613 ProcesoNivel/(15659:15659): Se recibio la posicion(10,9) del Personaje $
+
+[INFO] 17:02:31:613 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:31:613 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:31:613 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:31:613 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:32:614 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:32:614 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:32:614 ProcesoNivel/(15659:15659): Se recibio la posicion(10,8) del Personaje $
+
+[INFO] 17:02:32:614 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:32:614 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:32:614 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:32:614 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:33:615 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:33:615 ProcesoNivel/(15659:15659): Llego Msj tipo 2 payload 2
+[INFO] 17:02:33:615 ProcesoNivel/(15659:15659): Se recibio la posicion(10,7) del Personaje $
+
+[INFO] 17:02:33:615 ProcesoNivel/(15659:15659): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:02:33:615 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:33:615 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:33:615 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:34:615 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:34:615 ProcesoNivel/(15659:15659): Llego Msj tipo 3 payload 1
+[INFO] 17:02:34:615 ProcesoNivel/(15659:15659): El Personaje $ solicita una Instancia del Recurso M
+
+[INFO] 17:02:34:615 ProcesoNivel/(15659:15659): Hay instancias del recurso M y se le dio una al Personaje $
+
+[INFO] 17:02:34:616 ProcesoNivel/(15659:15659): Se mando la confirmacion 1 del pedido de Recurso
+
+[INFO] 17:02:34:616 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:34:616 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:34:616 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:35:616 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:35:616 ProcesoNivel/(15659:15659): Llego Msj tipo 1 payload 1
+[DEBUG] 17:02:35:616 ProcesoNivel/(15659:15659): Resp del recData: 1
+[INFO] 17:02:35:616 ProcesoNivel/(15659:15659): El Personaje $ solicita la Posición del Recurso F
+
+[INFO] 17:02:35:617 ProcesoNivel/(15659:15659): Se mando la pos(3,5) del Rec F al Personaje $
+
+[INFO] 17:02:35:617 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:35:617 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:35:617 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:36:618 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[INFO] 17:02:36:619 ProcesoNivel/(15659:15659): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:02:36:619 ProcesoNivel/(15659:15659): TotPj: 1 Tot Recursos: 3
+[INFO] 17:02:36:619 ProcesoNivel/(15659:15659): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:02:37:619 ProcesoNivel/(15659:15659): Personaje $ mando un mensaje
+[DEBUG] 17:02:37:619 ProcesoNivel/(15659:15659): Llego Msj tipo -118 payload 0
+[INFO] 17:02:37:619 ProcesoNivel/(15659:15659): Escuchando conexiones entrantes
+[INFO] 17:08:28:323 ProcesoNivel/(15749:15749): Escuchando conexiones entrantes
+[INFO] 17:09:19:506 ProcesoNivel/(15749:15749): Llego el Personaje $ del nivel
+[INFO] 17:09:19:506 ProcesoNivel/(15749:15749): Mando mensaje al personaje $
+[INFO] 17:09:19:506 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:19:506 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:19:507 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:20:507 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:20:507 ProcesoNivel/(15749:15749): Llego Msj tipo 1 payload 1
+[DEBUG] 17:09:20:507 ProcesoNivel/(15749:15749): Resp del recData: 1
+[INFO] 17:09:20:507 ProcesoNivel/(15749:15749): El Personaje $ solicita la Posición del Recurso H
+
+[INFO] 17:09:20:508 ProcesoNivel/(15749:15749): Se mando la pos(14,9) del Rec H al Personaje $
+
+[INFO] 17:09:20:508 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:20:508 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:20:508 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:21:509 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:21:509 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:21:509 ProcesoNivel/(15749:15749): Se recibio la posicion(1,1) del Personaje $
+
+[INFO] 17:09:21:509 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:21:509 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:21:509 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:21:509 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:22:510 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:22:510 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:22:510 ProcesoNivel/(15749:15749): Se recibio la posicion(2,1) del Personaje $
+
+[INFO] 17:09:22:510 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:22:510 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:22:510 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:22:510 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:23:511 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:23:511 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:23:511 ProcesoNivel/(15749:15749): Se recibio la posicion(3,1) del Personaje $
+
+[INFO] 17:09:23:511 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:23:511 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:23:511 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:23:511 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:24:512 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:24:512 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:24:512 ProcesoNivel/(15749:15749): Se recibio la posicion(4,1) del Personaje $
+
+[INFO] 17:09:24:512 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:24:512 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:24:512 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:24:512 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:25:513 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:25:513 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:25:513 ProcesoNivel/(15749:15749): Se recibio la posicion(5,1) del Personaje $
+
+[INFO] 17:09:25:513 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:25:513 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:25:513 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:25:513 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:26:514 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:26:514 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:26:514 ProcesoNivel/(15749:15749): Se recibio la posicion(6,1) del Personaje $
+
+[INFO] 17:09:26:514 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:26:514 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:26:514 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:26:514 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:27:515 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:27:515 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:27:515 ProcesoNivel/(15749:15749): Se recibio la posicion(7,1) del Personaje $
+
+[INFO] 17:09:27:515 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:27:515 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:27:515 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:27:516 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:28:516 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:28:516 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:28:516 ProcesoNivel/(15749:15749): Se recibio la posicion(8,1) del Personaje $
+
+[INFO] 17:09:28:516 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:28:516 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:28:516 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:28:516 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:29:517 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:29:517 ProcesoNivel/(15749:15749): Llego Msj tipo 2 payload 2
+[INFO] 17:09:29:517 ProcesoNivel/(15749:15749): Se recibio la posicion(9,1) del Personaje $
+
+[INFO] 17:09:29:517 ProcesoNivel/(15749:15749): Se le aviso al Personaje $ que llego bien su Posición
+[INFO] 17:09:29:517 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:29:518 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:29:518 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:30:518 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[INFO] 17:09:30:518 ProcesoNivel/(15749:15749): Algoritmo de Deteccion de Deadlock empezado...
+[DEBUG] 17:09:30:518 ProcesoNivel/(15749:15749): TotPj: 1 Tot Recursos: 3
+[INFO] 17:09:30:518 ProcesoNivel/(15749:15749): 
+ Oops! Deadlock detected and causing process is:process(36)
+[INFO] 17:09:31:519 ProcesoNivel/(15749:15749): Personaje $ mando un mensaje
+[DEBUG] 17:09:31:519 ProcesoNivel/(15749:15749): Llego Msj tipo -27 payload 0
+[INFO] 17:09:31:519 ProcesoNivel/(15749:15749): Escuchando conexiones entrantes
+[INFO] 17:11:36:332 ProcesoNivel/(15887:15887): Escuchando conexiones entrantes

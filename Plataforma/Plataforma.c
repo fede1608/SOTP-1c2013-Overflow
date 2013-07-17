@@ -73,6 +73,7 @@ typedef struct t_msjPersonaje {
 	int solicitaRecurso;
 	int bloqueado;
 	int finNivel;
+	char recursoSolicitado;
 } MensajePersonaje;
 
 //----------------------------------------------------------------
@@ -226,28 +227,18 @@ int planificador (InfoNivel* nivel) {
 			//Comportamientos según el mensaje que se recibe del personaje
 
 			//Si informa de fin de nivel se lo retira de la cola de listos
-			if(msjPersonaje.finNivel){
-				printf("El personaje termino el Nivel\n");
-				log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
-				queue_pop(colaListos);
-				msjPersonaje.solicitaRecurso=0;
-				msjPersonaje.bloqueado=0;
-				quantum=varGlobalQuantum+1;
-				printf("Se retiro al personaje de la cola\n");
-				log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
-			}
-
-			//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
-			if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
-				printf("Rec no bloq1 %d\n",quantum);
-				log_info(logPlanificador,"Rec no bloq1 %d",quantum);
-				quantum=varGlobalQuantum+1;
-				queue_push(colaListos,queue_pop(colaListos));
-				printf("Rec no bloq2 %d\n",quantum);
-				log_info(logPlanificador,"Rec no bloq2 %d", quantum);
-			}
-
-			//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
+//			if(msjPersonaje.finNivel){
+//				printf("El personaje termino el Nivel\n");
+//				log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+//				queue_pop(colaListos);
+//				msjPersonaje.solicitaRecurso=0;
+//				msjPersonaje.bloqueado=0;
+//				quantum=varGlobalQuantum+1;
+//				printf("Se retiro al personaje de la cola\n");
+//				log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
+//			}
+			log_debug(logPlanificador,"NeedRec: %d Blocked: %d FinNivel: %d Rec: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
+//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
 			if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
 				printf("Rec bloq1 %d",quantum);
 				log_info(logPlanificador,"Rec no bloq1 %d",quantum);
@@ -255,13 +246,42 @@ int planificador (InfoNivel* nivel) {
 				queue_push(colaBloqueados,queue_pop(colaListos));
 				printf("Rec bloq2 %d",quantum);
 				log_info(logPlanificador,"Rec no bloq2 %d", quantum);
+			}else{
+//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
+				if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
+					if(msjPersonaje.finNivel){
+						printf("El personaje termino el Nivel\n");
+						log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+						queue_pop(colaListos);
+						msjPersonaje.solicitaRecurso=0;
+						msjPersonaje.bloqueado=0;
+						quantum=varGlobalQuantum+1;
+						printf("Se retiro al personaje de la cola\n");
+						log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
+					}else{
+					log_info(logPlanificador,"Rec no bloq1 %d",quantum);
+					quantum=varGlobalQuantum+1;
+					queue_push(colaListos,queue_pop(colaListos));
+					log_info(logPlanificador,"Se puso el Personaje %c al final de la cola luego de asignarle el recurso %c", personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado);
+					}
+				}else{
+					if(msjPersonaje.finNivel){
+						printf("El personaje termino el Nivel\n");
+						log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+						queue_pop(colaListos);
+						msjPersonaje.solicitaRecurso=0;
+						msjPersonaje.bloqueado=0;
+						quantum=varGlobalQuantum+1;
+						printf("Se retiro al personaje de la cola\n");
+						log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
+					}
+				}
 			}
 
-			printf("Q %d\n",quantum);
-			log_info(logPlanificador,"Q %d",quantum);
+
 			quantum--;
-			printf("Q %d\n",quantum);
-			log_info(logPlanificador,"Q %d",quantum);
+			log_debug(logPlanificador,"Quatum Left: %d\n",quantum);
+
 			usleep(varGlobalSleep);
 		}else{
 			log_debug(logPlanificador,"Cola vacia --> Sleep");

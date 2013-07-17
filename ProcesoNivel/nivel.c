@@ -17,12 +17,16 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 #include <socketsOv.h>
 #include <pthread.h>
 #include "tad_items.h" //aca ya se incluye el #include "nivel.h"
 #include "collections/list.h"
 
 static int rows,cols;
+ITEM_NIVEL * listaItems = NULL;
+t_list * listaPersonajes;
+t_log * logger;
 
 typedef struct t_posicion {
 	int8_t x;
@@ -30,10 +34,10 @@ typedef struct t_posicion {
 } Posicion;
 
 //todo borrar
-typedef struct t_datap {
-int socket;
-ITEM_NIVEL * nodo;
-} DataP;
+//typedef struct t_datap {
+//int socket;
+//ITEM_NIVEL * nodo;
+//} DataP;
 
 typedef struct t_nodoPers {
 int socket;
@@ -49,15 +53,14 @@ char id;
 int cantAsignada;
 } NodoRecurso;
 
-ITEM_NIVEL * listaItems = NULL;
-t_list * listaPersonajes;
-t_log * logger;
+
 
 void handler(NodoPersonaje* dataPer);
 void listenear(int socketEscucha);
 void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
 t_list* inicializarListaRecursos(void);
 void liberarRecursos(t_list* listaPer,char personaje);
+void detectarDeadlock(void);
 //1) El proceso nivel crea 1 lista (global)
 //que tiene personajes e items
 
@@ -179,12 +182,11 @@ int main(void){
 		return max;
 	}
 
-	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
-	int buffer;							/* Buffer para leer de los socket */
+	fd_set descriptoresLectura;	/* Descriptores de interes para select() */						/* Buffer para leer de los socket */
 	int maximo;							/* Número de descriptor más grande */
 	int i;								/* Para bucles */
 	listaPersonajes= list_create();
-	int socketEscucha,socketNuevaConexion;
+	int socketEscucha;
 	socketEscucha=quieroUnPutoSocketDeEscucha(puertoEscuchaNivel);
 
 		while(1){
@@ -228,7 +230,9 @@ int main(void){
 
 
 			nivel_gui_dibujar(listaItems);
-//			usleep(100000);
+			detectarDeadlock();
+
+			usleep(1000000);
 		}
 
 		usleep(2000000);
@@ -394,7 +398,7 @@ void listenear(int socketEscucha){
 				nodoPer = malloc(sizeof(NodoPersonaje));
 				nodoPer->id=*per;
 				nodoPer->socket=socketNuevaConexion;
-				nodoPer->nodo = CrearPersonaje(&listaItems, *per, 0 ,1);
+				nodoPer->nodo = CrearPersonaje(&listaItems, *per, 0 ,0);
 				nodoPer->personajeBloqueado=0;
 				nodoPer->recBloqueado='0';
 				nodoPer->listaRecursosAsignados=inicializarListaRecursos();
@@ -456,7 +460,7 @@ t_list* inicializarListaRecursos(void){
 }
 void liberarRecursos(t_list* listaPer,char personaje){
 	char idPer;
-	char idRec;
+//	char idRec;
 	bool esPersonaje(NodoPersonaje* nodo){
 					if(nodo->id==idPer)
 						return true;
@@ -472,4 +476,121 @@ void liberarRecursos(t_list* listaPer,char personaje){
 	list_destroy_and_destroy_elements(nodoPerAux->listaRecursosAsignados,liberarInstancias);
 	free(nodoPerAux);
 
+}
+
+void detectarDeadlock(){
+
+	int totalPj,totalRec,i,j;
+	int** asignados;
+	int** requeridos;
+	int* disponible;
+	bool * finish;
+	NodoPersonaje* nodoPer;
+	NodoRecurso* nodoRec;
+	ITEM_NIVEL* itemNivel;
+	int count=0;
+	bool flag=true;
+	log_info(logger,"Algoritmo de Deteccion de Deadlock empezado...");
+	totalPj=list_size(listaPersonajes);
+	totalRec=cantidadItems(listaItems,RECURSO_ITEM_TYPE);
+	if(totalPj==0) return;
+	log_debug(logger,"TotPj: %d Tot Recursos: %d",totalPj,totalRec);
+	asignados=malloc(sizeof(int*) * totalPj);
+	requeridos=malloc(sizeof(int*) * totalPj);
+	disponible=malloc(sizeof(int)*totalRec);
+	finish=malloc(sizeof(bool)*totalPj);
+	//armado de matriz de recursos asignado y matriz de flags finish
+	for(i=0;i<totalPj;i++) {
+		finish[i]=false;
+		count++;
+		nodoPer=list_get(listaPersonajes,i);
+		asignados[i]=malloc(sizeof(int)*totalRec);
+		for(j=0;j<totalRec;j++) {
+			nodoRec=list_get((nodoPer->listaRecursosAsignados),j);
+			asignados[i][j]=nodoRec->cantAsignada;
+		}
+	}
+
+	//armado de matriz de recursos solicitados
+	for(i=0;i<totalPj;i++)    {
+		nodoPer=list_get(listaPersonajes,i);
+		requeridos[i]=malloc(sizeof(int)*totalRec);
+		for(j=0;j<totalRec;j++) {
+			requeridos[i][j]=0;
+
+			if(nodoPer->personajeBloqueado){
+				nodoRec=list_get((nodoPer->listaRecursosAsignados),j);
+				if(nodoPer->recBloqueado==nodoRec->id)
+					requeridos[i][j]=nodoRec->cantAsignada;
+			}
+		}
+	}
+	//armado de vector de recursos disponibles
+	for(j=0;j<totalRec;j++) {
+		nodoRec=list_get((nodoPer->listaRecursosAsignados),j);
+		itemNivel=obtenerRecurso(listaItems,nodoRec->id);
+		disponible[j]=itemNivel->quantity;
+	}
+
+	while((count!=0)&&flag)    {                              //if finish array has all true's(all processes to running state)
+								   //deadlock not detected and loop stops!
+		for(i=0;i<totalPj;i++)    {
+			count=0;
+			nodoPer=list_get(listaPersonajes,i);
+			//To check whether resources can be allocated any to blocked process
+			if(finish[i]==false)
+			{
+				for(j=0;j<totalRec;j++) {
+					log_debug(logger,"RecReq: %d RecDisp: %d",requeridos[i][j],disponible[j]);
+						if(requeridos[i][j]<=disponible[j])
+						{
+							count++;
+						}
+				}
+				flag=false;
+				if(count==totalRec)
+				{
+					for(j=0;j<totalRec;j++)         {
+						disponible[j]+=asignados[i][j];        //allocated reources are released and added to available!
+					}
+					finish[i]=true;
+					log_info(logger,"Personaje %c is transferred to running state and assumed finished",nodoPer->id);
+				}
+				else{
+					flag=true;
+					log_info(logger,"Personaje %c is not transferred to running state and assumed finished",nodoPer->id);
+				}
+			}
+		}
+		count=0;
+		for(j=0;j<totalPj;j++)    {
+			if(finish[j]==true)
+			{
+				count++;
+			}
+		}
+	}//fin while
+
+	for(i=0;i<totalPj;i++)    {
+		if(finish[i]==false)
+		{
+			nodoPer=list_get(listaPersonajes,i);
+			log_info(logger,"Oops! Deadlock detected and causing process is:process(%c)",nodoPer->id);
+			break;
+		}
+	}
+	i=i-1;
+	if(finish[i]==true)
+		log_info(logger,"Hurray! Deadlock not detected:-)");
+
+	for(i=0;i<totalPj;i++)    {
+		free(asignados[i]);
+		free(requeridos[i]);
+	}
+	free(asignados);
+	free(requeridos);
+	free(disponible);
+	free(finish);
+
+	return;
 }

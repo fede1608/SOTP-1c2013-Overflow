@@ -1,8 +1,6 @@
-nombre=Mario
-simbolo=@
-planDeNiveles=[Nivel1,Nivel3,Nivel4]
-obj[Nivel1]=[H,F,H]
-obj[Nivel3]=[H,M,F]
-obj[Nivel4]=[M,F,M]
+nombre=Goomba
+simbolo=#
+planDeNiveles=[DeadLock]
+obj[DeadLock]=[Z,H]
 vidas=5
 orquestador=127.0.0.1:4999
