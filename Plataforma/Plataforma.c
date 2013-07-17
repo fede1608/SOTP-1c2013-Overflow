@@ -80,9 +80,9 @@ typedef struct t_msjPersonaje {
 //************************** LOGUEO **************************
 
 t_log_level detail = LOG_LEVEL_INFO;
-t_log * logOrquestador = log_create("LogOrquestador","Orquestador",true,detail);
+t_log * logOrquestador;
 //TODO: Necesita ser sincronizado porque hay muchas instancias de planificador
-t_log * logPlanificador = log_create("LogPlanificador","Planificador",true,detail);
+t_log * logPlanificador;
 
 //----------------------------------------------------------------
 
@@ -102,6 +102,8 @@ bool esMiNivel(NodoNivel* nodo);
 //Función principal del proceso, es la encargada de crear al orquestador y al planificador
 //Cardinalidad = un único thread
 int main (void) {
+	logOrquestador = log_create("LogOrquestador","Orquestador",true,detail);
+	logPlanificador = log_create("LogPlanificador","Planificador",true,detail);
 	t_config* configNivel = config_create("config.txt");
 	varGlobalQuantum=config_get_int_value(configNivel,"Quantum");
 	varGlobalSleep=(config_get_int_value(configNivel,"TiempoDeRetardoDelQuantum"))* 1000000;
