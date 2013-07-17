@@ -102,12 +102,12 @@ bool esMiNivel(NodoNivel* nodo);
 //Función principal del proceso, es la encargada de crear al orquestador y al planificador
 //Cardinalidad = un único thread
 int main (void) {
-	logOrquestador = log_create("LogOrquestador","Orquestador",true,detail);
-	logPlanificador = log_create("LogPlanificador","Planificador",true,detail);
+	logOrquestador = log_create("LogOrquestador.log","Orquestador",true,detail);
+	logPlanificador = log_create("LogPlanificador.log","Planificador",true,detail);
 	t_config* configNivel = config_create("config.txt");
 	varGlobalQuantum=config_get_int_value(configNivel,"Quantum");
-	varGlobalSleep=(config_get_int_value(configNivel,"TiempoDeRetardoDelQuantum"))* 1000000;
-
+	varGlobalSleep=(int)(config_get_double_value(configNivel,"TiempoDeRetardoDelQuantum")* 1000000);
+	printf("Quantum: %d Sleep: %d microseconds\n",varGlobalQuantum,	varGlobalSleep);
 
 	//******************** inicio inotify *********************
 	// Al inicializar inotify este nos devuelve un descriptor de archivo
@@ -264,8 +264,8 @@ int planificador (InfoNivel* nivel) {
 			log_info(logPlanificador,"Q %d",quantum);
 			usleep(varGlobalSleep);
 		}else{
-			log_info(logPlanificador,"Cola vacia --> Sleep");
-			usleep(10000); //para que no quede en espera activa
+			log_debug(logPlanificador,"Cola vacia --> Sleep");
+			usleep(200000); //para que no quede en espera activa
 		}
 	}//Cierra While(1)
 
@@ -292,18 +292,8 @@ int orquestador (void) {
 
 	ConxNivPlan msj;
 
-	printf("THR Orquestador: iniciado.\n THR Orquestador: Esperando conexiones de personajes o Niveles...\n");
 	log_info(logOrquestador,"THR Orquestador: iniciado");
 	log_info(logOrquestador,"THR Orquestador: Esperando conexiones de personajes o Niveles...");
-
-	//TODO llamar al handler de niveles
-//	InfoNivel *nivel;
-//	nivel=malloc(sizeof(InfoNivel));
-//	strcpy(nivel->ip,"127.0.0.1");
-//	nivel->numero=1;
-//	nivel->port=5000;
-//	pthread_t threadPlanif;
-//	pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
 
 	//Creamos un socket de escucha para el puerto 4999
 	int socketEscucha;
@@ -326,7 +316,6 @@ int orquestador (void) {
 		struct sockaddr_in cli_addr;
 		int socklen=sizeof(cli_addr);
 		if ((socketNuevaConexion = accept(socketEscucha, &cli_addr, &socklen)) < 0) {
-			//log_error(logger,"Error al aceptar conexion entrante");
 			perror("Error al aceptar conexion");
 			log_error(logOrquestador,"Error al aceptar conexion");
 			return EXIT_FAILURE;
@@ -396,7 +385,7 @@ int orquestador (void) {
 						msj.portPlanificador=nivel->puertoPlanif;
 						log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
 					}
-					//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje
+					//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
 					if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
 						log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
 					}
@@ -444,13 +433,13 @@ int orquestador (void) {
 			*aux=nodoNivel->port;
 			//manda el puerto asignado al nivel para que escuche conexiones.
 			//TODO: y si es -1 de qué nos pintamos?
-			if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux))
+			if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux)){
 				log_error(logOrquestador,"No se pudo enviar un mensaje al nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
-				break; //TODO handlear desconexion
+				break;} //TODO handlear desconexion
 			free(aux);
-			if(!recibirMensaje(socketNuevaConexion,(void**)&aux))
+			if(!recibirMensaje(socketNuevaConexion,(void**)&aux)){
 				log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
-				break; //TODO handlear desconexion
+				break; }//TODO handlear desconexion
 			free(aux);
 
 			pthread_t threadPlanif;

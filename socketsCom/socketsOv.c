@@ -17,18 +17,22 @@
 			Header header;
 			int auxInt;
 			//Que el tamanio lo mande
+			void* bufferAux;
 
 			header.type = tipo;
 			header.payloadlength = tamanio;
-
-			if ((auxInt=send(unSocket, &header, sizeof(Header), 0)) >= 0){
-				if ((auxInt=send(unSocket, buffer, header.payloadlength, 0)) >= 0) {
-					return auxInt;
-				}
-
-			}
-
+			bufferAux=malloc(sizeof(Header)+tamanio);
+			memcpy(bufferAux,&header,sizeof(Header));
+			memcpy((bufferAux+(sizeof(Header))),buffer,tamanio);
+//			if ((auxInt=send(unSocket, &header, sizeof(Header), 0)) >= 0){
+			auxInt=send(unSocket, bufferAux,(sizeof(Header)+tamanio), 0);
+			free(bufferAux);
 			return auxInt;
+
+
+//			}
+
+
 		}
 
 		//Recibe un mensaje del servidor - Version Lucas
