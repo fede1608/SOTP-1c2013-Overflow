@@ -116,11 +116,14 @@ int main (void) {
 
 //******************** inicio inotify *********************
 	//variables del inotify
-	int i = 0;
+
 	int fd;//file_descriptor
 	int wd;// watch_descriptor
-	char buffer[EVENT_BUF_LEN];
 
+
+	while(1) {
+	int i = 0;
+	char buffer[EVENT_BUF_LEN];
 	//Creamos una instancia de inotify, me devuelve un archivo descriptor
 	fd = inotify_init();
 	//Verificamos los errores
@@ -159,7 +162,9 @@ int main (void) {
 				}
 			}
 		}
+	buffer[EVENT_BUF_LEN]="";
 	i += EVENT_SIZE + event->len;
+	}
 	}
 	//removing the “/tmp” directory from the watch list.
 	inotify_rm_watch( fd, wd );
