@@ -32,7 +32,7 @@
 #include  "socketsOv.h" //Librería compartida para sockects de overflow
 #include <sys/inotify.h> //Libreria inotify
 #include "config.h"
-
+ #include <errno.h>
 //----------------------------------------------------------------
 
 //******************** DEFINICIONES GLOBALES *********************
@@ -42,6 +42,10 @@
 int varGlobalQuantum;
 int varGlobalSleep;
 char* nombreNivel;//se usa para la funcion que se manda al list_find
+
+#define EVENT_SIZE ( sizeof (struct inotify_event) )
+#define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + 24 ) )
+
 //Structs propios de la plataforma
 
 typedef struct t_infoPlanificador {
@@ -110,12 +114,57 @@ int main (void) {
 	varGlobalSleep=(int)(config_get_double_value(configNivel,"TiempoDeRetardoDelQuantum")* 1000000);
 	printf("Quantum: %d Sleep: %d microseconds\n",varGlobalQuantum,	varGlobalSleep);
 
-	//******************** inicio inotify *********************
-	// Al inicializar inotify este nos devuelve un descriptor de archivo
-		int file_descriptor = inotify_init();
-		if (file_descriptor < 0) {
-			perror("inotify_init");
+//******************** inicio inotify *********************
+	//variables del inotify
+	int i = 0;
+	int fd;//file_descriptor
+	int wd;// watch_descriptor
+	char buffer[EVENT_BUF_LEN];
+
+	//Creamos una instancia de inotify, me devuelve un archivo descriptor
+	fd = inotify_init();
+	//Verificamos los errores
+	if ( fd < 0 ) {
+		perror( "inotify_init" );
+	}
+
+	// Creamos un reloj para el evento IN_MODIFY
+	//watch_descriptor= inotify_add_watch(archivoDescrpitor, path, evento)
+	wd = inotify_add_watch( fd, "/home/utnso/workspace/Plataforma", IN_MODIFY);
+
+	// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
+	// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
+	// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
+	// referente a los eventos ocurridos
+
+	int length = read( fd, buffer, EVENT_BUF_LEN );
+	//Verficamos los errores
+	if ( length < 0 ) {
+		perror( "read" );
+	}
+
+	while ( i < length ) {
+	struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
+		if ( event->len )
+		{
+			if ( event->mask & IN_MODIFY)
+			{
+				if ( event->mask & IN_ISDIR )
+				{
+					//printf( "El directorio %s fue modificado.\n", event->name );
+				}
+				else
+				{
+					printf( "El archivo %s fue modificado.\n", event->name );
+				}
+			}
 		}
+	i += EVENT_SIZE + event->len;
+	}
+	//removing the “/tmp” directory from the watch list.
+	inotify_rm_watch( fd, wd );
+	//Se cierra la instancia de inotify
+	close( fd );
 	//******************** fin inotify *********************
 
 		printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
