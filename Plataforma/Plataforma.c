@@ -41,6 +41,8 @@
 //int varGlobalSleep=0.5* 1000000;
 int varGlobalQuantum;
 int varGlobalSleep;
+int flagGlobalFin=1;//flag q anuncia el fin del programa
+int g_contPersonajes=0;//contador global de personajes
 char* nombreNivel;//se usa para la funcion que se manda al list_find
 
 //son constantes
@@ -114,6 +116,16 @@ int main (void) {
 	varGlobalQuantum=config_get_int_value(configNivel,"Quantum");
 	varGlobalSleep=(int)(config_get_double_value(configNivel,"TiempoDeRetardoDelQuantum")* 1000000);
 	printf("Quantum: %d Sleep: %d microseconds\n",varGlobalQuantum,	varGlobalSleep);
+	printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
+	log_info(logOrquestador,"Proceso plataforma iniciado");
+	log_info(logOrquestador,"Creando THR Orquestador");
+
+	pthread_t thr_orquestador;
+	pthread_create(&thr_orquestador, NULL, orquestador, NULL);
+	log_info(logOrquestador,"THR Orquestador creado correctamente");
+
+	//pthread_join(thr_orquestador, NULL); //Esperamos que termine el thread orquestador
+	//pthread_detach(thr_orquestador);
 
 //********************* INICIO INOTIFY *********************
 int fd;//file_descriptor
@@ -122,7 +134,7 @@ int wd;// watch_descriptor
 struct timeval time;
 fd_set rfds;
 int ret;
-
+while(1){//flagGlobalFin) { //sale cuando se termina el programa
 time.tv_sec = 5;
 time.tv_usec = 0;
 
@@ -139,70 +151,65 @@ if (!ret){
 }
 if (FD_ISSET (fd, &rfds)){
 
-	while(1) {
-	int i = 0;
-	char buffer[EVENT_BUF_LEN];
 
 
 
-	//Creamos una instancia de inotify, me devuelve un archivo descriptor
-	fd = inotify_init();
-	//Verificamos los errores
-	if ( fd < 0 ) {
-		perror( "inotify_init" );
-	}
 
-	// Creamos un reloj para el evento IN_MODIFY
-	//watch_descriptor= inotify_add_watch(archivoDescrpitor, path, evento)
-	wd = inotify_add_watch( fd, "/home/utnso/workspace/Prueba/Debug", IN_MODIFY);
+//	while(1){//flagGlobalFin) { //sale cuando se termina el programa
+		int i = 0;
+		char buffer[EVENT_BUF_LEN];
 
-	// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
-	// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
-	// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
-	// referente a los eventos ocurridos
 
-	int length = read( fd, buffer, EVENT_BUF_LEN );
-	//Verficamos los errores
-	if ( length < 0 ) {
-		perror( "read" );
-	}
 
-	while ( i < length ) {
-	struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
-		if ( event->len )
-		{
-			if ( event->mask & IN_MODIFY)
+		//Creamos una instancia de inotify, me devuelve un archivo descriptor
+		fd = inotify_init();
+		//Verificamos los errores
+		if ( fd < 0 ) {
+			perror( "inotify_init" );
+		}
+
+		// Creamos un reloj para el evento IN_MODIFY
+		//watch_descriptor= inotify_add_watch(archivoDescrpitor, path, evento)
+		wd = inotify_add_watch( fd, "./config.txt", IN_MODIFY);
+
+		// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
+		// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
+		// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
+		// referente a los eventos ocurridos
+
+		int length = read( fd, buffer, EVENT_BUF_LEN );
+		//Verficamos los errores
+		if ( length < 0 ) {
+			perror( "read" );
+		}
+
+		while ( i < length ) {
+		struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
+			if ( event->len )
 			{
-				if ( event->mask & IN_ISDIR )//IN_ISDIR es la bandera que indica que ocurrio un evento
+				if ( event->mask & IN_MODIFY)
 				{
-					//printf( "El directorio %s fue modificado.\n", event->name );
-				}
-				else
-				{
-					printf( "El archivo %s fue modificado.\n", event->name );
+					if ( event->mask & IN_ISDIR )//IN_ISDIR es la bandera que indica que ocurrio un evento
+					{
+						//printf( "El directorio %s fue modificado.\n", event->name );
+					}
+					else
+					{
+						printf( "El archivo %s fue modificado.\n", event->name );
+					}
 				}
 			}
+			buffer[EVENT_BUF_LEN]="";
+		i += EVENT_SIZE + event->len;
+
 		}
-		buffer[EVENT_BUF_LEN]="";
-	i += EVENT_SIZE + event->len;
 
+		usleep(varGlobalSleep);//evitar espera activa
 	}
-	}
-	//HAY QUE MODIFICAR EL WHILE
-		printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
-		log_info(logOrquestador,"Proceso plataforma iniciado");
-		log_info(logOrquestador,"Creando THR Orquestador");
 
-		pthread_t thr_orquestador;
-		pthread_create(&thr_orquestador, NULL, orquestador, NULL);
-		log_info(logOrquestador,"THR Orquestador creado correctamente");
 
-		//pthread_join(thr_orquestador, NULL); //Esperamos que termine el thread orquestador
-		pthread_detach(thr_orquestador);
 
-		printf("Proceso plataforma finalizado correctamente\n");
 
-		usleep(varGlobalSleep);
 
 }
 //removing the “/tmp” directory from the watch list.
@@ -211,7 +218,7 @@ inotify_rm_watch(fd,wd);
 //Se cierra la instancia de inotify
 close(fd);
 //******************** FIN INOTIFY *********************
-
+printf("Proceso plataforma finalizado correctamente\n");
 return 0;
 }
 //FIN DE MAIN
@@ -481,6 +488,7 @@ int orquestador (void) {
 					log_info(logOrquestador,"Se encontro el nivel %p",nivel);
 
 					if(nivel!=NULL){
+
 						log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
 						strcpy(msj.ipNivel,nivel->ip);
 						msj.portNivel=nivel->port;
