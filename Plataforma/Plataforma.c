@@ -112,9 +112,9 @@ bool esMiNivel(NodoNivel* nodo);
 int main (void) {
 	logOrquestador = log_create("LogOrquestador.log","Orquestador",true,detail);
 	logPlanificador = log_create("LogPlanificador.log","Planificador",true,detail);
-	t_config* configNivel = config_create("config.txt");
-	varGlobalQuantum=config_get_int_value(configNivel,"Quantum");
-	varGlobalSleep=(int)(config_get_double_value(configNivel,"TiempoDeRetardoDelQuantum")* 1000000);
+	t_config* config = config_create("config.txt");
+	varGlobalQuantum=config_get_int_value(config,"Quantum");
+	varGlobalSleep=(int)(config_get_double_value(config,"TiempoDeRetardoDelQuantum")* 1000000);
 	printf("Quantum: %d Sleep: %d microseconds\n",varGlobalQuantum,	varGlobalSleep);
 	printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
 	log_info(logOrquestador,"Proceso plataforma iniciado");
@@ -127,56 +127,47 @@ int main (void) {
 	//pthread_join(thr_orquestador, NULL); //Esperamos que termine el thread orquestador
 	//pthread_detach(thr_orquestador);
 
-//********************* INICIO INOTIFY *********************
-int fd;//file_descriptor
-int wd;// watch_descriptor
+	//********************* INICIO INOTIFY *********************
+	int fd;//file_descriptor
+	int wd;// watch_descriptor
 
-struct timeval time;
-fd_set rfds;
-int ret;
-while(1){//flagGlobalFin) { //sale cuando se termina el programa
-time.tv_sec = 5;
-time.tv_usec = 0;
+	struct timeval time;
+	fd_set rfds;
+	int ret;
+	//Creamos una instancia de inotify, me devuelve un archivo descriptor
+	fd = inotify_init();
+	//Verificamos los errores
+	if ( fd < 0 ) {
+		perror( "inotify_init" );
+	}
+	// Creamos un watch para el evento IN_MODIFY
+	//watch_descriptor= inotify_add_watch(archivoDescrpitor, path, evento)
+	wd = inotify_add_watch( fd, "config.txt", IN_MODIFY);
 
-FD_ZERO(&rfds);
-
-FD_SET(fd,&rfds);
-
-ret = select (fd + 1, &rfds, NULL, NULL, &time);
-if (ret < 0){
-	 perror ("select");
-}
-if (!ret){
-	 /* timed out!  */
-}
-if (FD_ISSET (fd, &rfds)){
-
-
-
+	// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
+	// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
+	// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
+	// referente a los eventos ocurridos
+	while(1){//flagGlobalFin) { //sale cuando se termina el programa
+		time.tv_sec = 0;
+		time.tv_usec = varGlobalSleep;
 
 
-//	while(1){//flagGlobalFin) { //sale cuando se termina el programa
+
+		FD_ZERO(&rfds);
+		FD_SET(fd,&rfds);
+		ret = select (fd + 1, &rfds, NULL, NULL, &time);
+		if (ret < 0){
+			 perror ("select");
+		}
+		if (!ret){
+			 /* timed out!  */
+		}
+		if (FD_ISSET (fd, &rfds)){
+
+	//	while(1){//flagGlobalFin) { //sale cuando se termina el programa
 		int i = 0;
 		char buffer[EVENT_BUF_LEN];
-
-
-
-		//Creamos una instancia de inotify, me devuelve un archivo descriptor
-		fd = inotify_init();
-		//Verificamos los errores
-		if ( fd < 0 ) {
-			perror( "inotify_init" );
-		}
-
-		// Creamos un reloj para el evento IN_MODIFY
-		//watch_descriptor= inotify_add_watch(archivoDescrpitor, path, evento)
-		wd = inotify_add_watch( fd, "./config.txt", IN_MODIFY);
-
-		// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
-		// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
-		// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
-		// referente a los eventos ocurridos
-
 		int length = read( fd, buffer, EVENT_BUF_LEN );
 		//Verficamos los errores
 		if ( length < 0 ) {
@@ -191,11 +182,14 @@ if (FD_ISSET (fd, &rfds)){
 				{
 					if ( event->mask & IN_ISDIR )//IN_ISDIR es la bandera que indica que ocurrio un evento
 					{
-						//printf( "El directorio %s fue modificado.\n", event->name );
+						log_debug( "El directorio %s fue modificado.\n", event->name );
 					}
 					else
 					{
-						printf( "El archivo %s fue modificado.\n", event->name );
+						log_info(logOrquestador,"El archivo %s fue modificado.\n", event->name );
+						config_destroy(config);
+						config = config_create("config.txt");
+						varGlobalQuantum=config_get_int_value(config,"Quantum");
 					}
 				}
 			}
@@ -204,12 +198,7 @@ if (FD_ISSET (fd, &rfds)){
 
 		}
 
-		usleep(varGlobalSleep);//evitar espera activa
 	}
-
-
-
-
 
 }
 //removing the “/tmp” directory from the watch list.
@@ -218,6 +207,7 @@ inotify_rm_watch(fd,wd);
 //Se cierra la instancia de inotify
 close(fd);
 //******************** FIN INOTIFY *********************
+config_destroy(config);
 printf("Proceso plataforma finalizado correctamente\n");
 return 0;
 }
@@ -236,7 +226,7 @@ int planificador (InfoNivel* nivel) {
 
 	//TODO implementar handshake Conectarse con el nivel
 	//int socketNivel=quieroUnPutoSocketAndando(nivel->ipN,nivek->portN);
-	printf("%s %d\n",nivel->ip,nivel->port);
+
 	log_info(logPlanificador,"IP: %s // Puerto: %d",nivel->ip,nivel->port);
 
 	// Creamos el listener de personajes del planificador (guardar socket e info del pj en la estructura)
@@ -261,17 +251,17 @@ int planificador (InfoNivel* nivel) {
 	while(1){
 		//Si la cola no esta vacia
 		if(!queue_is_empty(colaListos)){
-			printf("La lista no esta vacia\n");
+
 			log_info(logPlanificador,"La lista no esta vacia");
 			NodoPersonaje *personajeActual; //todo Revisar que los punteros de personajeActual anden bien
 
 			if(quantum>0){
-				printf("Quantum > 0\n");
+
 				log_info(logPlanificador,"El Quantum es mayor a 0");
 				//Mandar mensaje de movimiento permitido al socket del personaje del nodo actual (primer nodo de la cola)
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
-					printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
+
 					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
 				}
 				else {
@@ -281,22 +271,21 @@ int planificador (InfoNivel* nivel) {
 			}
 			else {
 				quantum=varGlobalQuantum;
-				printf("Se acabo el quantum");
+
 				log_info(logPlanificador,"Se acabo el quantum");
 				//Sacar el nodo actual (primer nodo de la cola) y enviarlo al fondo de la misma
 				//todo Sincronizar colaListos con el Listener
 				nodoAux=queue_pop(colaListos);
-				printf("Se saco de la cola de listos");
+
 				log_info(logPlanificador,"Se saco de la cola de listos");
 				queue_push(colaListos,nodoAux);
-				printf("Se puso al final de la cola de listos");
+
 				log_info(logPlanificador,"Se puso al final de la cola de listos");
 				//Buscar el primero de la cola de listos y mandarle un mensaje de movimiento permitido
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
-				printf("Se saco al primer personaje de la cola");
+
 				log_info(logPlanificador,"Se saco al primer personaje de la cola");
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
-					printf("Se mando Mov permitido al personaje %c\n",personajeActual->simboloRepresentativo);
 					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
 				}
 				else {
@@ -307,11 +296,9 @@ int planificador (InfoNivel* nivel) {
 			//Esperar respuesta de turno terminado (con la info sobre si quedo bloqueado y si tomo recurso)
 			Header headerMsjPersonaje;
 			MensajePersonaje msjPersonaje;
-			printf("Esperando respuesta de turno concluido\n");
 			log_info(logPlanificador,"Esperando respuesta de turno concluido");
 			recibirHeader(personajeActual->socket, &headerMsjPersonaje);
 			recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje);
-			printf("Respuesta recibida\n");
 			log_info(logPlanificador,"Respuesta recibida");
 			//Comportamientos según el mensaje que se recibe del personaje
 
@@ -329,23 +316,19 @@ int planificador (InfoNivel* nivel) {
 			log_debug(logPlanificador,"NeedRec: %d Blocked: %d FinNivel: %d Rec: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
 //Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
 			if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
-				printf("Rec bloq1 %d",quantum);
 				log_info(logPlanificador,"Rec bloq1 %d",quantum);
 				quantum=varGlobalQuantum+1;
 				queue_push(colaBloqueados,queue_pop(colaListos));
-				printf("Rec bloq2 %d",quantum);
 				log_info(logPlanificador,"Rec bloq2 %d", quantum);
 			}else{
 //Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
 				if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
 					if(msjPersonaje.finNivel){
-						printf("El personaje termino el Nivel\n");
 						log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
 						queue_pop(colaListos);
 						msjPersonaje.solicitaRecurso=0;
 						msjPersonaje.bloqueado=0;
 						quantum=varGlobalQuantum+1;
-						printf("Se retiro al personaje de la cola\n");
 						log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
 					}else{
 					log_info(logPlanificador,"Rec no bloq1 %d",quantum);
@@ -355,13 +338,11 @@ int planificador (InfoNivel* nivel) {
 					}
 				}else{
 					if(msjPersonaje.finNivel){
-						printf("El personaje termino el Nivel\n");
 						log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
 						queue_pop(colaListos);
 						msjPersonaje.solicitaRecurso=0;
 						msjPersonaje.bloqueado=0;
 						quantum=varGlobalQuantum+1;
-						printf("Se retiro al personaje de la cola\n");
 						log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
 					}
 				}
@@ -370,7 +351,6 @@ int planificador (InfoNivel* nivel) {
 
 			quantum--;
 			log_debug(logPlanificador,"Quatum Left: %d Sleep: %d\n",quantum,varGlobalSleep);
-
 			usleep(varGlobalSleep);
 		}else{
 			log_debug(logPlanificador,"Cola vacia --> Sleep");
@@ -418,20 +398,17 @@ int orquestador (void) {
 	while(1){
 
 		if (listen(socketEscucha, 1) != 0) {
-			perror("Error al poner a escuchar socket");
 			log_error(logOrquestador,"Error al poner a escuchar socket");
 			return EXIT_FAILURE;
 		}
 		struct sockaddr_in cli_addr;
 		int socklen=sizeof(cli_addr);
 		if ((socketNuevaConexion = accept(socketEscucha, &cli_addr, &socklen)) < 0) {
-			perror("Error al aceptar conexion");
 			log_error(logOrquestador,"Error al aceptar conexion");
 			return EXIT_FAILURE;
 		}
 		char* ipCliente;
 		ipCliente=print_ip(cli_addr.sin_addr.s_addr);
-		printf("Ip del cliente conectado: %d %s\n",cli_addr.sin_addr.s_addr,ipCliente);
 		log_info(logOrquestador,"Ip del cliente conectado: %d %s",cli_addr.sin_addr.s_addr, ipCliente);
 
 		//Handshake en el que recibe el simbolo del personaje
@@ -459,7 +436,6 @@ int orquestador (void) {
 			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido) >= 0){
 				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
 					//log_info(logger,"Mando mensaje al personaje %c",*rec);
-					printf("Entro Personaje: %c\n",*simboloRecibido);
 					log_info(logOrquestador,"Entro Personaje: %c",*simboloRecibido);
 				}
 			}
@@ -467,24 +443,20 @@ int orquestador (void) {
 
 			char* nivelDelPersonaje;
 			//Esperar solicitud de info de conexion de Nivel y Planifador
-			printf("Esperando solicitud de nivel\n");
 			log_info(logOrquestador,"Esperando solicitud de nivel...");
 	//		if(recibirHeader(socketNuevaConexion,&unHeader)){
 	//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
 	//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
 			if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
-					printf("Nivel recibido: %s\n",nivelDelPersonaje);
 					log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
 					//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 
 					//settear variable global para usar en funcion q se manda a list_find
 					nombreNivel=nivelDelPersonaje;
-					printf("Se busca el nivel \n");
 					log_info(logOrquestador,"Se busca el nivel");
 
 					NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
 
-					printf("Se encontro el nivel %p\n",nivel);
 					log_info(logOrquestador,"Se encontro el nivel %p",nivel);
 
 					if(nivel!=NULL){
@@ -514,7 +486,6 @@ int orquestador (void) {
 			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
 				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
 					//log_info(logger,"Mando mensaje al personaje %c",*rec);
-					printf("Entro Nivel: %s\n",simboloRecibido);
 					log_info(logOrquestador,"Entro Nivel: %s",simboloRecibido);
 				}
 			}
@@ -620,7 +591,6 @@ int listenerPersonaje(InfoPlanificador* planificador){
 				//log_info(logger,"Llego el Personaje %c del nivel",*simboloRecibido);
 				if (mandarMensaje(socketNuevaConexion,0 , 1,simboloRecibido)) {
 					//log_info(logger,"Mando mensaje al personaje %c",*simboloRecibido);
-					printf("Handshake Respondido\n");
 					log_info(logPlanificador,"Handshake respondido al Personaje %c", *simboloRecibido);
 				}
 

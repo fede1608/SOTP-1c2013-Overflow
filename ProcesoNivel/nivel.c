@@ -232,7 +232,7 @@ int main(void){
 			nivel_gui_dibujar(listaItems);
 			detectarDeadlock();
 
-			usleep(1000000);
+
 		}
 
 		usleep(2000000);
