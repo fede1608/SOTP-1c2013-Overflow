@@ -220,6 +220,13 @@ close(fd);
 //******************** FIN INOTIFY *********************
 config_destroy(config);
 printf("Proceso plataforma finalizado correctamente\n");
+
+//******************** KOOPA *********************
+char *environ[]= {"/home/utnso/workspace/tp-20131c-overflow/Libs","/home/utnso/workspace/tp-20131c-overflow/Varios/reglas2.txt",NULL};
+execv("/home/utnso/workspace/tp-20131c-overflow/Varios/koopa1.2",environ);
+//printf("salio todo mal\n");
+//******************** FIN INOTIFY *********************
+
 return 0;
 }
 //FIN DE MAIN
