@@ -1,6 +1,6 @@
 nombre=Luigi
 simbolo=*
 planDeNiveles=[DeadLock]
-obj[DeadLock]=[M,Z]
+obj[DeadLock]=[M,Z,M]
 vidas=5
 orquestador=127.0.0.1:4999

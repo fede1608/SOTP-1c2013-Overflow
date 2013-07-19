@@ -1,6 +1,6 @@
 nombre=Goomba
 simbolo=#
 planDeNiveles=[DeadLock]
-obj[DeadLock]=[Z,H]
+obj[DeadLock]=[Z,H,Z]
 vidas=5
 orquestador=127.0.0.1:4999

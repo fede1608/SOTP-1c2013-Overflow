@@ -521,7 +521,7 @@ void detectarDeadlock(){
 			if(nodoPer->personajeBloqueado){
 				nodoRec=list_get((nodoPer->listaRecursosAsignados),j);
 				if(nodoPer->recBloqueado==nodoRec->id)
-					requeridos[i][j]=nodoRec->cantAsignada;
+					requeridos[i][j]=1;
 			}
 		}
 	}

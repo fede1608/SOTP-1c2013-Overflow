@@ -295,11 +295,11 @@ int planificador (InfoNivel* nivel) {
 //Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
 			if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
 				printf("Rec bloq1 %d",quantum);
-				log_info(logPlanificador,"Rec no bloq1 %d",quantum);
+				log_info(logPlanificador,"Rec bloq1 %d",quantum);
 				quantum=varGlobalQuantum+1;
 				queue_push(colaBloqueados,queue_pop(colaListos));
 				printf("Rec bloq2 %d",quantum);
-				log_info(logPlanificador,"Rec no bloq2 %d", quantum);
+				log_info(logPlanificador,"Rec bloq2 %d", quantum);
 			}else{
 //Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
 				if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
@@ -334,12 +334,12 @@ int planificador (InfoNivel* nivel) {
 
 
 			quantum--;
-			log_debug(logPlanificador,"Quatum Left: %d\n",quantum);
+			log_debug(logPlanificador,"Quatum Left: %d Sleep: %d\n",quantum,varGlobalSleep);
 
 			usleep(varGlobalSleep);
 		}else{
 			log_debug(logPlanificador,"Cola vacia --> Sleep");
-			usleep(200000); //para que no quede en espera activa
+			usleep(varGlobalSleep); //para que no quede en espera activa
 		}
 	}//Cierra While(1)
 

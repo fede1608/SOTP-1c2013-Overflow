@@ -43,7 +43,7 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="nivel-gui"/>
 								</option>
 								<option id="gnu.c.link.option.paths.1851209874" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="/home/utnso/tp-20131c-overflow/Libs"/>
+									<listOptionValue builtIn="false" value="/home/utnso/TPSO/tp-20131c-overflow/Libs"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1011363631" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
