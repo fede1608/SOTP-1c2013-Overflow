@@ -34,7 +34,9 @@
 #include "config.h"
  #include <errno.h>
 //----------------------------------------------------------------
-
+//son constantes
+#define EVENT_SIZE ( sizeof (struct inotify_event))
+#define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + 16 ) )
 //******************** DEFINICIONES GLOBALES *********************
 //Variables Globales del sistema
 //int varGlobalQuantum=3;
@@ -45,9 +47,7 @@ int flagGlobalFin=1;//flag q anuncia el fin del programa
 int g_contPersonajes=0;//contador global de personajes
 char* nombreNivel;//se usa para la funcion que se manda al list_find
 
-//son constantes
-#define EVENT_SIZE ( sizeof (struct inotify_event) )
-#define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + 24 ) )
+
 
 //Structs propios de la plataforma
 
@@ -131,17 +131,16 @@ int main (void) {
 	//********************* INICIO INOTIFY *********************
 	int fd;//file_descriptor
 	int wd;// watch_descriptor
-	log_debug(logOrquestador,"sdasd");
+
 	char cwd[1024];
 	char * fileconf="/config.txt";
 	if (getcwd(cwd, sizeof(cwd)) != NULL){
-		log_debug(logOrquestador,"sdasd2");
-		log_debug(logOrquestador,"Current working dir: %s\n", cwd);
+		log_debug(logOrquestador,"Current working dir: %s", cwd);
 		strcat(cwd, fileconf);
+		log_debug(logOrquestador,"Current file: %s", cwd);
 	}
 	else
 	   perror("getcwd() error");
-	log_debug(logOrquestador,"sdasd3");
 
 	struct timeval time;
 	fd_set rfds;
@@ -160,9 +159,9 @@ int main (void) {
 	// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
 	// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
 	// referente a los eventos ocurridos
-	while(1){//flagGlobalFin) { //sale cuando se termina el programa
-		time.tv_sec = 0;
-		time.tv_usec = varGlobalSleep;
+	while(flagGlobalFin) { //sale cuando se termina el programa
+		time.tv_sec = 2;
+		time.tv_usec = 0;//varGlobalSleep;
 
 
 
@@ -188,24 +187,24 @@ int main (void) {
 
 		while ( i < length ) {
 		struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
-			if ( event->len )
-			{
+		//si watcheamos un archivo no va a venir el nombre poqrue es redundante por eso event->len es igual a 0
+
+		log_debug(logOrquestador,"wd=%d mask=%u cookie=%u len=%u\n",
+		                event->wd, event->mask,
+		                event->cookie, event->len);
 				if ( event->mask & IN_MODIFY)
 				{
-					if ( event->mask & IN_ISDIR )//IN_ISDIR es la bandera que indica que ocurrio un evento
-					{
-						log_debug(logOrquestador,"El directorio %s fue modificado.\n", event->name );
-					}
-					else
-					{
-						log_info(logOrquestador,"El archivo %s fue modificado.\n", event->name );
-						config_destroy(config);
-						config = config_create("config.txt");
-						varGlobalQuantum=config_get_int_value(config,"Quantum");
+
+					config_destroy(config);
+					config = config_create("config.txt");
+					if(config_has_property(config,"Quantum")){
+					varGlobalQuantum=config_get_int_value(config,"Quantum");
+					log_info(logOrquestador,"El archivo de configuracion fue modificado");
+					log_info(logOrquestador,"Nuevo Valor del Quantum: %d",varGlobalQuantum);
 					}
 				}
-			}
-			buffer[EVENT_BUF_LEN]="";
+
+		buffer[EVENT_BUF_LEN]="";
 		i += EVENT_SIZE + event->len;
 
 		}
