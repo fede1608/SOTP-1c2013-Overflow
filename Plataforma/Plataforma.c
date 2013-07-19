@@ -88,7 +88,7 @@ typedef struct t_msjPersonaje {
 
 //************************** LOGUEO **************************
 
-t_log_level detail = LOG_LEVEL_INFO;
+t_log_level detail = LOG_LEVEL_TRACE;
 t_log * logOrquestador;
 //TODO: Necesita ser sincronizado porque hay muchas instancias de planificador
 t_log * logPlanificador;
@@ -131,14 +131,17 @@ int main (void) {
 	//********************* INICIO INOTIFY *********************
 	int fd;//file_descriptor
 	int wd;// watch_descriptor
-
+	log_debug(logOrquestador,"sdasd");
 	char cwd[1024];
-	if (getcwd(cwd, sizeof(cwd)) != NULL)
-	   //fprintf(stdout, "Current working dir: %s\n", cwd);
-		string_append(&cwd, "/config.txt");
+	char * fileconf="/config.txt";
+	if (getcwd(cwd, sizeof(cwd)) != NULL){
+		log_debug(logOrquestador,"sdasd2");
+		log_debug(logOrquestador,"Current working dir: %s\n", cwd);
+		strcat(cwd, fileconf);
+	}
 	else
 	   perror("getcwd() error");
-
+	log_debug(logOrquestador,"sdasd3");
 
 	struct timeval time;
 	fd_set rfds;
@@ -191,7 +194,7 @@ int main (void) {
 				{
 					if ( event->mask & IN_ISDIR )//IN_ISDIR es la bandera que indica que ocurrio un evento
 					{
-						log_debug( "El directorio %s fue modificado.\n", event->name );
+						log_debug(logOrquestador,"El directorio %s fue modificado.\n", event->name );
 					}
 					else
 					{
