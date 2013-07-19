@@ -132,6 +132,14 @@ int main (void) {
 	int fd;//file_descriptor
 	int wd;// watch_descriptor
 
+	char cwd[1024];
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+	   //fprintf(stdout, "Current working dir: %s\n", cwd);
+		string_append(&cwd, "/config.txt");
+	else
+	   perror("getcwd() error");
+
+
 	struct timeval time;
 	fd_set rfds;
 	int ret;
@@ -143,7 +151,7 @@ int main (void) {
 	}
 	// Creamos un watch para el evento IN_MODIFY
 	//watch_descriptor= inotify_add_watch(archivoDescrpitor, path, evento)
-	wd = inotify_add_watch( fd, "config.txt", IN_MODIFY);
+	wd = inotify_add_watch( fd, cwd, IN_MODIFY);
 
 	// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
 	// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
