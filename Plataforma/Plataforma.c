@@ -458,13 +458,7 @@ int orquestador (void) {
 					switch(unHeader.type){
 						//TODO: implementar
 						case 3:
-//							simboloRecibido=malloc(unHeader.payloadlength);
-//							if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
-//								if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
-//									//log_info(logger,"Mando mensaje al personaje %c",*rec);
-//									log_info(logOrquestador,"Entro Nivel: %s",simboloRecibido);
-//								}
-//							}
+
 							break;
 						default:
 							break;
@@ -519,34 +513,82 @@ int orquestador (void) {
 					}
 					char* nivelDelPersonaje;
 					//Esperar solicitud de info de conexion de Nivel y Planifador
-					log_info(logOrquestador,"Esperando solicitud de nivel...");
-			//		if(recibirHeader(socketNuevaConexion,&unHeader)){
-			//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
-			//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
-					if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
-							log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
-							//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
-							//settear variable global para usar en funcion q se manda a list_find
-							nombreNivel=nivelDelPersonaje;
-							log_info(logOrquestador,"Se busca el nivel");
-							NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
-							log_info(logOrquestador,"Se encontro el nivel %p",nivel);
-							if(nivel!=NULL){
-								log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
-								strcpy(msj.ipNivel,nivel->ip);
-								msj.portNivel=nivel->port;
-								msj.portPlanificador=nivel->puertoPlanif;
-								log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
+
+					if(recibirHeader(socketNuevaConexion,&unHeader)){
+						log_debug(logOrquestador,"Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
+						switch(unHeader.type){
+						case 1://Personaje entra por primera vez al orquestador (incrementa el contador de personajes)
+							log_info(logOrquestador,"El Personaje %c se conecto por primera vez",*simboloRecibido);
+							log_info(logOrquestador,"Esperando solicitud de nivel...");
+							nivelDelPersonaje=malloc(unHeader.payloadlength);
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+	//						if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
+								log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
+								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
+								//settear variable global para usar en funcion q se manda a list_find
+								nombreNivel=nivelDelPersonaje;
+								log_info(logOrquestador,"Se busca el nivel");
+								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
+								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
+								if(nivel!=NULL){
+									log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
+									strcpy(msj.ipNivel,nivel->ip);
+									msj.portNivel=nivel->port;
+									msj.portPlanificador=nivel->puertoPlanif;
+									log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
+								}
+								//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
+								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+									log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
+								}
+								else {
+									log_error(logOrquestador,"No se pudo enviar los datos del nivel al Personaje %c",*simboloRecibido);
+								}
 							}
-							//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
-							if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
-								log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
+							break;
+						case 2://el personaje se conecta desp de terminar un nivel
+
+							log_info(logOrquestador,"Esperando solicitud de nivel...");
+							nivelDelPersonaje=malloc(unHeader.payloadlength);
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+							log_info(logOrquestador,"El Personaje %c termino el nivel %s",*simboloRecibido,nivelDelPersonaje);
 							}
-							else {
-								log_error(logOrquestador,"No se pudo enviar los datos del nivel al Personaje %c",*simboloRecibido);
+							log_info(logOrquestador,"Esperando solicitud de nivel...");
+							if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
+								log_info(logOrquestador,"El personaje %c solicita informacion del nivel %s",*simboloRecibido,nivelDelPersonaje);
+								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
+								//settear variable global para usar en funcion q se manda a list_find
+								nombreNivel=nivelDelPersonaje;
+								log_info(logOrquestador,"Se busca el nivel");
+								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
+								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
+								if(nivel!=NULL){
+									log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
+									strcpy(msj.ipNivel,nivel->ip);
+									msj.portNivel=nivel->port;
+									msj.portPlanificador=nivel->puertoPlanif;
+									log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
+								}
+								//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
+								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+									log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
+								}
+								else {
+									log_error(logOrquestador,"No se pudo enviar los datos del nivel al Personaje %c",*simboloRecibido);
+								}
 							}
-			//			}
+							break;
+						case 3: //el personaje se muere por sigint y reinicia el nivelActual
+							//todo implementar aca y en personaje
+							break;
+						case 4: //el personaje pierde todas las vidas y reinicia el plan de niveles
+							//todo implementar aca y en personaje
+							break;
+						default:
+							break;
+						}
 					}
+
 					//cerrar socket
 					close(socketNuevaConexion);
 					log_info(logOrquestador,"Se cerro el socket %d",socketNuevaConexion);

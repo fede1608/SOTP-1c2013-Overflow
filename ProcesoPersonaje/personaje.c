@@ -136,8 +136,12 @@ int main(void){
 					printf("msj recibido from handshake %c\n",*auxC);
 				}
 			}
-
 			Header unHeader;
+			if(c!=0){
+				//mandar nivel que termino
+				mandarMensaje(unSocketOrq,2,strlen(niveles[c-1])+1,niveles[c-1]);
+				log_debug(log,"NivelAnterior: %s",nivelActual);
+			}
 			//esperar solicitud de info nivel/Planif
 			mandarMensaje(unSocketOrq,1,strlen(nivelActual)+1,nivelActual);
 //			printf("%s",nivelActual);
@@ -201,11 +205,10 @@ int main(void){
 
 			void* buffer;
 
-	for(ii=0;ii<veclong;ii++){
+	for(ii=0;ii<veclong;ii++){//for each recurso
 		recActual=*obj[ii];
 		//solicitar posicion recurso Recurso: recactual
 		//esperar posicion del recurso posicion : rec
-
 		llego=1;
 		while(llego){
 			Header unHeader;
@@ -217,6 +220,7 @@ int main(void){
 			if(unHeader.type==8){//planificador autorizo el movimiento
 				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
 				log_info(log,"Permiso de Movimiento Recibido");
+				alive=1;
 				}
 			if(unHeader.type==9){//orquestador mato al personaje
 				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
@@ -257,30 +261,29 @@ int main(void){
 			respAlPlanf.solicitaRecurso=0;
 			respAlPlanf.finNivel=0;
 			respAlPlanf.recursoSolicitado='0';
-			printf("pos %d %d \n",pos.x,pos.y);
+
 			if (pos.x!=rec.x) {
 				(rec.x-pos.x)>0?pos.x++:pos.x--;
 			}
 			else if (pos.y!=rec.y) {
 				(rec.y-pos.y)>0?pos.y++:pos.y--;
 			}
-
+			log_info(log,"El personaje esta en la posicion X: %d Y: %d",pos.x,pos.y);
 			//aviso posicion pos al nivel
 			h.type = 2;
 			buffer=&pos;
 			char* sth;
 
 			if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)) {
-	//			printf("Llego el header de la posicion del personaje %d %d\n",pos.x,pos.y);
 				log_info(log,"Llego el header de la posicion del personaje %d %d",pos.x,pos.y);
 				if (recibirMensaje(unSocket, (void**)&sth)>=0) {
-	//				printf("Llego header respuesta: %c del nivel\n",*sth);
-					log_debug(log,"Llego header respuesta");
 					log_info(log,"Llego header respuesta: %c del nivel",*sth);
 				}
 			}
 
 			if((pos.y==rec.y)&(pos.x==rec.x)) {
+				//todo Ver como resolver el tema que el personaje si se queda bloqueado por el ultimo recurso de los objetivos del nivel, este termina el nivel y no se queda bloqueado.
+
 				//Solicitar instancia del recActual
 				//esperar OK
 				h.type = 3;
@@ -289,10 +292,7 @@ int main(void){
 				buffer = &recActual;
 
 				if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
-	//				printf("Llego el header de peticion de recurso %c al nivel\n",recActual);
-					log_info(log,"Llego el header de peticion de recurso %c al nivel",recActual);
-	//				printf("Llego el buffer del recurso necesario al nivel\n");
-					log_info(log,"Llego el buffer del recurso necesario al nivel");
+					log_info(log,"Se envio el mensaje de peticion de recurso %c al nivel",recActual);
 					Header unHeader;
 					Posicion lifeSucks;
 					respAlPlanf.recursoSolicitado=recActual;
@@ -300,7 +300,6 @@ int main(void){
 						int * respRec;
 						respRec=malloc(sizeof(int));
 						recibirData(unSocket,unHeader,(void**)respRec);
-	//					printf("Llego respuesta %d del nivel\n", *respRec);
 						log_info(log,"Llego respuesta %d del nivel",*respRec);
 
 						respAlPlanf.solicitaRecurso=1;
@@ -308,11 +307,9 @@ int main(void){
 							respAlPlanf.bloqueado=0;
 							rec.x=-1;
 							rec.y=-1;
-	//						printf("Se entrego una instancia del Recurso %c\n",recActual);
 							log_info(log,"Se entrego una instancia del Recurso %c",recActual);
 						}else{
 							respAlPlanf.bloqueado=1;
-	//						printf("No se entrego una instancia del Recurso %c\n",recActual);
 							log_info(log,"No se entrego una instancia del Recurso %c",recActual);
 						}
 						free(respRec);
