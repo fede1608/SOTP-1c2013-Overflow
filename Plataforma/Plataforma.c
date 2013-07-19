@@ -74,6 +74,7 @@ typedef struct t_nodoNivel {//TODO completar segun las necesidades
 	char ip[20];
 	int port;
 	int puertoPlanif;
+	int socket;
 } NodoNivel;
 
 typedef struct t_msjPersonaje {
@@ -369,7 +370,7 @@ int planificador (InfoNivel* nivel) {
 //Cardinalidad = un único thread que atiende las solicitudes
 int orquestador (void) {
 	t_list* listaNiveles=list_create();
-	int contadorPuerto=5000;
+	int contadorPuerto=4999;
 	int socketNuevaConexion;
 	//Struct con info de conexión (IP y puerto) del nivel y el planificador asociado a ese nivel
 	typedef struct t_infoConxNivPlan {
@@ -384,10 +385,10 @@ int orquestador (void) {
 	log_info(logOrquestador,"THR Orquestador: iniciado");
 	log_info(logOrquestador,"THR Orquestador: Esperando conexiones de personajes o Niveles...");
 
-	//Creamos un socket de escucha para el puerto 4999
+	//Creamos un socket de escucha para el puerto inicial setteado en contadorPuerto
 	int socketEscucha;
-	if ((socketEscucha = quieroUnPutoSocketDeEscucha(4999)) != 1){
-		//TODO: Des-hardcodear el puerto 4999
+	if ((socketEscucha = quieroUnPutoSocketDeEscucha(contadorPuerto)) != 1){
+		contadorPuerto++;
 		log_info(logOrquestador,"Socket de escucha para el puerto 4999 creado");
 	}
 	else {
@@ -395,152 +396,188 @@ int orquestador (void) {
 	}
 	//TODO: Supongo que el while(1) debería estar dentro del else
 	//Chequear eso
+
+	fd_set descriptoresLectura;	/* Descriptores de interes para select() */						/* Buffer para leer de los socket */
+	int maximo=socketEscucha;							/* Número de descriptor más grande */
+	int i;								/* Para bucles */
 	while(1){
 
-		if (listen(socketEscucha, 1) != 0) {
-			log_error(logOrquestador,"Error al poner a escuchar socket");
-			return EXIT_FAILURE;
+		NodoNivel *nodoN;
+		/* Se inicializa descriptoresLectura */
+		FD_ZERO (&descriptoresLectura);
+		/* Se añade para select() el socket servidor */
+		FD_SET (socketEscucha, &descriptoresLectura);
+		/* Se añaden para select() los sockets con los clientes ya conectados */
+		for (i=0; i<list_size(listaNiveles); i++){
+			nodoN=list_get(listaNiveles,i);
+			FD_SET(nodoN->socket, &descriptoresLectura);
+			if(nodoN->socket > maximo)
+				maximo=nodoN->socket;
 		}
-		struct sockaddr_in cli_addr;
-		int socklen=sizeof(cli_addr);
-		if ((socketNuevaConexion = accept(socketEscucha, &cli_addr, &socklen)) < 0) {
-			log_error(logOrquestador,"Error al aceptar conexion");
-			return EXIT_FAILURE;
+
+		/* Espera indefinida hasta que alguno de los descriptores tenga algo
+		 * que decir: un nuevo cliente o un cliente ya conectado que envía un
+		 * mensaje */
+		select (maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
+		/* Se comprueba si algún cliente ya conectado ha enviado algo */
+		for (i=0; i<list_size(listaNiveles); i++){
+			nodoN=list_get(listaNiveles,i);
+			if (FD_ISSET (nodoN->socket, &descriptoresLectura))
+			{
+				//recibir info del nivel
+				char *simboloRecibido; //Ej: @ ! / % $ &
+				simboloRecibido=malloc(1);
+				Header unHeader;
+				if(recibirHeader(socketNuevaConexion,&unHeader)){
+					log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
+					switch(unHeader.type){
+						//TODO: implementar
+						case 3:
+//							simboloRecibido=malloc(unHeader.payloadlength);
+//							if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
+//								if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
+//									//log_info(logger,"Mando mensaje al personaje %c",*rec);
+//									log_info(logOrquestador,"Entro Nivel: %s",simboloRecibido);
+//								}
+//							}
+							break;
+						default:
+							break;
+						}
+				}
+			}
 		}
-		char* ipCliente;
-		ipCliente=print_ip(cli_addr.sin_addr.s_addr);
-		log_info(logOrquestador,"Ip del cliente conectado: %d %s",cli_addr.sin_addr.s_addr, ipCliente);
 
-		//Handshake en el que recibe el simbolo del personaje
-		char *simboloRecibido; //Ej: @ ! / % $ &
-		simboloRecibido=malloc(1);
-		Header unHeader;
-		if(recibirHeader(socketNuevaConexion,&unHeader)){
+		/* Se comprueba si algún cliente nuevo desea conectarse y se le
+		 * admite */
+		if (FD_ISSET (socketEscucha, &descriptoresLectura))
+		{
+			//llamar al nuevaconexion
 
-		log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
+			if (listen(socketEscucha, 1) != 0) {
+				log_error(logOrquestador,"Error al poner a escuchar socket");
+				return EXIT_FAILURE;
+			}
+			struct sockaddr_in cli_addr;
+			int socklen=sizeof(cli_addr);
+			if ((socketNuevaConexion = accept(socketEscucha, &cli_addr, &socklen)) < 0) {
+				log_error(logOrquestador,"Error al aceptar conexion");
+				return EXIT_FAILURE;
+			}
+			char* ipCliente;
+			ipCliente=print_ip(cli_addr.sin_addr.s_addr);
+			log_info(logOrquestador,"Ip del cliente conectado: %d %s",cli_addr.sin_addr.s_addr, ipCliente);
 
-		switch(unHeader.type){
-
-		//TODO: colocar una pequenia descripción de cada tipo
-
-		case 0://case Personaje
-
-			log_info(logOrquestador,"Header tipo 0");
-
-			strcpy(msj.ipNivel,"127.0.0.1");
-			strcpy(msj.ipPlanificador,"127.0.0.1");
-			msj.portNivel=0;
-			msj.portPlanificador=0;
+			//Handshake en el que recibe el simbolo del personaje
+			char *simboloRecibido; //Ej: @ ! / % $ &
 			simboloRecibido=malloc(1);
+			Header unHeader;
+			if(recibirHeader(socketNuevaConexion,&unHeader)){
 
-			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido) >= 0){
-				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
-					//log_info(logger,"Mando mensaje al personaje %c",*rec);
-					log_info(logOrquestador,"Entro Personaje: %c",*simboloRecibido);
+				log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
+
+				switch(unHeader.type){
+				//TODO: colocar una pequenia descripción de cada tipo
+				case 0://case Personaje
+					log_info(logOrquestador,"Header tipo 0");
+					strcpy(msj.ipNivel,"127.0.0.1");
+					strcpy(msj.ipPlanificador,"127.0.0.1");
+					msj.portNivel=0;
+					msj.portPlanificador=0;
+					simboloRecibido=malloc(1);
+
+					if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido) >= 0){
+						if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
+							//log_info(logger,"Mando mensaje al personaje %c",*rec);
+							log_info(logOrquestador,"Entro Personaje: %c",*simboloRecibido);
+						}
+					}
+					char* nivelDelPersonaje;
+					//Esperar solicitud de info de conexion de Nivel y Planifador
+					log_info(logOrquestador,"Esperando solicitud de nivel...");
+			//		if(recibirHeader(socketNuevaConexion,&unHeader)){
+			//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
+			//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+					if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
+							log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
+							//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
+							//settear variable global para usar en funcion q se manda a list_find
+							nombreNivel=nivelDelPersonaje;
+							log_info(logOrquestador,"Se busca el nivel");
+							NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
+							log_info(logOrquestador,"Se encontro el nivel %p",nivel);
+							if(nivel!=NULL){
+								log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
+								strcpy(msj.ipNivel,nivel->ip);
+								msj.portNivel=nivel->port;
+								msj.portPlanificador=nivel->puertoPlanif;
+								log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
+							}
+							//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
+							if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+								log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
+							}
+							else {
+								log_error(logOrquestador,"No se pudo enviar los datos del nivel al Personaje %c",*simboloRecibido);
+							}
+			//			}
+					}
+					//cerrar socket
+					close(socketNuevaConexion);
+					log_info(logOrquestador,"Se cerro el socket %d",socketNuevaConexion);
+					break;
+
+				case 2: //case Nivel
+					simboloRecibido=malloc(unHeader.payloadlength);
+					if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
+						if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
+							//log_info(logger,"Mando mensaje al personaje %c",*rec);
+							log_info(logOrquestador,"Entro Nivel: %s",simboloRecibido);
+						}
+					}
+					NodoNivel *nodoNivel;
+					nodoNivel=malloc(sizeof(NodoNivel));
+					strcpy(nodoNivel->ip,ipCliente);
+					nodoNivel->nombreNivel=simboloRecibido;
+					nodoNivel->port=contadorPuerto;
+					contadorPuerto++;
+					nodoNivel->puertoPlanif=contadorPuerto;
+					nodoNivel->socket=socketNuevaConexion;
+					list_add(listaNiveles,nodoNivel);
+					log_info(logOrquestador,"Se anadio el nivel %s a la lista de Niveles",simboloRecibido);
+
+					InfoNivel *nivel;
+					nivel=malloc(sizeof(InfoNivel));
+					strcpy(nivel->ip,ipCliente);
+					nivel->nombre=simboloRecibido;
+					nivel->port=nodoNivel->port;
+					nivel->puertoPlanif=contadorPuerto;
+					contadorPuerto++;
+
+					int* aux;
+					aux=malloc(sizeof(int));
+					*aux=nodoNivel->port;
+					//manda el puerto asignado al nivel para que escuche conexiones.
+					//TODO: y si es -1 de qué nos pintamos?
+					if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux)){
+						log_error(logOrquestador,"No se pudo enviar un mensaje al nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
+						break;}
+					free(aux);
+					if(!recibirMensaje(socketNuevaConexion,(void**)&aux)){
+						log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
+						break; }
+					free(aux);
+
+					pthread_t threadPlanif;
+					pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
+					log_info(logOrquestador,"Se creo el THR del planificador correspondiente al nivel %s",simboloRecibido);
+					break;
+				default:
+					break;
 				}
 			}
-
-
-			char* nivelDelPersonaje;
-			//Esperar solicitud de info de conexion de Nivel y Planifador
-			log_info(logOrquestador,"Esperando solicitud de nivel...");
-	//		if(recibirHeader(socketNuevaConexion,&unHeader)){
-	//			printf("Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
-	//			if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
-			if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
-					log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
-					//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
-
-					//settear variable global para usar en funcion q se manda a list_find
-					nombreNivel=nivelDelPersonaje;
-					log_info(logOrquestador,"Se busca el nivel");
-
-					NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
-
-					log_info(logOrquestador,"Se encontro el nivel %p",nivel);
-
-					if(nivel!=NULL){
-
-						log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
-						strcpy(msj.ipNivel,nivel->ip);
-						msj.portNivel=nivel->port;
-						msj.portPlanificador=nivel->puertoPlanif;
-						log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
-					}
-					//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
-					if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
-						log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
-					}
-					else {
-						log_error(logOrquestador,"No se pudo enviar los datos del nivel al Personaje %c",*simboloRecibido);
-					}
-	//			}
-			}
-			//cerrar socket
-			close(socketNuevaConexion);
-			log_info(logOrquestador,"Se cerro el socket %d",socketNuevaConexion);
-			break;
-
-		case 2: //case Nivel
-			simboloRecibido=malloc(unHeader.payloadlength);
-			if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
-				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
-					//log_info(logger,"Mando mensaje al personaje %c",*rec);
-					log_info(logOrquestador,"Entro Nivel: %s",simboloRecibido);
-				}
-			}
-
-			NodoNivel *nodoNivel;
-			nodoNivel=malloc(sizeof(NodoNivel));
-			strcpy(nodoNivel->ip,ipCliente);
-			nodoNivel->nombreNivel=simboloRecibido;
-			nodoNivel->port=contadorPuerto;
-			contadorPuerto++;
-			nodoNivel->puertoPlanif=contadorPuerto;
-
-			list_add(listaNiveles,nodoNivel);
-			log_info(logOrquestador,"Se anadio el nivel %s a la lista de Niveles",simboloRecibido);
-
-			InfoNivel *nivel;
-			nivel=malloc(sizeof(InfoNivel));
-			strcpy(nivel->ip,ipCliente);
-			nivel->nombre=simboloRecibido;
-			nivel->port=nodoNivel->port;
-			nivel->puertoPlanif=contadorPuerto;
-			contadorPuerto++;
-
-			int* aux;
-			aux=malloc(sizeof(int));
-			*aux=nodoNivel->port;
-			//manda el puerto asignado al nivel para que escuche conexiones.
-			//TODO: y si es -1 de qué nos pintamos?
-			if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux)){
-				log_error(logOrquestador,"No se pudo enviar un mensaje al nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
-				break;} //TODO handlear desconexion
-			free(aux);
-			if(!recibirMensaje(socketNuevaConexion,(void**)&aux)){
-				log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
-				break; }//TODO handlear desconexion
-			free(aux);
-
-			pthread_t threadPlanif;
-			pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
-			log_info(logOrquestador,"Se creo el THR del planificador correspondiente al nivel %s",simboloRecibido);
-
-			break;
-		default:
-			break;
 		}
-	}
-
 	}//Cierra While(1)
-
-	//log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
-	//
-	//pthread_t threadPersonaje;
-	//
-	//pthread_create(&threadPersonaje, NULL, han, (void *)msj);
-
 
 	//	printf("THR Orquestador: terminado\n"); LLamar a Koopa
 

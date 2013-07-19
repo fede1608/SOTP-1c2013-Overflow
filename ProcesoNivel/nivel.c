@@ -6,7 +6,6 @@
  */
 #include "config.h"
 #include "log.h"
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>

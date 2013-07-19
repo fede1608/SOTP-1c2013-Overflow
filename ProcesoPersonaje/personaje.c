@@ -212,14 +212,29 @@ int main(void){
 			// esperar mensaje de movPermitido para continuar
 			char* charAux;
 			log_info(log,"Esperando permiso de movimiento...");
+			int alive=1;
 			if(recibirHeader(unSocketPlanif,&unHeader)>0){
-			if(unHeader.type==8){
+			if(unHeader.type==8){//planificador autorizo el movimiento
 				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
 				log_info(log,"Permiso de Movimiento Recibido");
 				}
+			if(unHeader.type==9){//orquestador mato al personaje
+				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+				log_info(log,"Orquestador ha matado al personaje");
+				vidas--;
+				//cerrar conexion con el nivel
+				mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+				c--;
+				if(vidas==0) c=-1;//reiniciar plan de niveles
+				llego=0;
+				ii=veclong;
+				alive=0;
+				seMurio=0;
+				//todo implementar logica de muerte
+				}
 			}
 
-
+		if(alive) {//si el orquestador no lo mato
 			if((rec.x==-1)&&(rec.y==-1)){ //si no tiene asignada un destino solicitar uno
 				buffer= &recActual;
 				//solicitar Posicion del recurso recActual
@@ -323,25 +338,7 @@ int main(void){
 						}
 					//exit(0);
 				}
-	//			else {
-	//				recActual=*obj[ii+1];
-	//				buffer=&recActual;
-	//
-	//				if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
-	//					log_info(log,"Llego el header de la posicion a recurso al nivel");
-	//					log_info(log,"Llego el recurso actual necesario al nivel");
-	//					Header unHeader;
-	//
-	//					if (recibirHeader(unSocket,&unHeader)) {
-	//						log_info(log,"pos %d %d %d %d",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
-	//						Posicion lifeSucks;
-	//						recibirData(unSocket,unHeader,(void**)&lifeSucks);
-	//						rec=lifeSucks;
-	//						log_info(log,"Llego %c header respuesta del nivel: %d",recActual,rec.x,rec.y);
-	//						log_info(log,"Llego la posicion del recurso solicitado del nivel");
-	//					}
-	//				}
-	//			}
+
 
 			}
 			//mandar mensaje de resp al Planif
@@ -359,6 +356,8 @@ int main(void){
 			}
 			mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
 			printf("Se envio respuesta de turno concluido al Planificador\n");
+		}//fin if(alive)
+
 		}//fin while(llego)
 		printf("Fin for\n");
 	}//fin for each recurso
