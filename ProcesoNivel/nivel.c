@@ -59,6 +59,7 @@ void listenear(int socketEscucha);
 void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant);
 t_list* inicializarListaRecursos(void);
 void liberarRecursos(t_list* listaPer,char personaje);
+void desconexion(NodoPersonaje* dataPer);
 void detectarDeadlock(void);
 //1) El proceso nivel crea 1 lista (global)
 //que tiene personajes e items
@@ -264,94 +265,107 @@ void handler(NodoPersonaje* dataPer){
 			return false;
 		}
 
-
 		// todos los returns son para handlear el tema de desconexion del cliente sin aviso
 		//todo hacer una funcion local q se encargue de tratar desconexion(cerrar el socket,borrar nodoPersonaje de listapersonaje y borrar personaje de la lista de items)
-		if(!recibirHeader(dataPer->socket,&unHeader)) {close(dataPer->socket);return;}
-		log_debug(logger,"Llego Msj tipo %d payload %d", unHeader.type,unHeader.payloadlength);
-		switch(unHeader.type){
-			case 0:
-				if(!recibirData(dataPer->socket,unHeader, (void**)carAux)) {close(dataPer->socket);return;}
-				log_info(logger,"Llego el Personaje %c al nivel(Thread)", *carAux);
-				if (mandarMensaje(dataPer->socket,0 , 1,carAux))
-				{
-					log_info(logger,"Se contesto el handshake");
-				}else {close(dataPer->socket);return;}
-				break;
-			case 1:
-				resp=recibirData(dataPer->socket,unHeader, (void**)carAux);
-				if(!resp) {close(dataPer->socket);return;}
-				log_debug(logger,"Resp del recData: %d",resp);
-				log_info(logger,"El Personaje %c solicita la Posición del Recurso %c\n",dataPer->nodo->id,*carAux);
-				nodoAux=obtenerRecurso(listaItems, *carAux);
-				posAux.x=nodoAux->posx;
-				posAux.y=nodoAux->posy;
-				buffer=&posAux;
-				if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
-					log_info(logger,"Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer->nodo->id);
-				}else {close(dataPer->socket);return;}
-				break;
-			case 2:
-				if(!recibirData(dataPer->socket, unHeader, (void**)&posAux)) {close(dataPer->socket);return;}
-				dataPer->nodo->posx=posAux.x;
-				dataPer->nodo->posy=posAux.y;
-				log_info(logger,"Se recibio la posicion(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id);
-	//			carAux=malloc(1);
-				carAux[0]='K';
-				if (mandarMensaje(dataPer->socket,4 , sizeof(char),(void*)carAux)) {
-					log_info(logger,"Se le aviso al Personaje %c que llego bien su Posición",dataPer->nodo->id);
-				}else {close(dataPer->socket);return;}
-				break;
-			case 3:
-				//Personaje solicita recurso
-				if(!recibirData(dataPer->socket, unHeader, (void**)carAux)) {close(dataPer->socket);return;}
-				log_info(logger,"El Personaje %c solicita una Instancia del Recurso %c\n",dataPer->nodo->id,*carAux);
-				if(restarRecurso(listaItems, *carAux)>0)
-				{
-					idPer=dataPer->nodo->id;
-					NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
-					idRec=*carAux;
-					NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
-					nodoRecAux->cantAsignada++;
-					log_info(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer->nodo->id);
-		//			nodoAux=obtenerRecurso(listaItems, *carAux);
-					int* respRec;
-					respRec=malloc(sizeof(int));
-					*respRec=1;
-					if (mandarMensaje(dataPer->socket,4 , sizeof(int),(void*)respRec)) {
-						log_info(logger,"Se mando la confirmacion %d del pedido de Recurso\n",*respRec);
-					}else {close(dataPer->socket);return;}
-					free(respRec);
-
-				}else{
-					idPer=dataPer->nodo->id;
-					NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
-					nodoPerAux->personajeBloqueado=1;
-					nodoPerAux->recBloqueado=*carAux;
-					log_info(logger,"No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
-					int*respRec;
-					respRec=malloc(sizeof(int));
-					*respRec=0;
-					if (mandarMensaje(dataPer->socket,4 , sizeof(int),(void*)respRec)) {
-						log_info(logger,"Se mando la confirmacion %d del pedido de Recurso\n",*respRec);
-					} else {close(dataPer->socket);return;}
-					free(respRec);
-				}
-				break;
-			case 4:
-				//todo sincronizar con los demas threads y con el listener cuando crea un personaje nuevo!
-				log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
-				log_debug(logger,"Case 4 puntero del personaje: %p",dataPer->nodo);
-				liberarRecursos(listaPersonajes,(dataPer->nodo)->id);
-				BorrarItem(&listaItems,(dataPer->nodo)->id);
-				log_info(logger,"El personaje salio del Nivel.");
-				close(dataPer->socket);
-				log_debug(logger,"Se cerro el Socket: %d",dataPer->socket);
-				return;
-				break;
-			default:
-					break;
+		if(recibirHeader(dataPer->socket,&unHeader) < 1)
+		{
+			desconexion(dataPer);
+			//return;
 		}
+		else
+		{
+			log_debug(logger,"Llego Msj tipo %d payload %d", unHeader.type,unHeader.payloadlength);
+
+					switch(unHeader.type){
+						case 0:
+							if(!recibirData(dataPer->socket,unHeader, (void**)carAux)) {close(dataPer->socket);return;}
+							log_info(logger,"Llego el Personaje %c al nivel(Thread)", *carAux);
+							if (mandarMensaje(dataPer->socket,0 , 1,carAux))
+							{
+								log_info(logger,"Se contesto el handshake");
+							//}else {close(dataPer->socket);return;}
+							}else {desconexion(dataPer);}
+							break;
+						case 1:
+							resp=recibirData(dataPer->socket,unHeader, (void**)carAux);
+							if(!resp) {close(dataPer->socket);return;}
+							log_debug(logger,"Resp del recData: %d",resp);
+							log_info(logger,"El Personaje %c solicita la Posición del Recurso %c\n",dataPer->nodo->id,*carAux);
+							nodoAux=obtenerRecurso(listaItems, *carAux);
+							posAux.x=nodoAux->posx;
+							posAux.y=nodoAux->posy;
+							buffer=&posAux;
+							if(mandarMensaje(dataPer->socket,1 , sizeof(Posicion),buffer)){
+								log_info(logger,"Se mando la pos(%d,%d) del Rec %c al Personaje %c\n",posAux.x,posAux.y,*carAux,dataPer->nodo->id);
+							//}else {close(dataPer->socket);return;}
+							}else {desconexion(dataPer);}
+							break;
+						case 2:
+							if(!recibirData(dataPer->socket, unHeader, (void**)&posAux)) {close(dataPer->socket);return;}
+							dataPer->nodo->posx=posAux.x;
+							dataPer->nodo->posy=posAux.y;
+							log_info(logger,"Se recibio la posicion(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id);
+				//			carAux=malloc(1);
+							carAux[0]='K';
+							if (mandarMensaje(dataPer->socket,4 , sizeof(char),(void*)carAux)) {
+								log_info(logger,"Se le aviso al Personaje %c que llego bien su Posición",dataPer->nodo->id);
+							//}else {close(dataPer->socket);return;}
+							}else {desconexion(dataPer);}
+							break;
+						case 3:
+							//Personaje solicita recurso
+							if(!recibirData(dataPer->socket, unHeader, (void**)carAux)) {close(dataPer->socket);return;}
+							log_info(logger,"El Personaje %c solicita una Instancia del Recurso %c\n",dataPer->nodo->id,*carAux);
+							if(restarRecurso(listaItems, *carAux)>0)
+							{
+								idPer=dataPer->nodo->id;
+								NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
+								idRec=*carAux;
+								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
+								nodoRecAux->cantAsignada++;
+								log_info(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer->nodo->id);
+					//			nodoAux=obtenerRecurso(listaItems, *carAux);
+								int* respRec;
+								respRec=malloc(sizeof(int));
+								*respRec=1;
+								if (mandarMensaje(dataPer->socket,4 , sizeof(int),(void*)respRec)) {
+									log_info(logger,"Se mando la confirmacion %d del pedido de Recurso\n",*respRec);
+								//}else {close(dataPer->socket);return;}
+								}else {desconexion(dataPer);}
+								free(respRec);
+
+							}else{
+								idPer=dataPer->nodo->id;
+								NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
+								nodoPerAux->personajeBloqueado=1;
+								nodoPerAux->recBloqueado=*carAux;
+								log_info(logger,"No hay instancias del recurso %c y no se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
+								int*respRec;
+								respRec=malloc(sizeof(int));
+								*respRec=0;
+								if (mandarMensaje(dataPer->socket,4 , sizeof(int),(void*)respRec)) {
+									log_info(logger,"Se mando la confirmacion %d del pedido de Recurso\n",*respRec);
+								//} else {close(dataPer->socket);return;}
+								}else {desconexion(dataPer);}
+								free(respRec);
+							}
+							break;
+						case 4:
+							//todo sincronizar con los demas threads y con el listener cuando crea un personaje nuevo!
+							log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
+							log_debug(logger,"Case 4 puntero del personaje: %p",dataPer->nodo);
+							liberarRecursos(listaPersonajes,(dataPer->nodo)->id);
+							BorrarItem(&listaItems,(dataPer->nodo)->id);
+							log_info(logger,"El personaje salio del Nivel.");
+							close(dataPer->socket);
+							log_debug(logger,"Se cerro el Socket: %d",dataPer->socket);
+							//return;
+							break;
+						default:
+								break;
+					}
+		}
+
 //		free(carAux);
 	//}
 
@@ -475,6 +489,17 @@ void liberarRecursos(t_list* listaPer,char personaje){
 	list_destroy_and_destroy_elements(nodoPerAux->listaRecursosAsignados,liberarInstancias);
 	free(nodoPerAux);
 
+}
+
+//Maneja la desconexion de un PJ inesperadamente
+//limpiando el nivel
+
+void desconexion(NodoPersonaje* dataPer){
+
+	log_info(logger,"El PJ %c se ha desconectado",dataPer->id);
+	BorrarItem(&listaItems,(dataPer->nodo)->id);
+	liberarRecursos(listaPersonajes,dataPer->id);
+	close(dataPer->socket);
 }
 
 void detectarDeadlock(){

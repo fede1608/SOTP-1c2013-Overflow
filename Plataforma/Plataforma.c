@@ -298,63 +298,88 @@ int planificador (InfoNivel* nivel) {
 			Header headerMsjPersonaje;
 			MensajePersonaje msjPersonaje;
 			log_info(logPlanificador,"Esperando respuesta de turno concluido");
-			recibirHeader(personajeActual->socket, &headerMsjPersonaje);
-			recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje);
-			log_info(logPlanificador,"Respuesta recibida");
-			//Comportamientos según el mensaje que se recibe del personaje
+			if(recibirHeader(personajeActual->socket, &headerMsjPersonaje) > 0){
+				if(recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje)){
 
-			//Si informa de fin de nivel se lo retira de la cola de listos
-//			if(msjPersonaje.finNivel){
-//				printf("El personaje termino el Nivel\n");
-//				log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
-//				queue_pop(colaListos);
-//				msjPersonaje.solicitaRecurso=0;
-//				msjPersonaje.bloqueado=0;
-//				quantum=varGlobalQuantum+1;
-//				printf("Se retiro al personaje de la cola\n");
-//				log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
-//			}
-			log_debug(logPlanificador,"NeedRec: %d Blocked: %d FinNivel: %d Rec: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
-//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
-			if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
-				log_info(logPlanificador,"Rec bloq1 %d",quantum);
-				quantum=varGlobalQuantum+1;
-				queue_push(colaBloqueados,queue_pop(colaListos));
-				log_info(logPlanificador,"Rec bloq2 %d", quantum);
-			}else{
-//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
-				if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
-					if(msjPersonaje.finNivel){
-						log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
-						queue_pop(colaListos);
-						msjPersonaje.solicitaRecurso=0;
-						msjPersonaje.bloqueado=0;
+					log_info(logPlanificador,"Respuesta recibida");
+					//Comportamientos según el mensaje que se recibe del personaje
+
+					//Si informa de fin de nivel se lo retira de la cola de listos
+					//		if(msjPersonaje.finNivel){
+					//			printf("El personaje termino el Nivel\n");
+					//			log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+					//			queue_pop(colaListos);
+					//			msjPersonaje.solicitaRecurso=0;
+					//			msjPersonaje.bloqueado=0;
+					//			quantum=varGlobalQuantum+1;
+					//			printf("Se retiro al personaje de la cola\n");
+					//			log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
+					//			}
+					log_debug(logPlanificador,"NeedRec: %d Blocked: %d FinNivel: %d Rec: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
+		//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
+					if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
+						log_info(logPlanificador,"Rec bloq1 %d",quantum);
 						quantum=varGlobalQuantum+1;
-						log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
+						queue_push(colaBloqueados,queue_pop(colaListos));
+						log_info(logPlanificador,"Rec bloq2 %d", quantum);
 					}else{
-					log_info(logPlanificador,"Rec no bloq1 %d",quantum);
+		//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
+						if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
+							if(msjPersonaje.finNivel){
+								log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+								queue_pop(colaListos);
+								msjPersonaje.solicitaRecurso=0;
+								msjPersonaje.bloqueado=0;
+								quantum=varGlobalQuantum+1;
+								log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
+							}else{
+							log_info(logPlanificador,"Rec no bloq1 %d",quantum);
+							quantum=varGlobalQuantum+1;
+							queue_push(colaListos,queue_pop(colaListos));
+							log_info(logPlanificador,"Se puso el Personaje %c al final de la cola luego de asignarle el recurso %c", personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado);
+							}
+						}else{
+							if(msjPersonaje.finNivel){
+								log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+								queue_pop(colaListos);
+								msjPersonaje.solicitaRecurso=0;
+								msjPersonaje.bloqueado=0;
+								quantum=varGlobalQuantum+1;
+								close(personajeActual->socket);
+								log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
+							}
+						}
+					}
+
+					quantum--;
+					log_debug(logPlanificador,"Quatum Left: %d Sleep: %d\n",quantum,varGlobalSleep);
+					usleep(varGlobalSleep);
+				}
+				else {
+					//Se retira al PJ de la cola de Listos
+					//Por aparente desconexion
+					queue_pop(colaListos);
+					msjPersonaje.solicitaRecurso=0;
+					msjPersonaje.bloqueado=0;
 					quantum=varGlobalQuantum+1;
-					queue_push(colaListos,queue_pop(colaListos));
-					log_info(logPlanificador,"Se puso el Personaje %c al final de la cola luego de asignarle el recurso %c", personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado);
-					}
-				}else{
-					if(msjPersonaje.finNivel){
-						log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
-						queue_pop(colaListos);
-						msjPersonaje.solicitaRecurso=0;
-						msjPersonaje.bloqueado=0;
-						quantum=varGlobalQuantum+1;
-						log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
-					}
+					close(personajeActual->socket);
+					log_error(logPlanificador,"No llego la data del PJ: %c",personajeActual->simboloRepresentativo);
+
 				}
 			}
+			else {
+				//Se retira al PJ de la cola de Listos
+				//Por aparente desconexion
+				queue_pop(colaListos);
+				msjPersonaje.solicitaRecurso=0;
+				msjPersonaje.bloqueado=0;
+				quantum=varGlobalQuantum+1;
+				close(personajeActual->socket);
+				log_error(logPlanificador,"No llego el header del PJ: %c",personajeActual->simboloRepresentativo);
+			}
 
-
-			quantum--;
-			log_debug(logPlanificador,"Quatum Left: %d Sleep: %d\n",quantum,varGlobalSleep);
-			usleep(varGlobalSleep);
 		}else{
-			log_debug(logPlanificador,"Cola vacia --> Sleep");
+			log_error(logPlanificador,"Cola vacia --> Sleep");
 			usleep(varGlobalSleep); //para que no quede en espera activa
 		}
 	}//Cierra While(1)
