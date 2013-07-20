@@ -46,8 +46,7 @@ int varGlobalSleep;
 int flagGlobalFin=1;//flag q anuncia el fin del programa
 int g_contPersonajes=0;//contador global de personajes
 char* nombreNivel;//se usa para la funcion que se manda al list_find
-
-
+t_list* listaNiveles;
 
 //Structs propios de la plataforma
 
@@ -111,6 +110,7 @@ bool esMiNivel(NodoNivel* nodo);
 //Función principal del proceso, es la encargada de crear al orquestador y al planificador
 //Cardinalidad = un único thread
 int main (void) {
+	listaNiveles=list_create();
 	logOrquestador = log_create("LogOrquestador.log","Orquestador",true,detail);
 	logPlanificador = log_create("LogPlanificador.log","Planificador",true,detail);
 	t_config* config = config_create("config.txt");
@@ -267,6 +267,22 @@ int planificador (InfoNivel* nivel) {
 	int quantum=varGlobalQuantum;
 
 	while(1){
+
+		/*TODO: no me gusta como esta hecho pero es
+		 * la unica solucion que se me ocurrio en este momento.
+		 * La idea es que esta variable global sea una flag que se active
+		 * cuando un nivel se cierra y funciona barbaro para romper
+		 * el while y que termine el thread, el problema es cuando
+		 * se desconecten varios niveles al mismo tiempo,
+		 * quizas cierra alguno que no va*/
+
+		nombreNivel = nivel->nombre;
+
+		if(!list_find(listaNiveles,esMiNivel)){
+			log_info(logPlanificador,"Se rompe el while(1) y se cierra el thread");
+			break;
+		}
+
 		//Si la cola no esta vacia
 		if(!queue_is_empty(colaListos)){
 
@@ -396,7 +412,7 @@ int planificador (InfoNivel* nivel) {
 			}
 
 		}else{
-			log_error(logPlanificador,"Cola vacia --> Sleep");
+			log_error(logPlanificador,"Cola de listos vacia --> Sleep");
 			usleep(varGlobalSleep); //para que no quede en espera activa
 		}
 	}//Cierra While(1)
@@ -411,7 +427,7 @@ int planificador (InfoNivel* nivel) {
 //proceso personaje que se conecte.
 //Cardinalidad = un único thread que atiende las solicitudes
 int orquestador (void) {
-	t_list* listaNiveles=list_create();
+	//t_list* listaNiveles=list_create();
 	int contadorPuerto=4999;
 	int socketNuevaConexion;
 	//Struct con info de conexión (IP y puerto) del nivel y el planificador asociado a ese nivel
@@ -470,19 +486,32 @@ int orquestador (void) {
 				char *simboloRecibido; //Ej: @ ! / % $ &
 				simboloRecibido=malloc(1);
 				Header unHeader;
-				if(recibirHeader(socketNuevaConexion,&unHeader)){
+				if(recibirHeader(socketNuevaConexion,&unHeader)>0){
 					log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
 					switch(unHeader.type){
 						//TODO: implementar
+						//Implementar que?
 						case 3:
 
 							break;
 						default:
 							break;
 						}
+					close(socketNuevaConexion);
+				}
+				/* Si se desconecta el nivel correspondiente
+				 * (el socket se desconecta)
+				es eliminado de la lista de niveles */
+				else {
+					nombreNivel = nodoN->nombreNivel;
+					list_remove_by_condition(listaNiveles, esMiNivel);
+					log_info(logOrquestador,"Se borro el nivel %s por desconexion",nodoN->nombreNivel);
+					close(socketNuevaConexion);
 				}
 			}
 		}
+
+
 
 		/* Se comprueba si algún cliente nuevo desea conectarse y se le
 		 * admite */
@@ -513,7 +542,6 @@ int orquestador (void) {
 				log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
 
 				switch(unHeader.type){
-				//TODO: colocar una pequenia descripción de cada tipo
 				case 0://case Personaje
 					log_info(logOrquestador,"Header tipo 0");
 					strcpy(msj.ipNivel,"127.0.0.1");
@@ -524,7 +552,6 @@ int orquestador (void) {
 
 					if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido) >= 0){
 						if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
-							//log_info(logger,"Mando mensaje al personaje %c",*rec);
 							log_info(logOrquestador,"Entro Personaje: %c",*simboloRecibido);
 						}
 					}
