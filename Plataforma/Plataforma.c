@@ -283,6 +283,13 @@ int planificador (InfoNivel* nivel) {
 
 	int quantum=varGlobalQuantum;
 
+	/*Esta var auxiliar lo que hace es que si no se pudo
+	 * mandar el movimiento permitido al personaje,
+	 * en el if para recibir la respuesta automaticamente
+	 * ejecute la desconexion del Personaje
+	 */
+	int varAuxiliar=0;
+
 	while(1){
 
 		/*TODO: no me gusta como esta hecho pero es
@@ -330,9 +337,11 @@ int planificador (InfoNivel* nivel) {
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
 
 					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+					varAuxiliar=0;
 				}
 				else {
 					log_error(logPlanificador,"No se pudo enviar un Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+					varAuxiliar=1;
 				}
 
 			}
@@ -354,9 +363,11 @@ int planificador (InfoNivel* nivel) {
 				log_info(logPlanificador,"Se saco al primer personaje de la cola");
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
 					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+					varAuxiliar=0;
 				}
 				else {
 					log_error(logPlanificador,"No se pudo enviar Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+					varAuxiliar=1;
 				}
 			}
 
@@ -364,7 +375,7 @@ int planificador (InfoNivel* nivel) {
 			Header headerMsjPersonaje;
 			MensajePersonaje msjPersonaje;
 			log_info(logPlanificador,"Esperando respuesta de turno concluido");
-			if(recibirHeader(personajeActual->socket, &headerMsjPersonaje) > 0){
+			if(varAuxiliar == 0 && recibirHeader(personajeActual->socket, &headerMsjPersonaje) > 0){
 				if(recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje)){
 					log_info(logPlanificador,"Respuesta recibida");
 					//Comportamientos según el mensaje que se recibe del personaje
