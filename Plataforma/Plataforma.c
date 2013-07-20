@@ -114,6 +114,7 @@ int orquestador (void);
 int listenerPersonaje(InfoPlanificador* planificador);
 char* print_ip(int ip);
 bool esMiNivel(NodoNivel* nodo);
+void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, int quantum, t_queue * colaListos);
 //----------------------------------------------------------------
 
 //******************** FUNCIONES PRINCIPALES *********************
@@ -412,11 +413,7 @@ int planificador (InfoNivel* nivel) {
 				else {
 					//Se retira al PJ de la cola de Listos
 					//Por aparente desconexion
-					queue_pop(colaListos);
-					msjPersonaje.solicitaRecurso=0;
-					msjPersonaje.bloqueado=0;
-					quantum=varGlobalQuantum+1;
-					close(personajeActual->socket);
+					desconexionPersonaje(personajeActual->socket, msjPersonaje, quantum, colaListos);
 					log_error(logPlanificador,"No llego la data del PJ: %c",personajeActual->simboloRepresentativo);
 
 				}
@@ -424,11 +421,7 @@ int planificador (InfoNivel* nivel) {
 			else {
 				//Se retira al PJ de la cola de Listos
 				//Por aparente desconexion
-				queue_pop(colaListos);
-				msjPersonaje.solicitaRecurso=0;
-				msjPersonaje.bloqueado=0;
-				quantum=varGlobalQuantum+1;
-				close(personajeActual->socket);
+				desconexionPersonaje(personajeActual->socket, msjPersonaje, quantum, colaListos);
 				log_error(logPlanificador,"No llego el header del PJ: %c",personajeActual->simboloRepresentativo);
 			}
 
@@ -914,5 +907,14 @@ bool esMiNivel(NodoNivel* nodo){
 	if(strcmp(nodo->nombreNivel,nombreNivel)==0)
 		return true;
 	return false;
+}
+
+void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, int quantum, t_queue * colaListos){
+	queue_pop(colaListos);
+	msjPersonaje.solicitaRecurso=0;
+	msjPersonaje.bloqueado=0;
+	quantum=varGlobalQuantum+1;
+	g_contPersonajes--;
+	close(socketDesconectar);
 }
 //----------------------------------------------------------------
