@@ -43,6 +43,8 @@
 //int varGlobalSleep=0.5* 1000000;
 int varGlobalQuantum;
 int varGlobalSleep;
+int varGlobalDeadlock;
+int varGlobalSleepDeadlock;
 int flagGlobalFin=1;//flag q anuncia el fin del programa
 int g_contPersonajes=0;//contador global de personajes
 char* nombreNivel;//se usa para la funcion que se manda al list_find
@@ -79,6 +81,8 @@ typedef struct t_nodoNivel {//TODO completar segun las necesidades
 	int port;
 	int puertoPlanif;
 	int socket;
+	int deadlockActivado;
+	int sleepDeadlock;
 } NodoNivel;
 
 typedef struct t_msjPersonaje {
@@ -121,6 +125,8 @@ int main (void) {
 	t_config* config = config_create("config.txt");
 	varGlobalQuantum=config_get_int_value(config,"Quantum");
 	varGlobalSleep=(int)(config_get_double_value(config,"TiempoDeRetardoDelQuantum")* 1000000);
+	varGlobalDeadlock=config_get_int_value(config,"AlgoritmoDeDeteccionDeInterbloqueo");
+	varGlobalSleepDeadlock=(int)(config_get_double_value(config,"EjecucionDeAlgoritmoDeDeteccionDeInterbloqueo")* 1000000);
 	printf("Quantum: %d Sleep: %d microseconds\n",varGlobalQuantum,	varGlobalSleep);
 	printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
 	log_info(logOrquestador,"Proceso plataforma iniciado");
@@ -670,6 +676,8 @@ int orquestador (void) {
 					contadorPuerto++;
 					nodoNivel->puertoPlanif=contadorPuerto;
 					nodoNivel->socket=socketNuevaConexion;
+					nodoNivel->deadlockActivado=varGlobalDeadlock;
+					nodoNivel->sleepDeadlock=varGlobalSleepDeadlock;
 					list_add(listaNiveles,nodoNivel);
 					log_info(logOrquestador,"Se anadio el nivel %s a la lista de Niveles",simboloRecibido);
 
@@ -694,6 +702,35 @@ int orquestador (void) {
 						log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
 						break; }
 					free(aux);
+
+					//******MANDAMOS LA INFO AL DEADLOCK DE CADA NIVEL*******
+					int* aux2;
+					aux2=malloc(sizeof(int));
+					*aux2=nodoNivel->deadlockActivado;
+
+					if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux2)){
+						log_error(logOrquestador,"No se pudo enviar un mensaje al nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
+						break;}
+					free(aux2);
+					if(!recibirMensaje(socketNuevaConexion,(void**)&aux2)){
+						log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
+						break; }
+					free(aux2);
+
+					int* aux3;
+					aux3=malloc(sizeof(int));
+					*aux3=nodoNivel->sleepDeadlock;
+					if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux3)){
+						log_error(logOrquestador,"No se pudo enviar un mensaje al nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
+						break;}
+					free(aux3);
+					if(!recibirMensaje(socketNuevaConexion,(void**)&aux3)){
+						log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
+						break; }
+					free(aux3);
+					//******FIN DE MANDAMOS LA INFO AL DEADLOCK DE CADA NIVEL*******
+
+
 
 					pthread_t threadPlanif;
 					pthread_create(&threadPlanif, NULL, planificador, (void *)nivel);
