@@ -50,6 +50,11 @@ t_list* listaNiveles;
 
 //Structs propios de la plataforma
 
+typedef struct t_nodoRec {
+char id;
+int cantAsignada;
+} NodoRecurso;
+
 typedef struct t_infoPlanificador {
 	int port;
 	t_queue* colaListos;
@@ -486,13 +491,24 @@ int orquestador (void) {
 				char *simboloRecibido; //Ej: @ ! / % $ &
 				simboloRecibido=malloc(1);
 				Header unHeader;
-				if(recibirHeader(socketNuevaConexion,&unHeader)>0){
+				if(recibirHeader(nodoN->socket,&unHeader)>0){
 					log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
 					switch(unHeader.type){
 						//TODO: implementar
-						//Implementar que?
+
 						case 3:
 
+							break;
+						case 4://el nivel envia los recursos liberados
+							NodoRecurso* nodoR;
+							nodoR=malloc(unHeader.payloadlength/sizeof(NodoRecurso));
+							recibirData(nodoN->socket,unHeader,(void**)nodoR);
+							//buscar en entre los bloqueados y empezar a asignar recursos liberados, pasar pj a listos
+							//for each pj bloq{
+							//for each recursoRecibido{
+							//rec==id && rec.cant>0? joya restar, sumar al asignado, liberar pj, romper for
+							//} }
+							//mandar recAsignados
 							break;
 						default:
 							break;

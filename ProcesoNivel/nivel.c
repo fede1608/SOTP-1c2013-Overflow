@@ -23,6 +23,7 @@
 #include "collections/list.h"
 
 static int rows,cols;
+int socketOrq;
 ITEM_NIVEL * listaItems = NULL;
 t_list * listaPersonajes;
 t_log * logger;
@@ -136,7 +137,7 @@ int main(void){
 	ipPuertoOrq=string_split(aux1, ":");
 	int puertoOrq=(int)strtol(ipPuertoOrq[1], NULL, 10);
 
-	int socketOrq= quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
+	socketOrq= quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
 
 	//handshake Orquestador-Nivel
 	if (mandarMensaje(socketOrq,2,strlen(nombreNivel)+1,nombreNivel)) {
@@ -473,7 +474,6 @@ t_list* inicializarListaRecursos(void){
 }
 void liberarRecursos(t_list* listaPer,char personaje){
 	char idPer;
-//	char idRec;
 	bool esPersonaje(NodoPersonaje* nodo){
 					if(nodo->id==idPer)
 						return true;
@@ -483,9 +483,17 @@ void liberarRecursos(t_list* listaPer,char personaje){
 		sumarRecurso(listaItems,nodo->id,nodo->cantAsignada);
 		free(nodo);
 	}
-
 	idPer=personaje;
 	NodoPersonaje* nodoPerAux = list_remove_by_condition(listaPer,esPersonaje);
+
+	NodoRecurso* buffer=malloc(sizeof(NodoRecurso)*list_size(nodoPerAux->listaRecursosAsignados));
+	int i;
+	for(i=0;i<list_size(nodoPerAux->listaRecursosAsignados);i++){
+		memcpy(&(buffer[i]),list_get(nodoPerAux->listaRecursosAsignados,i),sizeof(NodoRecurso));
+	}
+	mandarMensaje(socketOrq,4,sizeof(NodoRecurso)*list_size(nodoPerAux->listaRecursosAsignados),(void*) buffer);
+	//todo recibir recursos asignados
+
 	list_destroy_and_destroy_elements(nodoPerAux->listaRecursosAsignados,liberarInstancias);
 	free(nodoPerAux);
 
