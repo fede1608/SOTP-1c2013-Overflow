@@ -1,2 +1,4 @@
+AlgoritmoDeDeteccionDeInterbloqueo=1
+EjecucionDeAlgoritmoDeDeteccionDeInterbloqueo=20
 Quantum=4
 TiempoDeRetardoDelQuantum=0.5
