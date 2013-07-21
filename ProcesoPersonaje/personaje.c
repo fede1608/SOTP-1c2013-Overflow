@@ -71,15 +71,25 @@ void manejador (int sig){
 		log_info(log,"Te han Concedido una vida.\n Vidas restantes: %d\n",vidas);
 		vidas++;
 		break;
-}
+	}
 }
 
 
 int main(void){
 	//Señales
-	signal(SIGTERM,manejador);
-	signal(SIGINT,manejador);
-	signal(SIGUSR1,manejador);
+//	signal(SIGTERM,manejador);
+//	signal(SIGINT,manejador);
+//	signal(SIGUSR1,manejador);
+	struct sigaction new_action;
+	new_action.sa_handler = manejador;
+	sigemptyset (&new_action.sa_mask);
+	new_action.sa_flags = 0;
+	sigaction (SIGINT, &new_action, NULL);
+	sigaction (SIGTERM, &new_action, NULL);
+	sigaction (SIGUSR1, &new_action, NULL);
+
+
+
 	config=config_create("config.txt");
 
 	//Se inicializan las variables para el logueo
@@ -218,35 +228,35 @@ int main(void){
 			int alive=1;
 			if(recibirHeader(unSocketPlanif,&unHeader)>0){
 				printf("salio del recv");
-			if(unHeader.type==8){//planificador autorizo el movimiento
-				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
-				log_info(log,"Permiso de Movimiento Recibido");
-				alive=1;
-				if(ii==veclong){//esto solo sucede cuando el PJ queda bloqueado al pedir el ultimo recurso de sus objetivos en ese nivel
-					alive=0;//se evita todos los msjs
-					mandarMensaje(unSocket,4 , sizeof(char),&recActual);
-					MensajePersonaje respAlPlanf;
-					respAlPlanf.bloqueado=0;
-					respAlPlanf.solicitaRecurso=0;
-					respAlPlanf.finNivel=1;
-					respAlPlanf.recursoSolicitado='0';
-					mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
-					log_info(log,"Se envio respuesta de turno concluido al Planificador\n");
+				if(unHeader.type==8){//planificador autorizo el movimiento
+					recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+					log_info(log,"Permiso de Movimiento Recibido");
+					alive=1;
+					if(ii==veclong){//esto solo sucede cuando el PJ queda bloqueado al pedir el ultimo recurso de sus objetivos en ese nivel
+						alive=0;//se evita todos los msjs
+						mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+						MensajePersonaje respAlPlanf;
+						respAlPlanf.bloqueado=0;
+						respAlPlanf.solicitaRecurso=0;
+						respAlPlanf.finNivel=1;
+						respAlPlanf.recursoSolicitado='0';
+						mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
+						log_info(log,"Se envio respuesta de turno concluido al Planificador\n");
+					}
 				}
-			}
-			if(unHeader.type==9){//orquestador mato al personaje
-				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
-				log_info(log,"Orquestador ha matado al personaje");
-				vidas--;
-				//cerrar conexion con el nivel
-				mandarMensaje(unSocket,4 , sizeof(char),&recActual);
-				c--;
-				if(vidas==0) c=-1;//reiniciar plan de niveles
-				llego=0;
-				ii=veclong;
-				alive=0;
-				seMurio=0;
-				//logica de muerte
+				if(unHeader.type==9){//orquestador mato al personaje
+					recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+					log_info(log,"Orquestador ha matado al personaje");
+					vidas--;
+					//cerrar conexion con el nivel
+					mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+					c--;
+					if(vidas==0) c=-1;//reiniciar plan de niveles
+					llego=0;
+					ii=veclong;
+					alive=0;
+					seMurio=0;
+					//logica de muerte
 				}
 			}
 			printf("salio del recv");
