@@ -234,7 +234,7 @@ int main(void){
 					alive=1;
 					if(ii==veclong){//esto solo sucede cuando el PJ queda bloqueado al pedir el ultimo recurso de sus objetivos en ese nivel
 						alive=0;//se evita todos los msjs
-						mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+						mandarMensaje(unSocket,4 , sizeof(char),&charPer);//se le manda el char del personaje como señuelo para asignar el recurso q se le concedio
 						MensajePersonaje respAlPlanf;
 						respAlPlanf.bloqueado=0;
 						respAlPlanf.solicitaRecurso=0;
@@ -328,13 +328,13 @@ int main(void){
 						respAlPlanf.solicitaRecurso=1;
 						if(*respRec){
 							respAlPlanf.bloqueado=0;
-							rec.x=-1;
-							rec.y=-1;
 							log_info(log,"Se entrego una instancia del Recurso %c",recActual);
 						}else{
 							respAlPlanf.bloqueado=1;
 							log_info(log,"No se entrego una instancia del Recurso %c",recActual);
 						}
+						rec.x=-1;
+						rec.y=-1;
 						free(respRec);
 
 					}

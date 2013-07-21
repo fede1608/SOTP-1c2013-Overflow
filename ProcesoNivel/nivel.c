@@ -318,6 +318,15 @@ void handler(NodoPersonaje* dataPer){
 						case 1:
 							resp=recibirData(dataPer->socket,unHeader, (void**)carAux);
 							if(!resp) {close(dataPer->socket);return;}
+							if(dataPer->personajeBloqueado){
+								dataPer->personajeBloqueado=0;
+								idPer=dataPer->nodo->id;
+								NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
+								idRec=dataPer->recBloqueado;
+								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
+								nodoRecAux->cantAsignada++;
+								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer->nodo->id);
+							}
 							log_debug(logger,"Resp del recData: %d",resp);
 							log_info(logger,"El Personaje %c solicita la Posición del Recurso %c\n",dataPer->nodo->id,*carAux);
 							nodoAux=obtenerRecurso(listaItems, *carAux);
@@ -331,6 +340,15 @@ void handler(NodoPersonaje* dataPer){
 							break;
 						case 2:
 							if(!recibirData(dataPer->socket, unHeader, (void**)&posAux)) {close(dataPer->socket);return;}
+							if(dataPer->personajeBloqueado){
+								dataPer->personajeBloqueado=0;
+								idPer=dataPer->nodo->id;
+								NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
+								idRec=dataPer->recBloqueado;
+								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
+								nodoRecAux->cantAsignada++;
+								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer->nodo->id);
+							}
 							dataPer->nodo->posx=posAux.x;
 							dataPer->nodo->posy=posAux.y;
 							log_info(logger,"Se recibio la posicion(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id);
@@ -380,7 +398,17 @@ void handler(NodoPersonaje* dataPer){
 							}
 							break;
 						case 4:
+							if(!recibirData(dataPer->socket, unHeader, (void**)carAux)) {close(dataPer->socket);return;}
 							//todo sincronizar con los demas threads y con el listener cuando crea un personaje nuevo!
+							if(dataPer->personajeBloqueado&&dataPer->nodo->id==*carAux){
+								dataPer->personajeBloqueado=0;
+								idPer=dataPer->nodo->id;
+								NodoPersonaje* nodoPerAux = list_find(listaPersonajes,esPersonaje);
+								idRec=dataPer->recBloqueado;
+								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
+								nodoRecAux->cantAsignada++;
+								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c\n",*carAux,dataPer->nodo->id);
+							}
 							log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
 							log_debug(logger,"Case 4 puntero del personaje: %p",dataPer->nodo);
 							liberarRecursos(listaPersonajes,(dataPer->nodo)->id);
