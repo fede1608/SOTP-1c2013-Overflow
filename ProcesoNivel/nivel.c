@@ -155,8 +155,29 @@ int main(void){
 			mandarMensaje(socketOrq,1,sizeof(int),puerto);
 		}
 	}
-
-
+	//*****  INICIO HEADER DEL DEADLOCK Y SLEEP ******
+		Header headerDeadlock;
+		int* deadlockActivado;
+		deadlockActivado=malloc(sizeof(int));
+		if(recibirHeader(socketOrq,&headerDeadlock)){
+			printf("Se recibe validacion del Deadlock\n");
+			if(recibirData(socketOrq,headerDeadlock,(void**)deadlockActivado)){
+				printf("Se recibe validacion del Deadlock\n");
+				mandarMensaje(socketOrq,1,sizeof(int),deadlockActivado);
+			}
+		}
+		Header headerSleepDeadlock;
+			int* sleepDeadlock;
+			sleepDeadlock=malloc(sizeof(int));
+			if(recibirHeader(socketOrq,&headerSleepDeadlock)){
+				printf("Se recibio el sleep del Deadlock\n");
+				if(recibirData(socketOrq,headerSleepDeadlock,(void**)sleepDeadlock)){
+					printf("Se recibio el Sleep del Deadlock\n");
+					puertoEscuchaNivel=*puerto;
+					mandarMensaje(socketOrq,1,sizeof(int),sleepDeadlock);
+				}
+			}
+		//*****  FIN DEL HEADER DEL DEADLOCK Y SLEEP ******
 	nivel_gui_inicializar();
 	nivel_gui_get_area_nivel(&rows, &cols);
 	nivel_gui_dibujar(listaItems);
@@ -230,8 +251,15 @@ int main(void){
 
 
 			nivel_gui_dibujar(listaItems);
-			detectarDeadlock();
 
+			//********** Thread deteccion deadlock***********
+			//detectarDeadlock();
+			if (deadlockActivado>0){
+				pthread_t thr_detectorDeadlock;
+				pthread_create(&thr_detectorDeadlock, NULL, detectarDeadlock, NULL);
+				usleep (sleepDeadlock);
+			}
+		    //********** Fin Thread deteccion deadlock***********
 
 		}
 
