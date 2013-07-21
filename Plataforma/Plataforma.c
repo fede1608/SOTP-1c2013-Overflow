@@ -62,19 +62,6 @@ typedef struct t_infoPlanificador {
 	t_queue* colaListos;
 } InfoPlanificador;
 
-typedef struct t_infoNivel {
-	char* nombre;
-	char ip[20];
-	int port;
-	int puertoPlanif;
-} InfoNivel;
-
-typedef struct t_nodoPersonaje {//TODO completar segun las necesidades
-	char simboloRepresentativo; //Ej: @ ! / % $ &
-	int socket;
-	char recursoPedido;
-} NodoPersonaje;
-
 typedef struct t_nodoNivel {//TODO completar segun las necesidades
 	char* nombreNivel; //Ej: @ ! / % $ &
 	char ip[20];
@@ -83,7 +70,23 @@ typedef struct t_nodoNivel {//TODO completar segun las necesidades
 	int socket;
 	int deadlockActivado;
 	int sleepDeadlock;
+	t_queue * colaListos;
+	t_queue * colaBloquedos;
 } NodoNivel;
+
+typedef struct t_infoNivel {
+	char* nombre;
+	char ip[20];
+	int port;
+	int puertoPlanif;
+	NodoNivel* nodoN;
+} InfoNivel;
+
+typedef struct t_nodoPersonaje {//TODO completar segun las necesidades
+	char simboloRepresentativo; //Ej: @ ! / % $ &
+	int socket;
+	char recursoPedido;
+} NodoPersonaje;
 
 typedef struct t_msjPersonaje {
 	int solicitaRecurso;
@@ -252,7 +255,8 @@ int planificador (InfoNivel* nivel) {
 	//cola de personajes listos y bloqueados
 	t_queue *colaListos=queue_create();
 	t_queue *colaBloqueados=queue_create();
-
+	nivel->nodoN->colaBloquedos=colaBloqueados;
+	nivel->nodoN->colaListos=colaListos;
 	//TODO implementar handshake Conectarse con el nivel
 	//int socketNivel=quieroUnPutoSocketAndando(nivel->ipN,nivek->portN);
 
@@ -344,7 +348,6 @@ int planificador (InfoNivel* nivel) {
 			log_info(logPlanificador,"Esperando respuesta de turno concluido");
 			if(recibirHeader(personajeActual->socket, &headerMsjPersonaje) > 0){
 				if(recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje)){
-
 					log_info(logPlanificador,"Respuesta recibida");
 					//Comportamientos según el mensaje que se recibe del personaje
 
@@ -362,7 +365,8 @@ int planificador (InfoNivel* nivel) {
 					log_debug(logPlanificador,"NeedRec: %d Blocked: %d FinNivel: %d Rec: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
 		//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
 					if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
-						log_info(logPlanificador,"Rec bloq1 %d",quantum);
+						log_info(logPlanificador,"Rec%c bloq1 %d",msjPersonaje.recursoSolicitado,quantum);
+						personajeActual->recursoPedido=msjPersonaje.recursoSolicitado;
 						quantum=varGlobalQuantum+1;
 						queue_push(colaBloqueados,queue_pop(colaListos));
 						log_info(logPlanificador,"Rec bloq2 %d", quantum);
@@ -423,7 +427,7 @@ int planificador (InfoNivel* nivel) {
 			}
 
 		}else{
-			log_error(logPlanificador,"Cola de listos vacia --> Sleep");
+			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
 			usleep(varGlobalSleep); //para que no quede en espera activa
 		}
 	}//Cierra While(1)
@@ -499,6 +503,8 @@ int orquestador (void) {
 				Header unHeader;
 				if(recibirHeader(nodoN->socket,&unHeader)>0){
 					log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
+					NodoRecurso *nodoR;
+					NodoRecurso * recursosAsignados1;
 					switch(unHeader.type){
 						//TODO: implementar
 
@@ -506,15 +512,48 @@ int orquestador (void) {
 
 							break;
 						case 4://el nivel envia los recursos liberados
-							NodoRecurso* nodoR;
-							nodoR=malloc(unHeader.payloadlength/sizeof(NodoRecurso));
+
+							log_info(logOrquestador,"El nivel %s solicita liberar recursos",nodoN->nombreNivel);
+							nodoR=malloc(unHeader.payloadlength);
 							recibirData(nodoN->socket,unHeader,(void**)nodoR);
 							//buscar en entre los bloqueados y empezar a asignar recursos liberados, pasar pj a listos
+							int p,r,tamColaBloq;
+							for(r=0;r<(unHeader.payloadlength/sizeof(NodoRecurso));r++)
+								log_debug(logOrquestador,"id: %c recALib: %d",nodoR[r].id,nodoR[r].cantAsignada);
+
+
+
+
+							recursosAsignados1=malloc(unHeader.payloadlength);
+							memcpy(recursosAsignados1,nodoR,unHeader.payloadlength);
+
+							//inicializa la los rec asignados
+							for(r=0;r<(unHeader.payloadlength/sizeof(NodoRecurso));r++)
+								recursosAsignados1[r].cantAsignada=0;
 							//for each pj bloq{
+							tamColaBloq=queue_size(nodoN->colaBloquedos);
+							for (p=0;p<tamColaBloq;p++){
 							//for each recursoRecibido{
-							//rec==id && rec.cant>0? joya restar, sumar al asignado, liberar pj, romper for
-							//} }
+								NodoPersonaje* nodoP=queue_pop(nodoN->colaBloquedos);
+								log_debug(logOrquestador,"Per: %c recBloc:%c",nodoP->simboloRepresentativo,nodoP->recursoPedido);
+								for(r=0;r<(unHeader.payloadlength/sizeof(NodoRecurso));r++){
+									//rec==id && rec.cant>0? joya restar, sumar al asignado, liberar pj, romper for
+									if((nodoR[r].id==nodoP->recursoPedido)&&(nodoR[r].cantAsignada>0)){
+										nodoR[r].cantAsignada--;
+										recursosAsignados1[r].cantAsignada++;
+										log_info(logOrquestador,"Se libero al personaje %c", nodoP->simboloRepresentativo);
+										queue_push(nodoN->colaListos,nodoP);
+										r=(unHeader.payloadlength/sizeof(NodoRecurso));
+//										break;
+									} else if((r+1)==(unHeader.payloadlength/sizeof(NodoRecurso)))//si es el ultimo recurso y todavia no salio del for..
+										queue_push(nodoN->colaBloquedos,nodoP);
+								}
+							}
 							//mandar recAsignados
+							log_info(logOrquestador,"Se envio los recursos Asignados");
+							mandarMensaje(nodoN->socket,4,unHeader.payloadlength,(void*)recursosAsignados1);
+							free(nodoR);
+							free(recursosAsignados1);
 							break;
 						default:
 							break;
@@ -657,7 +696,7 @@ int orquestador (void) {
 
 					//cerrar socket
 					close(socketNuevaConexion);
-					log_info(logOrquestador,"Se cerro el socket %d",socketNuevaConexion);
+					log_info(logOrquestador,"Se cerro la conexion con el personaje %c",*simboloRecibido);
 					break;
 
 				case 2: //case Nivel
@@ -687,6 +726,7 @@ int orquestador (void) {
 					nivel->nombre=simboloRecibido;
 					nivel->port=nodoNivel->port;
 					nivel->puertoPlanif=contadorPuerto;
+					nivel->nodoN=nodoNivel;
 					contadorPuerto++;
 
 					int* aux;

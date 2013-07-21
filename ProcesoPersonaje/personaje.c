@@ -193,7 +193,7 @@ int main(void){
 			//conectar con nivel
 			int unSocket;
 			unSocket = quieroUnPutoSocketAndando(ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel);
-			log_info(log,"Se creo un nuevo socket. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,unSocket);
+			log_info(log,"Se creo un nuevo socket con el nivel. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,unSocket);
 			*charbuf=charPer;
 
 			if (mandarMensaje(unSocket,0 , 1,charbuf)) {
@@ -227,7 +227,7 @@ int main(void){
 			log_info(log,"Esperando permiso de movimiento...");
 			int alive=1;
 			if(recibirHeader(unSocketPlanif,&unHeader)>0){
-				printf("salio del recv");
+
 				if(unHeader.type==8){//planificador autorizo el movimiento
 					recibirData(unSocketPlanif,unHeader,(void**)&charAux);
 					log_info(log,"Permiso de Movimiento Recibido");
@@ -259,7 +259,7 @@ int main(void){
 					//logica de muerte
 				}
 			}
-			printf("salio del recv");
+
 		if(alive) {//si el orquestador no lo mato
 			if((rec.x==-1)&&(rec.y==-1)){ //si no tiene asignada un destino solicitar uno
 				buffer= &recActual;
@@ -267,6 +267,7 @@ int main(void){
 				if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
 					log_info(log,"Solicitada la posicion del recurso actual necesario al nivel");
 					Header unHeader;
+
 					if (recibirHeader(unSocket,&unHeader)) {
 						log_debug(log,"pos %d %d %d %d",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
 						Posicion lifeSucks;

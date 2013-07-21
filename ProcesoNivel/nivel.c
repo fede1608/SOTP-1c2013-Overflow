@@ -171,10 +171,10 @@ int main(void){
 			int* sleepDeadlock;
 			sleepDeadlock=malloc(sizeof(int));
 			if(recibirHeader(socketOrq,&headerSleepDeadlock)){
-				printf("Se recibio el sleep del Deadlock\n");
+				printf("Se recibio el Header sleep del Deadlock\n");
 				if(recibirData(socketOrq,headerSleepDeadlock,(void**)sleepDeadlock)){
 					printf("Se recibio el Sleep del Deadlock\n");
-					puertoEscuchaNivel=*puerto;
+
 					mandarMensaje(socketOrq,1,sizeof(int),sleepDeadlock);
 				}
 			}
@@ -258,7 +258,7 @@ int main(void){
 			if (deadlockActivado>0){
 				pthread_t thr_detectorDeadlock;
 				pthread_create(&thr_detectorDeadlock, NULL, detectarDeadlock, NULL);
-				usleep (sleepDeadlock);
+//				usleep (sleepDeadlock);
 			}
 		    //********** Fin Thread deteccion deadlock***********
 
@@ -415,7 +415,7 @@ void listenear(int socketEscucha){
 		if (listen(socketEscucha, 1) != 0) {
 
 			log_error(logger,"Error al bindear socket escucha");
-			return EXIT_FAILURE;
+			//return EXIT_FAILURE;
 		}
 
 			log_info(logger,"Escuchando conexiones entrantes");
@@ -425,7 +425,7 @@ void listenear(int socketEscucha){
 			if ((socketNuevaConexion = accept(socketEscucha, NULL, 0)) < 0) {
 
 				log_error(logger,"Error al aceptar conexion entrante");
-				return EXIT_FAILURE;
+				//return EXIT_FAILURE;
 			}
 
 			//Handshake en el que recibe la letra del personaje
@@ -520,8 +520,15 @@ void liberarRecursos(t_list* listaPer,char personaje){
 		memcpy(&(buffer[i]),list_get(nodoPerAux->listaRecursosAsignados,i),sizeof(NodoRecurso));
 	}
 	mandarMensaje(socketOrq,4,sizeof(NodoRecurso)*list_size(nodoPerAux->listaRecursosAsignados),(void*) buffer);
-	//todo recibir recursos asignados
 
+	//recibir recursos asignados
+	Header unHeader;
+	//todo validar
+	recibirHeader(socketOrq,&unHeader);
+	recibirData(socketOrq,unHeader,(void**)buffer);
+	for(i=0;i<(list_size(nodoPerAux->listaRecursosAsignados));i++)
+		sumarRecurso(listaItems,buffer[i].id,-(buffer[i].cantAsignada));
+	free(buffer);
 	list_destroy_and_destroy_elements(nodoPerAux->listaRecursosAsignados,liberarInstancias);
 	free(nodoPerAux);
 
