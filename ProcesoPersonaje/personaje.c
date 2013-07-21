@@ -46,7 +46,7 @@ char charPer;
 int lengthVecConfig(char * value);
 int seMurio=0;
 t_config* config;
-
+t_log * log;
 //El manejador de señales
 void manejador (int sig){
 	switch (sig){
@@ -55,17 +55,20 @@ void manejador (int sig){
 		//Se debe notificar al nivel el motivo de la muerte y liberar recursos
 		if (vidas>0){
 			vidas--;
-			printf("Has perdido una vida.\n Vidas restantes: %d\n",vidas);
+			log_info(log,"Has perdido una vida por SIGTERM. Vidas restantes: %d",vidas);
 			seMurio=1;
+			log_info(log,"Se procede a Reiniciar el Nivel");
 		}
 		else
 		{
+			log_info(log,"Has perdido todas tus vidas. Se procede a Reiniciar el Plan de Niveles");
 			vidas=config_get_int_value(config,"vidas");
 			seMurio=2;
 			//Reiniciar el plan de niveles
 		}
 		break;
 	case SIGUSR1:
+		log_info(log,"Te han Concedido una vida.\n Vidas restantes: %d\n",vidas);
 		vidas++;
 		break;
 }
@@ -81,7 +84,7 @@ int main(void){
 
 	//Se inicializan las variables para el logueo
 	t_log_level detail = LOG_LEVEL_TRACE;
-	t_log * log = log_create("LogPersonaje.log","Personaje",true,detail);
+	log = log_create("LogPersonaje.log","Personaje",true,detail);
 
 	//obtener recurso de config
 		char** obj;
@@ -133,11 +136,11 @@ int main(void){
 			//handshake Orquestador-Personaje
 			if (mandarMensaje(unSocketOrq ,0 , 1,auxC)) {
 				if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
-					printf("msj recibido from handshake %c\n",*auxC);
+					log_debug("Handshake contestado del Orquestador %c",*auxC);
 				}
 			}
 			Header unHeader;
-			if(c!=0){
+			if(c!=0){//si no es la primera vez q se conecta al orq manda el nombre del nivel anterior
 				//mandar nivel que termino
 				mandarMensaje(unSocketOrq,2,strlen(niveles[c-1])+1,niveles[c-1]);
 				log_debug(log,"NivelAnterior: %s",nivelActual);
@@ -149,7 +152,7 @@ int main(void){
 			if(recibirHeader(unSocketOrq,&unHeader)){
 				if(recibirData(unSocketOrq,unHeader,(void**)&ipNivelPlanif)){
 				//Obtener info de ip & port
-					printf("%s %d %s %d\n",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,ipNivelPlanif.ipPlanificador,ipNivelPlanif.portPlanificador);
+					log_debug(log,"IPNivel:%s PortNivel:%d IPPlanf:%s PortPlanf:%d\n",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,ipNivelPlanif.ipPlanificador,ipNivelPlanif.portPlanificador);
 				}
 			}
 
@@ -184,18 +187,14 @@ int main(void){
 			*charbuf=charPer;
 
 			if (mandarMensaje(unSocket,0 , 1,charbuf)) {
-//				printf("Llego el OK al nivel\n");
 				log_info(log,"Llego el OK al nivel");
 				if(recibirMensaje(unSocket, (void**)&charbuf)>=0) {
-//					printf("Llego el OK del nivel char %c\n",*charbuf);
 					log_info(log,"Llego el OK del nivel char %c",*charbuf);
 				}
 				else {
-//					printf("No llego al cliente la confirmacion del nivel (handshake)\n");
 					log_error(log,"No llego al cliente la confirmacion del nivel (handshake)");
 				}
 			} else {
-//				printf("No llego al nivel la confirmacion del personaje (handshake)\n");
 				log_error(log,"No llego al nivel la confirmacion del personaje (handshake)");
 			}
 
@@ -205,8 +204,9 @@ int main(void){
 
 			void* buffer;
 
-	for(ii=0;ii<veclong;ii++){//for each recurso
-		recActual=*obj[ii];
+	for(ii=0;ii<=veclong;ii++){//for each recurso
+		if(ii<veclong)//para evitar SF
+			recActual=*obj[ii];
 		//solicitar posicion recurso Recurso: recactual
 		//esperar posicion del recurso posicion : rec
 		llego=1;
@@ -217,11 +217,23 @@ int main(void){
 			log_info(log,"Esperando permiso de movimiento...");
 			int alive=1;
 			if(recibirHeader(unSocketPlanif,&unHeader)>0){
+				printf("salio del recv");
 			if(unHeader.type==8){//planificador autorizo el movimiento
 				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
 				log_info(log,"Permiso de Movimiento Recibido");
 				alive=1;
+				if(ii==veclong){//esto solo sucede cuando el PJ queda bloqueado al pedir el ultimo recurso de sus objetivos en ese nivel
+					alive=0;//se evita todos los msjs
+					mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+					MensajePersonaje respAlPlanf;
+					respAlPlanf.bloqueado=0;
+					respAlPlanf.solicitaRecurso=0;
+					respAlPlanf.finNivel=1;
+					respAlPlanf.recursoSolicitado='0';
+					mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
+					log_info(log,"Se envio respuesta de turno concluido al Planificador\n");
 				}
+			}
 			if(unHeader.type==9){//orquestador mato al personaje
 				recibirData(unSocketPlanif,unHeader,(void**)&charAux);
 				log_info(log,"Orquestador ha matado al personaje");
@@ -234,10 +246,10 @@ int main(void){
 				ii=veclong;
 				alive=0;
 				seMurio=0;
-				//todo implementar logica de muerte
+				//logica de muerte
 				}
 			}
-
+			printf("salio del recv");
 		if(alive) {//si el orquestador no lo mato
 			if((rec.x==-1)&&(rec.y==-1)){ //si no tiene asignada un destino solicitar uno
 				buffer= &recActual;
@@ -319,19 +331,26 @@ int main(void){
 
 				if((ii+1==veclong)) {
 					//cerrar conexion con el nivel
-					mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+					if(!respAlPlanf.bloqueado){//si no quedo bloqueado desp de pedir el ultimo recurso cierra conexion, de lo contrario sigue una vuelta mas
+						mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+						ii++;//evita q de una vuelta extra
+					}
 					respAlPlanf.finNivel=1;
 //					close(unSocket);
 					if(seMurio>0) {//Muerte del personaje
 						//cerrar conexion con el nivel
 						respAlPlanf.finNivel=1;
 						c--;
-						if(seMurio==2) c=-1;//reiniciar plan de niveles
+						seMurio=-1;
+						if(seMurio==2) {
+							c=-1;//reiniciar plan de niveles
+							seMurio=-2;
+						}
 						llego=0;
-						printf("Se murio %d %d %d\n",ii,c,llego);
+						log_debug(log,"Se murio1 %d %d %d\n",ii,c,llego);
 						ii=veclong;
-						printf("Se murio %d\n",ii);
-						seMurio=0;
+						log_debug(log,"Se murio1 %d\n",ii);
+
 						}
 					//exit(0);
 				}
@@ -346,17 +365,17 @@ int main(void){
 			c--;
 			if(seMurio==2) c=-1;
 			llego=0;
-			printf("Se murio %d %d %d\n",ii,c,llego);
+			log_debug(log,"Se murio2 ii:%d c:%d llego:%d\n",ii,c,llego);
 			ii=veclong;
-			printf("Se murio %d\n",ii);
+			log_debug(log,"Se murio2 ii:%d\n",ii);
 			seMurio=0;
 			}
 			mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
-			printf("Se envio respuesta de turno concluido al Planificador\n");
+			log_info(log,"Se envio respuesta de turno concluido al Planificador\n");
 		}//fin if(alive)
 
 		}//fin while(llego)
-		printf("Fin for\n");
+		log_debug(log,"Fin for\n");
 	}//fin for each recurso
 }//fin for each nivel
 
