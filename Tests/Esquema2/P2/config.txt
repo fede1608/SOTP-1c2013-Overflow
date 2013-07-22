@@ -1,0 +1,6 @@
+nombre=Luigi
+simbolo=*
+planDeNiveles=[Deadlock]
+obj[Deadlock]=[M,Z]
+vidas=5
+orquestador=127.0.0.1:4999
