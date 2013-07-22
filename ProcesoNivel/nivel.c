@@ -584,10 +584,11 @@ while(*deadlockActivado){
 	NodoPersonaje* nodoPer;
 	NodoRecurso* nodoRec;
 	ITEM_NIVEL* itemNivel;
-	int count=0;
 	bool flag=true;
 	log_info(logger,"Algoritmo de Deteccion de Deadlock empezado...");
 	totalPj=list_size(listaPersonajes);
+	int count=0;
+	int countAnt=totalPj;
 	if(totalPj==0) {
 		log_info(logger,"Algoritmo de Deteccion de Deadlock suspendido por falta de personajes...");
 		usleep(*sleepDeadlock);
@@ -634,8 +635,9 @@ while(*deadlockActivado){
 		disponible[j]=itemNivel->quantity;
 	}
 
-	while((count!=0)&&flag)    {                              //if finish array has all true's(all processes to running state)
-								   //deadlock not detected and loop stops!
+	while((count<countAnt)&&flag) {   //if finish array has all true's(all processes to running state)
+		if(count!=0)countAnt=count;
+		flag=false;				   //deadlock not detected and loop stops!
 		for(i=0;i<totalPj;i++)    {
 			count=0;
 			nodoPer=list_get(listaPersonajes,i);
@@ -649,11 +651,11 @@ while(*deadlockActivado){
 							count++;
 						}
 				}
-				flag=false;
+
 				if(count==totalRec)
 				{
 					for(j=0;j<totalRec;j++){
-						disponible[j]+=asignados[i][j];        //allocated reources are released and added to available!
+						disponible[j]+=asignados[i][j];//allocated reources are released and added to available!
 					}
 					finish[i]=true;
 					log_info(logger,"Personaje %c se pasa al estado ejecutando y se asume terminado",nodoPer->id);
@@ -671,6 +673,7 @@ while(*deadlockActivado){
 				count++;
 			}
 		}
+		log_debug(logger,"count: %d flag %d",count,flag);
 	}//fin while
 	int suma,sumaBools;
 	char* pjsEnDeadlock;
@@ -699,7 +702,7 @@ while(*deadlockActivado){
 	}
 	if(sumaBools)
 		log_info(logger,"Vamo'! Deadlock no Detectado");
-	else if(recovery){//todo handlear deadlock
+	else if(recovery){//handlear deadlock
 		unHeader.payloadlength=unHeader.payloadlength*sizeof(char);
 		log_info(logger,"Se envio pedido de recovery al Orquestador. Se envio %d personajes en deadlock",unHeader.payloadlength);
 		mandarMensaje(socketOrq,unHeader.type,unHeader.payloadlength,pjsEnDeadlock);
