@@ -347,7 +347,7 @@ int planificador (InfoNivel* nivel) {
 			int tam=queue_size(colaListos);
 			for (p=0;p<tam;p++){
 				NodoPersonaje* nodoP=queue_pop(colaListos);
-				log_info(logPlanificador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+				log_info(logPlanificador,"%d° Personaje: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->socket);
 				queue_push(colaListos,nodoP);
 			}
 			//imprimir PJ bloqueados
@@ -355,7 +355,7 @@ int planificador (InfoNivel* nivel) {
 			tam=queue_size(colaBloqueados);
 			for (p=0;p<tam;p++){
 				NodoPersonaje* nodoP=queue_pop(colaBloqueados);
-				log_info(logPlanificador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+				log_info(logPlanificador,"%d° Personaje: %c Recurso Solicitado: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido,nodoP->socket);
 				queue_push(colaBloqueados,nodoP);
 			}
 //			log_info(logPlanificador,"La lista no esta vacia");
@@ -704,7 +704,7 @@ int orquestador (void) {
 						default:
 							break;
 						}
-					close(socketNuevaConexion);
+//					close(socketNuevaConexion);WTF lucas?
 				}
 				/* Si se desconecta el nivel correspondiente
 				 * (el socket se desconecta)
@@ -713,7 +713,7 @@ int orquestador (void) {
 					nombreNivel = nodoN->nombreNivel;
 					list_remove_by_condition(listaNiveles, esMiNivel);
 					log_info(logOrquestador,"Se borro el nivel %s por desconexion",nodoN->nombreNivel);
-					close(socketNuevaConexion);
+					close(nodoN->socket);
 				}
 			}
 		}
@@ -1024,7 +1024,7 @@ int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha){
 				personaje->orden=planificador->contPersonajes;
 				queue_push(planificador->colaListos,personaje);
 				planificador->contPersonajes++;
-				log_info(logPlanificador,"Se agrego al Personaje %c a la cola de listos",*simboloRecibido);
+				log_info(logPlanificador,"Se agrego al Personaje %c Socket: %d a la cola de listos",*simboloRecibido,socketNuevaConexion);
 
 
 
