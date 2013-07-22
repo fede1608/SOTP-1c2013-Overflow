@@ -68,7 +68,7 @@ void manejador (int sig){
 		}
 		break;
 	case SIGUSR1:
-		log_info(log,"Te han Concedido una vida.\n Vidas restantes: %d\n",vidas);
+		log_info(log,"Te han Concedido una vida. Vidas restantes: %d",vidas);
 		vidas++;
 		break;
 	}
@@ -159,12 +159,11 @@ int main(void){
 			if(seMurio==-1)tipomsj=3;
 			if(seMurio==-2)tipomsj=4;
 			mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
-//			printf("%s",nivelActual);
 			log_debug(log,"NivelActual: %s",nivelActual);
 			if(recibirHeader(unSocketOrq,&unHeader)){
 				if(recibirData(unSocketOrq,unHeader,(void**)&ipNivelPlanif)){
 				//Obtener info de ip & port
-					log_debug(log,"IPNivel:%s PortNivel:%d IPPlanf:%s PortPlanf:%d\n",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,ipNivelPlanif.ipPlanificador,ipNivelPlanif.portPlanificador);
+					log_debug(log,"IPNivel:%s PortNivel:%d IPPlanf:%s PortPlanf:%d",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,ipNivelPlanif.ipPlanificador,ipNivelPlanif.portPlanificador);
 				}
 			}
 
@@ -243,7 +242,7 @@ int main(void){
 						respAlPlanf.finNivel=1;
 						respAlPlanf.recursoSolicitado='0';
 						mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
-						log_info(log,"Se envio respuesta de turno concluido al Planificador\n");
+						log_info(log,"Se envio respuesta de turno concluido al Planificador");
 					}
 				}
 				if(unHeader.type==9){//orquestador mato al personaje
@@ -360,9 +359,9 @@ int main(void){
 							seMurio=-2;
 						}
 						llego=0;
-						log_debug(log,"Se murio1 %d %d %d\n",ii,c,llego);
+						log_debug(log,"Se murio1 %d %d %d",ii,c,llego);
 						ii=veclong;
-						log_debug(log,"Se murio1 %d\n",ii);
+						log_debug(log,"Se murio1 %d",ii);
 
 						}
 					//exit(0);
@@ -378,17 +377,17 @@ int main(void){
 			c--;
 			if(seMurio==2) c=-1;
 			llego=0;
-			log_debug(log,"Se murio2 ii:%d c:%d llego:%d\n",ii,c,llego);
+			log_debug(log,"Se murio2 ii:%d c:%d llego:%d",ii,c,llego);
 			ii=veclong;
-			log_debug(log,"Se murio2 ii:%d\n",ii);
+			log_debug(log,"Se murio2 ii:%d",ii);
 			seMurio=0;
 			}
 			mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
-			log_info(log,"Se envio respuesta de turno concluido al Planificador\n");
+			log_info(log,"Se envio respuesta de turno concluido al Planificador");
 		}//fin if(alive)
 
 		}//fin while(llego)
-		log_debug(log,"Fin for\n");
+
 	}//fin for each recurso
 }//fin for each nivel
 
