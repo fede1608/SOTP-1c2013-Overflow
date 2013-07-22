@@ -130,8 +130,8 @@ int main (void) {
 	varGlobalSleep=(int)(config_get_double_value(config,"TiempoDeRetardoDelQuantum")* 1000000);
 	varGlobalDeadlock=config_get_int_value(config,"AlgoritmoDeDeteccionDeInterbloqueo");
 	varGlobalSleepDeadlock=(int)(config_get_double_value(config,"EjecucionDeAlgoritmoDeDeteccionDeInterbloqueo")* 1000000);
-	printf("Quantum: %d Sleep: %d microseconds\n",varGlobalQuantum,	varGlobalSleep);
-	printf("Proceso plataforma iniciado\nCreando THR Orquestador...\n");
+	log_info(logOrquestador,"Quantum: %d Sleep: %d microseconds",varGlobalQuantum,	varGlobalSleep);
+	log_info(logOrquestador,"Proceso plataforma iniciado. Creando THR Orquestador...");
 	log_info(logOrquestador,"Proceso plataforma iniciado");
 	log_info(logOrquestador,"Creando THR Orquestador");
 
@@ -203,7 +203,7 @@ int main (void) {
 		struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
 		//si watcheamos un archivo no va a venir el nombre poqrue es redundante por eso event->len es igual a 0
 
-		log_debug(logOrquestador,"wd=%d mask=%u cookie=%u len=%u\n",
+		log_debug(logOrquestador,"wd=%d mask=%u cookie=%u len=%u",
 		                event->wd, event->mask,
 		                event->cookie, event->len);
 				if ( event->mask & IN_MODIFY)
@@ -233,9 +233,10 @@ inotify_rm_watch(fd,wd);
 close(fd);
 //******************** FIN INOTIFY *********************
 config_destroy(config);
-printf("Proceso plataforma finalizado correctamente\n");
+log_info(logOrquestador,"Proceso plataforma finalizado correctamente\n");
 
 //******************** KOOPA *********************
+//todo hay que ver donde metemos a koopa para que esto sea consistente, yo diria meterlo en la misma carpeta q el planificador
 char *environ[]= {"../../Libs","../../Varios/reglas2.txt",NULL};
 execv("../../Varios/koopa1.2",environ);
 //printf("salio todo mal\n");
@@ -300,13 +301,29 @@ int planificador (InfoNivel* nivel) {
 
 		//Si la cola no esta vacia
 		if(!queue_is_empty(colaListos)){
-
-			log_info(logPlanificador,"La lista no esta vacia");
+			//imprimir PJ listos
+			log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+			int p;
+			int tam=queue_size(colaListos);
+			for (p=0;p<tam;p++){
+				NodoPersonaje* nodoP=queue_pop(colaListos);
+				log_info(logOrquestador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+				queue_push(colaListos,nodoP);
+			}
+			//imprimir PJ bloqueados
+			log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+			tam=queue_size(colaBloqueados);
+			for (p=0;p<tam;p++){
+				NodoPersonaje* nodoP=queue_pop(colaBloqueados);
+				log_info(logOrquestador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+				queue_push(colaBloqueados,nodoP);
+			}
+//			log_info(logPlanificador,"La lista no esta vacia");
 			NodoPersonaje *personajeActual; //todo Revisar que los punteros de personajeActual anden bien
 
 			if(quantum>0){
 
-				log_info(logPlanificador,"El Quantum es mayor a 0");
+				log_info(logPlanificador,"El Quantum %d es mayor a 0",quantum);
 				//Mandar mensaje de movimiento permitido al socket del personaje del nodo actual (primer nodo de la cola)
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
@@ -321,7 +338,7 @@ int planificador (InfoNivel* nivel) {
 			else {
 				quantum=varGlobalQuantum;
 
-				log_info(logPlanificador,"Se acabo el quantum");
+				log_info(logPlanificador,"Se termino el quantum");
 				//Sacar el nodo actual (primer nodo de la cola) y enviarlo al fondo de la misma
 				//todo Sincronizar colaListos con el Listener
 				nodoAux=queue_pop(colaListos);
@@ -389,7 +406,7 @@ int planificador (InfoNivel* nivel) {
 					}
 
 					quantum--;
-					log_debug(logPlanificador,"Quatum Left: %d Sleep: %d\n",quantum,varGlobalSleep);
+					log_debug(logPlanificador,"Quatum Left: %d Sleep: %d",quantum,varGlobalSleep);
 					usleep(varGlobalSleep);
 				}
 				else {
@@ -605,7 +622,7 @@ int orquestador (void) {
 					//Esperar solicitud de info de conexion de Nivel y Planifador
 
 					if(recibirHeader(socketNuevaConexion,&unHeader)){
-						log_debug(logOrquestador,"Info Header: %d %d\n",unHeader.payloadlength,unHeader.type);
+						log_debug(logOrquestador,"Info Header: payload:%d type:%d",unHeader.payloadlength,unHeader.type);
 						switch(unHeader.type){
 						case 1://Personaje entra por primera vez al orquestador (incrementa el contador de personajes)
 							log_info(logOrquestador,"El Personaje %c se conecto por primera vez",*simboloRecibido);
@@ -892,7 +909,7 @@ char* print_ip(int ip)
     return aux;
 }
 bool esMiNivel(NodoNivel* nodo){
-	printf("%s %s\n",nodo->nombreNivel,nombreNivel);
+//	printf("%s %s\n",nodo->nombreNivel,nombreNivel);
 
 	if(strcmp(nodo->nombreNivel,nombreNivel)==0)
 		return true;
