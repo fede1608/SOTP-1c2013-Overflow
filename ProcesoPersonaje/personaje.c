@@ -143,7 +143,7 @@ int main(void){
 			auxC=malloc(sizeof(char));
 			*auxC=charPer;
 			//handshake Orquestador-Personaje
-			if (mandarMensaje(unSocketOrq ,0 , 1,auxC)) {
+			if (mandarMensaje(unSocketOrq ,0 , sizeof(char),auxC)) {
 				if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
 					log_debug("Handshake contestado del Orquestador %c",*auxC);
 				}
@@ -176,10 +176,10 @@ int main(void){
 			unSocketPlanif = quieroUnPutoSocketAndando(ipPuertoOrq[0],ipNivelPlanif.portPlanificador);
 			log_info(log,"Se creo un nuevo socket con el Planificador. Direccion: %s // Puerto: %d // Socket: %d",ipPuertoOrq[0],ipNivelPlanif.portPlanificador,unSocketPlanif);
 			char* charbuf;
-			charbuf=malloc(1);
+			charbuf=malloc(sizeof(char));
 			*charbuf=charPer;
 			//handshake
-			if (mandarMensaje(unSocketPlanif,0 , 1,charbuf)) {
+			if (mandarMensaje(unSocketPlanif,0 , sizeof(char),charbuf)) {
 				log_info(log,"Se envío el Handshake al planificador");
 				if(recibirMensaje(unSocketPlanif, (void**)&charbuf)>=0) {
 					log_info(log,"Llego el Handshake del Planificador: %c",*charbuf);
@@ -198,7 +198,7 @@ int main(void){
 			log_info(log,"Se creo un nuevo socket con el nivel. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,unSocket);
 			*charbuf=charPer;
 
-			if (mandarMensaje(unSocket,0 , 1,charbuf)) {
+			if (mandarMensaje(unSocket,0 , sizeof(char),charbuf)) {
 				log_info(log,"Llego el OK al nivel");
 				if(recibirMensaje(unSocket, (void**)&charbuf)>=0) {
 					log_info(log,"Llego el OK del nivel char %c",*charbuf);
@@ -243,7 +243,8 @@ int main(void){
 						respAlPlanf.finNivel=1;
 						respAlPlanf.recursoSolicitado='0';
 						mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
-						log_info(log,"Se envio respuesta de turno concluido al Planificador");
+						log_info(log,"Se envio respuesta de turno concluido al Planificador LastResourse");
+						log_debug(log,"ii:%d veclong:%d c:%d",ii,veclong,c);
 					}
 				}
 				if(unHeader.type==9){//orquestador mato al personaje
@@ -263,6 +264,10 @@ int main(void){
 					seMurio=-3;
 					//logica de muerte
 				}
+			}else{
+				log_error(log,"Se perdio la conexion con el planificador");
+				alive=0;
+				exit(0);
 			}
 
 		if(alive) {//si el orquestador no lo mato
@@ -270,7 +275,7 @@ int main(void){
 				buffer= &recActual;
 				//solicitar Posicion del recurso recActual
 				if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
-					log_info(log,"Solicitada la posicion del recurso actual necesario al nivel");
+					log_info(log,"Solicitada la posicion del recurso actual %c necesario al nivel",recActual);
 					Header unHeader;
 
 					if (recibirHeader(unSocket,&unHeader)) {
@@ -364,7 +369,7 @@ int main(void){
 						}
 						llego=0;
 						log_debug(log,"Se murio1 %d %d %d",ii,c,llego);
-						ii=veclong;
+						ii=veclong+1;
 						log_debug(log,"Se murio1 %d",ii);
 
 						}
@@ -386,7 +391,7 @@ int main(void){
 			}
 			llego=0;
 			log_debug(log,"Se murio2 ii:%d c:%d llego:%d",ii,c,llego);
-			ii=veclong;
+			ii=veclong+1;
 			log_debug(log,"Se murio2 ii:%d",ii);
 			seMurio=0;
 			}
@@ -399,24 +404,24 @@ int main(void){
 	}//fin for each recurso
 }//fin for each nivel
 
-log_info(log,"Finalizado Plan de Niveles");
+
 int unSocketOrq;
 unSocketOrq = quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
 char* auxC;
 auxC=malloc(sizeof(char));
 *auxC=charPer;
 //handshake Orquestador-Personaje
-if (mandarMensaje(unSocketOrq ,0 , 1,auxC)) {
+if (mandarMensaje(unSocketOrq ,0 , sizeof(char),auxC)) {
 	if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
 		log_debug("Handshake contestado del Orquestador %c",*auxC);
 	}
 }
-Header unHeader;
 //esperar solicitud de info nivel/Planif
 int tipomsj=5;
 mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
+log_info(log,"Se envio Msj Fin de Plan de Niveles al Orquestador");
 close(unSocketOrq);
-
+log_info(log,"Finalizado Plan de Niveles");
 return EXIT_SUCCESS;
 
 }

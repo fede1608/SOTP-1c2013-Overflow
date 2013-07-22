@@ -111,7 +111,7 @@ int main(void){
 	log_info(logger,"Se inicia el Nivel");
 	t_config* configNivel = config_create("config.txt");
 	char *varstr;
-	varstr=malloc(8);
+	varstr=malloc(sizeof(char)*8);
 	strcpy(varstr,"Caja");
 	char pal[4];
 	int cantKeys = config_keys_amount(configNivel)-4;
@@ -274,7 +274,7 @@ void handler(NodoPersonaje* dataPer){
 	int resp;
 	Posicion posAux;
 	char* carAux;
-	carAux=malloc(1);
+	carAux=malloc(sizeof(char));
 	Header unHeader;
 	ITEM_NIVEL* nodoAux;
 	log_info(logger,"Personaje %c mando un mensaje", dataPer->nodo->id);
@@ -308,7 +308,7 @@ void handler(NodoPersonaje* dataPer){
 						case 0:
 							if(!recibirData(dataPer->socket,unHeader, (void**)carAux)) {close(dataPer->socket);return;}
 							log_info(logger,"Llego el Personaje %c al nivel(Thread)", *carAux);
-							if (mandarMensaje(dataPer->socket,0 , 1,carAux))
+							if (mandarMensaje(dataPer->socket,0 , sizeof(char),carAux))
 							{
 								log_info(logger,"Se contesto el handshake");
 							//}else {close(dataPer->socket);return;}
@@ -351,7 +351,7 @@ void handler(NodoPersonaje* dataPer){
 							dataPer->nodo->posx=posAux.x;
 							dataPer->nodo->posy=posAux.y;
 							log_info(logger,"Se recibio la posicion(%d,%d) del Personaje %c",posAux.x,posAux.y,dataPer->nodo->id);
-							carAux=malloc(1);
+							carAux=malloc(sizeof(char));
 							carAux[0]='K';
 							if (mandarMensaje(dataPer->socket,4 , sizeof(char),(void*)carAux)) {
 								log_info(logger,"Se le aviso al Personaje %c que llego bien su Posición",dataPer->nodo->id);
@@ -459,7 +459,7 @@ void listenear(int socketEscucha){
 			char* per;
 			if(recibirMensaje(socketNuevaConexion, (void**)&per)>=0) {
 				log_info(logger,"Llego el Personaje %c del nivel",*per);
-				if (mandarMensaje(socketNuevaConexion,0 , 1,per)) {
+				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),per)) {
 					log_info(logger,"Mando mensaje al personaje %c",*per);
 				}
 
@@ -678,7 +678,7 @@ while(*deadlockActivado){
 	unHeader.type=3;
 	unHeader.payloadlength=0;
 	log_info(logger,"%d Personajes en DeadLock o starvation",totalPj-count);
-	pjsEnDeadlock=malloc(totalPj-count);
+	pjsEnDeadlock=malloc(sizeof(char)*(totalPj-count));
 	sumaBools=1;
 	for(i=0;i<totalPj;i++){
 		suma=0;
@@ -700,6 +700,7 @@ while(*deadlockActivado){
 	if(sumaBools)
 		log_info(logger,"Vamo'! Deadlock no Detectado");
 	else if(recovery){//todo handlear deadlock
+		unHeader.payloadlength=unHeader.payloadlength*sizeof(char);
 		log_info(logger,"Se envio pedido de recovery al Orquestador. Se envio %d personajes en deadlock",unHeader.payloadlength);
 		mandarMensaje(socketOrq,unHeader.type,unHeader.payloadlength,pjsEnDeadlock);
 	}else log_info(logger,"Recovery desactivado %d",recovery);
