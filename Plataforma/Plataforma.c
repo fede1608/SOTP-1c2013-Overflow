@@ -339,20 +339,20 @@ int planificador (InfoNivel* nivel) {
 		//Si la cola no esta vacia
 		if(!queue_is_empty(colaListos)){
 			//imprimir PJ listos
-			log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+			log_info(logPlanificador,"*****Personajes en la Cola de Listos*****");
 			int p;
 			int tam=queue_size(colaListos);
 			for (p=0;p<tam;p++){
 				NodoPersonaje* nodoP=queue_pop(colaListos);
-				log_info(logOrquestador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+				log_info(logPlanificador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
 				queue_push(colaListos,nodoP);
 			}
 			//imprimir PJ bloqueados
-			log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+			log_info(logPlanificador,"*****Personajes en la Cola de Bloqueados*****");
 			tam=queue_size(colaBloqueados);
 			for (p=0;p<tam;p++){
 				NodoPersonaje* nodoP=queue_pop(colaBloqueados);
-				log_info(logOrquestador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+				log_info(logPlanificador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
 				queue_push(colaBloqueados,nodoP);
 			}
 //			log_info(logPlanificador,"La lista no esta vacia");
@@ -541,16 +541,103 @@ int orquestador (void) {
 				simboloRecibido=malloc(1);
 				Header unHeader;
 				if(recibirHeader(nodoN->socket,&unHeader)>0){
-					log_info(logOrquestador,"Header recibido del socket: %d",socketNuevaConexion);
+					log_info(logOrquestador,"Header recibido del socket: %d tipo: %d payload: %d",socketNuevaConexion,unHeader.type, unHeader.payloadlength);
 					NodoRecurso *nodoR;
 					NodoRecurso * recursosAsignados1;
+					char * pjDeadlock;
 					switch(unHeader.type){
 						//TODO: implementar
 
 						case 3:
+						{//todo borrar imprimir PJ listos
+							log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+							int p;
+							int tam=queue_size(nodoN->colaListos);
+							for (p=0;p<tam;p++){
+								NodoPersonaje* nodoP=queue_pop(nodoN->colaListos);
+								log_info(logOrquestador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+								queue_push(nodoN->colaListos,nodoP);
+							}
+							//imprimir PJ bloqueados
+							log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+							tam=queue_size(nodoN->colaBloquedos);
+							for (p=0;p<tam;p++){
+								NodoPersonaje* nodoP=queue_pop(nodoN->colaBloquedos);
+								log_info(logOrquestador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+								queue_push(nodoN->colaBloquedos,nodoP);
+							}}
 
+
+							log_info(logOrquestador,"Resolver deadlock");
+							pjDeadlock=malloc(unHeader.payloadlength);
+							recibirData(nodoN->socket,unHeader,(void**)pjDeadlock);
+							int r2,minimo2,p2,tamColaBloq2;
+							NodoPersonaje* nodoPj;
+							minimo2=9999;//valor absurdo
+							tamColaBloq2=queue_size(nodoN->colaBloquedos);
+							for(r2=0;r2<(unHeader.payloadlength);r2++){
+								for(p2=0;p2<tamColaBloq2;p2++){
+									nodoPj=queue_pop(nodoN->colaBloquedos);
+									if((pjDeadlock[r2]==nodoPj->simboloRepresentativo)&&(minimo2>nodoPj->orden))
+										minimo2=nodoPj->orden;
+									queue_push(nodoN->colaBloquedos,nodoPj);
+								}
+								log_debug(logOrquestador,"%d° Personaje en deadlock recibido: %c",r2+1,pjDeadlock[r2]);
+							}
+							for(p2=0;p2<tamColaBloq2;p2++){
+								nodoPj=queue_pop(nodoN->colaBloquedos);
+								if(minimo2==nodoPj->orden){
+									mandarMensaje(nodoPj->socket,9,sizeof(char),&(nodoPj->simboloRepresentativo));
+									log_info(logOrquestador,"Se mato al personaje %c y se procede a liberar sus preciosos recursos",nodoPj->simboloRepresentativo);
+								}
+								else
+									queue_push(nodoN->colaBloquedos,nodoPj);
+							}
+
+
+							{//todo borrar imprimir PJ listos
+								log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+								int p;
+								int tam=queue_size(nodoN->colaListos);
+								for (p=0;p<tam;p++){
+									NodoPersonaje* nodoP=queue_pop(nodoN->colaListos);
+									log_info(logOrquestador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+									queue_push(nodoN->colaListos,nodoP);
+								}
+								//imprimir PJ bloqueados
+								log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+								tam=queue_size(nodoN->colaBloquedos);
+								for (p=0;p<tam;p++){
+									NodoPersonaje* nodoP=queue_pop(nodoN->colaBloquedos);
+									log_info(logOrquestador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+									queue_push(nodoN->colaBloquedos,nodoP);
+								}}
+
+
+							free(nodoPj);
 							break;
 						case 4://el nivel envia los recursos liberados
+
+
+						{//todo borrar imprimir PJ listos
+							log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+							int p;
+							int tam=queue_size(nodoN->colaListos);
+							for (p=0;p<tam;p++){
+								NodoPersonaje* nodoP=queue_pop(nodoN->colaListos);
+								log_info(logOrquestador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+								queue_push(nodoN->colaListos,nodoP);
+							}
+							//imprimir PJ bloqueados
+							log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+							tam=queue_size(nodoN->colaBloquedos);
+							for (p=0;p<tam;p++){
+								NodoPersonaje* nodoP=queue_pop(nodoN->colaBloquedos);
+								log_info(logOrquestador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+								queue_push(nodoN->colaBloquedos,nodoP);
+							}}
+
+
 
 							log_info(logOrquestador,"El nivel %s solicita liberar recursos",nodoN->nombreNivel);
 							nodoR=malloc(unHeader.payloadlength);
@@ -584,6 +671,24 @@ int orquestador (void) {
 										queue_push(nodoN->colaBloquedos,nodoP);
 								}
 							}
+							{//todo borrar imprimir PJ listos
+								log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+								int p;
+								int tam=queue_size(nodoN->colaListos);
+								for (p=0;p<tam;p++){
+									NodoPersonaje* nodoP=queue_pop(nodoN->colaListos);
+									log_info(logOrquestador,"%d° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+									queue_push(nodoN->colaListos,nodoP);
+								}
+								//imprimir PJ bloqueados
+								log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+								tam=queue_size(nodoN->colaBloquedos);
+								for (p=0;p<tam;p++){
+									NodoPersonaje* nodoP=queue_pop(nodoN->colaBloquedos);
+									log_info(logOrquestador,"%d° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+									queue_push(nodoN->colaBloquedos,nodoP);
+								}}
+
 							//mandar recAsignados
 							log_info(logOrquestador,"Se envio los recursos Asignados");
 							mandarMensaje(nodoN->socket,4,unHeader.payloadlength,(void*)recursosAsignados1);
@@ -720,14 +825,15 @@ int orquestador (void) {
 								}
 							}
 							break;
-						case 3: case 4:	//case 3: el personaje se muere por sigterm y reinicia el nivelActual
+						case 3: case 4:	case 6://case 3: el personaje se muere por sigterm y reinicia el nivelActual
 									//case 4:el personaje pierde todas las vidas y reinicia el plan de niveles
 
 							log_info(logOrquestador,"Esperando solicitud de nivel...");
 							nivelDelPersonaje=malloc(unHeader.payloadlength);
 							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
 								if(unHeader.type==3) log_info(logOrquestador,"El Personaje %c murio por la señal SIGTERM y reinicia el nivel: %s",*simboloRecibido,nivelDelPersonaje);
-								else log_info(logOrquestador,"El Personaje %c perdio todas sus vidas y debe reiniciar su plan de niveles desde: %s",*simboloRecibido,nivelDelPersonaje);
+								else if(unHeader.type==4)log_info(logOrquestador,"El Personaje %c perdio todas sus vidas y debe reiniciar su plan de niveles desde: %s",*simboloRecibido,nivelDelPersonaje);
+								else log_info(logOrquestador,"El Personaje %c fue asesinado descaradamente por el orquestador y solicita volver al nivel: %s",*simboloRecibido,nivelDelPersonaje);
 	//						if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
 
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel

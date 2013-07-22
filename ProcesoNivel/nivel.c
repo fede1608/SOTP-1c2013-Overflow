@@ -29,6 +29,7 @@ t_list * listaPersonajes;
 t_log * logger;
 int* deadlockActivado;
 int* sleepDeadlock;
+int recovery=0;
 typedef struct t_posicion {
 	int8_t x;
 	int8_t y;
@@ -107,7 +108,7 @@ int main(void){
 	//false = Que no aparezca en pantalla los logs
 	//detail = Detalle con el que se va a loguear (TRACE,INFO,DEBUG,etc)
 	logger = log_create("LogNivel.log","ProcesoNivel",false,detail);
-
+	log_info(logger,"Se inicia el Nivel");
 	t_config* configNivel = config_create("config.txt");
 	char *varstr;
 	varstr=malloc(8);
@@ -136,6 +137,7 @@ int main(void){
 	listaPersonajes= list_create();
 	nombreNivel=config_get_string_value(configNivel,"Nombre");
 	aux1=config_get_string_value(configNivel,"orquestador");
+	recovery=config_get_int_value(configNivel,"Recovery");
 	ipPuertoOrq=string_split(aux1, ":");
 	int puertoOrq=(int)strtol(ipPuertoOrq[1], NULL, 10);
 
@@ -670,25 +672,38 @@ while(*deadlockActivado){
 			}
 		}
 	}//fin while
-	int suma;
+	int suma,sumaBools;
+	char* pjsEnDeadlock;
+	Header unHeader;
+	unHeader.type=3;
+	unHeader.payloadlength=0;
+	log_info(logger,"%d Personajes en DeadLock o starvation",totalPj-count);
+	pjsEnDeadlock=malloc(totalPj-count);
+	sumaBools=1;
 	for(i=0;i<totalPj;i++){
 		suma=0;
+		sumaBools=sumaBools&&finish[i];
 		if(finish[i]==false)
 		{
 			for(j=0;j<totalRec;j++)
 				suma+=asignados[i][j];
 			nodoPer=list_get(listaPersonajes,i);
 			if(suma>0){
+			pjsEnDeadlock[unHeader.payloadlength]=nodoPer->nodo->id;
+			unHeader.payloadlength++;
 			log_info(logger,"Shit! Deadlock detectado en el personaje: %c",nodoPer->id);
 			}
 			else
 			log_info(logger,"Shit! Starvation detectado en el personaje: %c",nodoPer->id);
 		}
 	}
-	i=i-1;
-	if(finish[i]==true)
+	if(sumaBools)
 		log_info(logger,"Vamo'! Deadlock no Detectado");
-
+	else if(recovery){//todo handlear deadlock
+		log_info(logger,"Se envio pedido de recovery al Orquestador. Se envio %d personajes en deadlock",unHeader.payloadlength);
+		mandarMensaje(socketOrq,unHeader.type,unHeader.payloadlength,pjsEnDeadlock);
+	}else log_info(logger,"Recovery desactivado %d",recovery);
+	free(pjsEnDeadlock);
 	for(i=0;i<totalPj;i++)    {
 		free(asignados[i]);
 		free(requeridos[i]);

@@ -158,6 +158,7 @@ int main(void){
 			int tipomsj=1;
 			if(seMurio==-1)tipomsj=3;
 			if(seMurio==-2)tipomsj=4;
+			if(seMurio==-3)tipomsj=6;
 			mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
 			log_debug(log,"NivelActual: %s",nivelActual);
 			if(recibirHeader(unSocketOrq,&unHeader)){
@@ -252,11 +253,14 @@ int main(void){
 					//cerrar conexion con el nivel
 					mandarMensaje(unSocket,4 , sizeof(char),&recActual);
 					c--;
-					if(vidas==0) c=-1;//reiniciar plan de niveles
+					if(vidas==0) {
+						c=-1;
+						vidas=config_get_int_value(config,"vidas");//reiniciar plan de niveles
+					}
 					llego=0;
 					ii=veclong;
 					alive=0;
-					seMurio=0;
+					seMurio=-3;
 					//logica de muerte
 				}
 			}
@@ -375,7 +379,11 @@ int main(void){
 			mandarMensaje(unSocket,4 , sizeof(char),&recActual);
 			respAlPlanf.finNivel=1;
 			c--;
-			if(seMurio==2) c=-1;
+			seMurio=-1;
+			if(seMurio==2) {
+				c=-1;//reiniciar plan de niveles
+				seMurio=-2;
+			}
 			llego=0;
 			log_debug(log,"Se murio2 ii:%d c:%d llego:%d",ii,c,llego);
 			ii=veclong;
