@@ -406,7 +406,7 @@ void handler(NodoPersonaje* dataPer){
 								idRec=dataPer->recBloqueado;
 								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
 								nodoRecAux->cantAsignada++;
-								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
+								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c",dataPer->recBloqueado,dataPer->nodo->id);
 							}
 							log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
 							log_debug(logger,"Case 4 puntero del personaje: %p",dataPer->nodo);
@@ -595,7 +595,7 @@ while(*deadlockActivado){
 		continue;
 	}
 	totalRec=cantidadItems(listaItems,RECURSO_ITEM_TYPE);
-	log_debug(logger,"TotPj: %d Tot Recursos: %d",totalPj,totalRec);
+	log_debug(logger,"TotPj: %d Tot Recursos: %d count: %d countAnt: %d",totalPj,totalRec,count, countAnt);
 	asignados=malloc(sizeof(int*) * totalPj);
 	requeridos=malloc(sizeof(int*) * totalPj);
 	disponible=malloc(sizeof(int)*totalRec);
@@ -604,7 +604,6 @@ while(*deadlockActivado){
 	//armado de matriz de recursos asignado y matriz de flags finish
 	for(i=0;i<totalPj;i++) {
 		finish[i]=false;
-		count++;
 		nodoPer=list_get(listaPersonajes,i);
 		asignados[i]=malloc(sizeof(int)*totalRec);
 		for(j=0;j<totalRec;j++) {
@@ -634,9 +633,10 @@ while(*deadlockActivado){
 		recursos[j]=itemNivel->id;
 		disponible[j]=itemNivel->quantity;
 	}
-
+	log_debug(logger,"BoolWhile: %d (count<countAnt): %d count: %d countAnt: %d flag: %d", ((count<countAnt)&&flag),(count<countAnt),count,countAnt,flag);
+	int banderaAnt=0;
 	while((count<countAnt)&&flag) {   //if finish array has all true's(all processes to running state)
-		if(count!=0)countAnt=count;
+		if(banderaAnt)countAnt=count;
 		flag=false;				   //deadlock not detected and loop stops!
 		for(i=0;i<totalPj;i++)    {
 			count=0;
@@ -668,12 +668,13 @@ while(*deadlockActivado){
 		}
 		count=0;
 		for(i=0;i<totalPj;i++)    {
-			if(finish[i]==true)
+			if(finish[i]==false)
 			{
 				count++;
 			}
 		}
 		log_debug(logger,"count: %d flag %d",count,flag);
+		banderaAnt=1;
 	}//fin while
 	int suma,sumaBools;
 	char* pjsEnDeadlock;
@@ -702,7 +703,7 @@ while(*deadlockActivado){
 	}
 	if(sumaBools)
 		log_info(logger,"Vamo'! Deadlock no Detectado");
-	else if(recovery){//handlear deadlock
+	else if(recovery&&(unHeader.payloadlength>0)){//handlear deadlock
 		unHeader.payloadlength=unHeader.payloadlength*sizeof(char);
 		log_info(logger,"Se envio pedido de recovery al Orquestador. Se envio %d personajes en deadlock",unHeader.payloadlength);
 		mandarMensaje(socketOrq,unHeader.type,unHeader.payloadlength,pjsEnDeadlock);

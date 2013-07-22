@@ -236,6 +236,7 @@ int main(void){
 					alive=1;
 					if(ii==veclong){//esto solo sucede cuando el PJ queda bloqueado al pedir el ultimo recurso de sus objetivos en ese nivel
 						alive=0;//se evita todos los msjs
+						llego=0;
 						mandarMensaje(unSocket,4 , sizeof(char),&charPer);//se le manda el char del personaje como señuelo para asignar el recurso q se le concedio
 						MensajePersonaje respAlPlanf;
 						respAlPlanf.bloqueado=0;

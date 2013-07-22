@@ -340,17 +340,20 @@ int planificador (InfoNivel* nivel) {
 
 		//Si la cola no esta vacia
 		if(!queue_is_empty(colaListos)){
-			pthread_mutex_lock(&nivel->nodoN->sem);
+//			pthread_mutex_lock(&nivel->nodoN->sem);
 			//imprimir PJ listos
 			log_info(logPlanificador,"*****Personajes en la Cola de Listos*****");
 			int p;
+			pthread_mutex_lock(&nivel->nodoN->sem);
 			int tam=queue_size(colaListos);
 			for (p=0;p<tam;p++){
 				NodoPersonaje* nodoP=queue_pop(colaListos);
 				log_info(logPlanificador,"%d° Personaje: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->socket);
 				queue_push(colaListos,nodoP);
 			}
+			pthread_mutex_unlock(&nivel->nodoN->sem);
 			//imprimir PJ bloqueados
+			pthread_mutex_lock(&nivel->nodoN->sem);
 			log_info(logPlanificador,"*****Personajes en la Cola de Bloqueados*****");
 			tam=queue_size(colaBloqueados);
 			for (p=0;p<tam;p++){
@@ -358,6 +361,7 @@ int planificador (InfoNivel* nivel) {
 				log_info(logPlanificador,"%d° Personaje: %c Recurso Solicitado: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido,nodoP->socket);
 				queue_push(colaBloqueados,nodoP);
 			}
+			pthread_mutex_unlock(&nivel->nodoN->sem);
 //			log_info(logPlanificador,"La lista no esta vacia");
 			NodoPersonaje *personajeActual; //todo Revisar que los punteros de personajeActual anden bien
 
@@ -365,6 +369,7 @@ int planificador (InfoNivel* nivel) {
 
 				log_info(logPlanificador,"El Quantum %d es mayor a 0",quantum);
 				//Mandar mensaje de movimiento permitido al socket del personaje del nodo actual (primer nodo de la cola)
+				pthread_mutex_lock(&nivel->nodoN->sem);
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
 
@@ -375,6 +380,7 @@ int planificador (InfoNivel* nivel) {
 					log_error(logPlanificador,"No se pudo enviar un Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
 					varAuxiliar=1;
 				}
+				pthread_mutex_unlock(&nivel->nodoN->sem);
 
 			}
 			else {
@@ -383,6 +389,7 @@ int planificador (InfoNivel* nivel) {
 				log_info(logPlanificador,"Se termino el quantum");
 				//Sacar el nodo actual (primer nodo de la cola) y enviarlo al fondo de la misma
 				//todo Sincronizar colaListos con el Listener
+				pthread_mutex_lock(&nivel->nodoN->sem);
 				NodoPersonaje* perAux=queue_pop(colaListos);
 
 				log_info(logPlanificador,"Se saco al pj %c de la cola de listos",perAux->simboloRepresentativo);
@@ -391,7 +398,7 @@ int planificador (InfoNivel* nivel) {
 				log_info(logPlanificador,"Se puso al pj %c al final de la cola de listos",perAux->simboloRepresentativo);
 				//Buscar el primero de la cola de listos y mandarle un mensaje de movimiento permitido
 				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
-
+				pthread_mutex_unlock(&nivel->nodoN->sem);
 				log_info(logPlanificador,"Se saco al primer personaje de la cola: %c",perAux->simboloRepresentativo);
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
 					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
@@ -418,14 +425,18 @@ int planificador (InfoNivel* nivel) {
 						log_debug(logPlanificador,"Per: %c Rec %c bloq1 %d",personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado,quantum);
 						personajeActual->recursoPedido=msjPersonaje.recursoSolicitado;
 						quantum=varGlobalQuantum+1;
+						pthread_mutex_lock(&nivel->nodoN->sem);
 						queue_push(colaBloqueados,queue_pop(colaListos));
+						pthread_mutex_unlock(&nivel->nodoN->sem);
 						log_debug(logPlanificador,"Per: %c Rec %c bloq2 %d",personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado,quantum);
 					}else{
 		//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
 						if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
 							if(msjPersonaje.finNivel){
 								log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+								pthread_mutex_lock(&nivel->nodoN->sem);
 								queue_pop(colaListos);
+								pthread_mutex_unlock(&nivel->nodoN->sem);
 								msjPersonaje.solicitaRecurso=0;
 								msjPersonaje.bloqueado=0;
 								quantum=varGlobalQuantum+1;
@@ -433,13 +444,17 @@ int planificador (InfoNivel* nivel) {
 							}else{
 							log_info(logPlanificador,"Rec no bloq1 %d",quantum);
 							quantum=varGlobalQuantum+1;
+							pthread_mutex_lock(&nivel->nodoN->sem);
 							queue_push(colaListos,queue_pop(colaListos));
+							pthread_mutex_unlock(&nivel->nodoN->sem);
 							log_info(logPlanificador,"Se puso el Personaje %c al final de la cola luego de asignarle el recurso %c", personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado);
 							}
 						}else{
 							if(msjPersonaje.finNivel){
 								log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
+								pthread_mutex_lock(&nivel->nodoN->sem);
 								queue_pop(colaListos);
+								pthread_mutex_unlock(&nivel->nodoN->sem);
 								msjPersonaje.solicitaRecurso=0;
 								msjPersonaje.bloqueado=0;
 								quantum=varGlobalQuantum+1;
@@ -467,7 +482,7 @@ int planificador (InfoNivel* nivel) {
 				desconexionPersonaje(personajeActual->socket, msjPersonaje, quantum, colaListos);
 				log_error(logPlanificador,"No llego el header del PJ: %c",personajeActual->simboloRepresentativo);
 			}
-			pthread_mutex_unlock(&nivel->nodoN->sem);
+//			pthread_mutex_unlock(&nivel->nodoN->sem);
 		}else{
 //			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
 			usleep(varGlobalSleep); //para que no quede en espera activa
