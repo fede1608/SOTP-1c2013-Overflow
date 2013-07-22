@@ -236,8 +236,8 @@ config_destroy(config);
 printf("Proceso plataforma finalizado correctamente\n");
 
 //******************** KOOPA *********************
-char *environ[]= {"/home/utnso/workspace/tp-20131c-overflow/Libs","/home/utnso/workspace/tp-20131c-overflow/Varios/reglas2.txt",NULL};
-execv("/home/utnso/workspace/tp-20131c-overflow/Varios/koopa1.2",environ);
+char *environ[]= {"../../Libs","../../Varios/reglas2.txt",NULL};
+execv("../../Varios/koopa1.2",environ);
 //printf("salio todo mal\n");
 //******************** FIN INOTIFY *********************
 
@@ -351,17 +351,6 @@ int planificador (InfoNivel* nivel) {
 					log_info(logPlanificador,"Respuesta recibida");
 					//Comportamientos según el mensaje que se recibe del personaje
 
-					//Si informa de fin de nivel se lo retira de la cola de listos
-					//		if(msjPersonaje.finNivel){
-					//			printf("El personaje termino el Nivel\n");
-					//			log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
-					//			queue_pop(colaListos);
-					//			msjPersonaje.solicitaRecurso=0;
-					//			msjPersonaje.bloqueado=0;
-					//			quantum=varGlobalQuantum+1;
-					//			printf("Se retiro al personaje de la cola\n");
-					//			log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
-					//			}
 					log_debug(logPlanificador,"NeedRec: %d Blocked: %d FinNivel: %d Rec: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
 		//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
 					if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
@@ -427,7 +416,7 @@ int planificador (InfoNivel* nivel) {
 			}
 
 		}else{
-			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
+//			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
 			usleep(varGlobalSleep); //para que no quede en espera activa
 		}
 	}//Cierra While(1)
@@ -520,10 +509,6 @@ int orquestador (void) {
 							int p,r,tamColaBloq;
 							for(r=0;r<(unHeader.payloadlength/sizeof(NodoRecurso));r++)
 								log_debug(logOrquestador,"id: %c recALib: %d",nodoR[r].id,nodoR[r].cantAsignada);
-
-
-
-
 							recursosAsignados1=malloc(unHeader.payloadlength);
 							memcpy(recursosAsignados1,nodoR,unHeader.payloadlength);
 
@@ -636,6 +621,8 @@ int orquestador (void) {
 								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
 								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
 								if(nivel!=NULL){
+									g_contPersonajes++;
+									log_debug(logOrquestador,"Personajes Restantes: %d Fin: %d",g_contPersonajes,flagGlobalFin);
 									log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
 									strcpy(msj.ipNivel,nivel->ip);
 									msj.portNivel=nivel->port;
@@ -683,11 +670,50 @@ int orquestador (void) {
 								}
 							}
 							break;
-						case 3: //el personaje se muere por sigint y reinicia el nivelActual
-							//todo implementar aca y en personaje
+						case 3: case 4:	//case 3: el personaje se muere por sigterm y reinicia el nivelActual
+									//case 4:el personaje pierde todas las vidas y reinicia el plan de niveles
+
+							log_info(logOrquestador,"Esperando solicitud de nivel...");
+							nivelDelPersonaje=malloc(unHeader.payloadlength);
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+								if(unHeader.type==3) log_info(logOrquestador,"El Personaje %c murio por la señal SIGTERM y reinicia el nivel: %s",*simboloRecibido,nivelDelPersonaje);
+								else log_info(logOrquestador,"El Personaje %c perdio todas sus vidas y debe reiniciar su plan de niveles desde: %s",*simboloRecibido,nivelDelPersonaje);
+	//						if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
+
+								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
+								//settear variable global para usar en funcion q se manda a list_find
+								nombreNivel=nivelDelPersonaje;
+								log_debug(logOrquestador,"Se busca el nivel");
+								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
+								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
+								if(nivel!=NULL){
+									log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
+									strcpy(msj.ipNivel,nivel->ip);
+									msj.portNivel=nivel->port;
+									msj.portPlanificador=nivel->puertoPlanif;
+									log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
+								}
+
+								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+									log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
+								}
+								else {
+									log_error(logOrquestador,"No se pudo enviar los datos del nivel al Personaje %c",*simboloRecibido);
+								}
+							}
 							break;
-						case 4: //el personaje pierde todas las vidas y reinicia el plan de niveles
-							//todo implementar aca y en personaje
+
+						case 5: //el pj termina su plan de nivel
+							nivelDelPersonaje=malloc(unHeader.payloadlength);
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+								g_contPersonajes--;
+								log_info(logOrquestador,"El personaje %c termino su plan de niveles",*simboloRecibido);
+
+								if(g_contPersonajes==0){
+									flagGlobalFin=0;
+								}
+								log_debug(logOrquestador,"Personajes Restantes: %d Fin: %d",g_contPersonajes,flagGlobalFin);
+							}
 							break;
 						default:
 							break;

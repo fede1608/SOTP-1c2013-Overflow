@@ -352,7 +352,7 @@ void handler(NodoPersonaje* dataPer){
 							dataPer->nodo->posx=posAux.x;
 							dataPer->nodo->posy=posAux.y;
 							log_info(logger,"Se recibio la posicion(%d,%d) del Personaje %c\n",posAux.x,posAux.y,dataPer->nodo->id);
-				//			carAux=malloc(1);
+							carAux=malloc(1);
 							carAux[0]='K';
 							if (mandarMensaje(dataPer->socket,4 , sizeof(char),(void*)carAux)) {
 								log_info(logger,"Se le aviso al Personaje %c que llego bien su Posición",dataPer->nodo->id);

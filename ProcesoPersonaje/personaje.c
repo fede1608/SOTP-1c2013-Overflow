@@ -80,6 +80,7 @@ int main(void){
 //	signal(SIGTERM,manejador);
 //	signal(SIGINT,manejador);
 //	signal(SIGUSR1,manejador);
+	//al usar signal el recv actua de manera q reinicia la solicitud en vez de tirar error, pero al usar sigaction y omitir la flag de reiniciar si se interrumpe
 	struct sigaction new_action;
 	new_action.sa_handler = manejador;
 	sigemptyset (&new_action.sa_mask);
@@ -87,8 +88,6 @@ int main(void){
 	sigaction (SIGINT, &new_action, NULL);
 	sigaction (SIGTERM, &new_action, NULL);
 	sigaction (SIGUSR1, &new_action, NULL);
-
-
 
 	config=config_create("config.txt");
 
@@ -156,7 +155,10 @@ int main(void){
 				log_debug(log,"NivelAnterior: %s",nivelActual);
 			}
 			//esperar solicitud de info nivel/Planif
-			mandarMensaje(unSocketOrq,1,strlen(nivelActual)+1,nivelActual);
+			int tipomsj=1;
+			if(seMurio==-1)tipomsj=3;
+			if(seMurio==-2)tipomsj=4;
+			mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
 //			printf("%s",nivelActual);
 			log_debug(log,"NivelActual: %s",nivelActual);
 			if(recibirHeader(unSocketOrq,&unHeader)){
@@ -391,11 +393,24 @@ int main(void){
 }//fin for each nivel
 
 log_info(log,"Finalizado Plan de Niveles");
-//todo avisar al orquestador
-sleep(1);
-return 0;
+int unSocketOrq;
+unSocketOrq = quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
+char* auxC;
+auxC=malloc(sizeof(char));
+*auxC=charPer;
+//handshake Orquestador-Personaje
+if (mandarMensaje(unSocketOrq ,0 , 1,auxC)) {
+	if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
+		log_debug("Handshake contestado del Orquestador %c",*auxC);
+	}
+}
+Header unHeader;
+//esperar solicitud de info nivel/Planif
+int tipomsj=5;
+mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
+close(unSocketOrq);
 
-
+return EXIT_SUCCESS;
 
 }
 
