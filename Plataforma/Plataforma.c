@@ -111,7 +111,7 @@ t_log * logPlanificador;
 //Prototipos de funciones a utilizar. Se definien luego de la función main.
 int planificador (InfoNivel* nivel);
 int orquestador (void);
-int listenerPersonaje(InfoPlanificador* planificador);
+int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha);
 char* print_ip(int ip);
 bool esMiNivel(NodoNivel* nodo);
 void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, int quantum, t_queue * colaListos);
@@ -272,9 +272,9 @@ int planificador (InfoNivel* nivel) {
 	//pasar puerto de la plataforma
 	planificadorActual->port=nivel->puertoPlanif;
 	//Este thread se encargará de escuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
-	pthread_t threadPersonaje;
-	pthread_create(&threadPersonaje, NULL, listenerPersonaje, (void *)planificadorActual);
-	log_info(logPlanificador,"THR de escucha del planificador de puerto %d creado correctamente",nivel->port);
+//	pthread_t threadPersonaje;
+//	pthread_create(&threadPersonaje, NULL, listenerPersonaje, (void *)planificadorActual);
+//	log_info(logPlanificador,"THR de escucha del planificador de puerto %d creado correctamente",nivel->port);
 
 	//Se necesita algun char (cualquiera) para poder usar la función de enviar mensaje más adelante
 	char* auxcar;
@@ -289,6 +289,13 @@ int planificador (InfoNivel* nivel) {
 	 * ejecute la desconexion del Personaje
 	 */
 	int varAuxiliar=0;
+
+	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
+    int socketEscucha;
+    if((socketEscucha=quieroUnPutoSocketDeEscucha(planificadorActual->port)) != 1)
+    	log_info(logPlanificador,"Escuchando Conexiones en el puerto: %d",planificadorActual->port);
+    else
+    	log_error(logPlanificador,"No se pudo crear el socket de escucha");
 
 	while(1){
 
@@ -306,6 +313,25 @@ int planificador (InfoNivel* nivel) {
 			log_info(logPlanificador,"Se rompe el while(1) y se cierra el thread");
 			break;
 		}
+
+		/* Se inicializa descriptoresLectura */
+		FD_ZERO (&descriptoresLectura);
+		FD_SET (socketEscucha, &descriptoresLectura);/* Se añade para select() el socket servidor */
+		/* Espera indefinida hasta que alguno de los descriptores tenga algo
+		 * que decir: un nuevo cliente  */
+		struct timeval timeout;
+		timeout.tv_sec=0;
+		timeout.tv_usec=0;
+		select (socketEscucha + 1, &descriptoresLectura, NULL, NULL, &timeout);
+		/* Se comprueba si algún cliente nuevo desea conectarse y se le
+		 * admite */
+		if (FD_ISSET (socketEscucha, &descriptoresLectura)){
+			listenerPersonaje(planificadorActual,socketEscucha);
+		}
+
+
+
+
 
 		//Si la cola no esta vacia
 		if(!queue_is_empty(colaListos)){
@@ -839,22 +865,14 @@ int orquestador (void) {
 //******************* FUNCIONES AUXILIARES ********************
 
 //listenerPersonaje:
-//Función que escucha nuevas conexiones de personajes y
-//será ejecutada a través de un hilo por un planificador
-//Cardinalidad = 0 hasta N threads ejecutándose simultaneamente, uno por planificador
-int listenerPersonaje(InfoPlanificador* planificador){
+//Función que escucha nuevas conexiones de personajes
+int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha){
 
-	    int socketEscucha,socketNuevaConexion;
-	    if((socketEscucha=quieroUnPutoSocketDeEscucha(planificador->port)) != 1){
-	    	log_info(logPlanificador,"Se creo el socket de escucha %d",planificador->port);
-	    }
-	    //TODO: el while(1) debería estar adentro del if
-	    else {
-	    	log_error(logPlanificador,"No se pudo crear el socket de escucha");
-	    }
+	    int socketNuevaConexion;
+
 
 	    //Ciclo While(1) para escuchar nuevos personajes indefinidamente
-		while (1){
+//		while (1){
 
 			// Escuchar nuevas conexiones entrantes.
 			if (listen(socketEscucha, 1) != 0) {
@@ -883,19 +901,25 @@ int listenerPersonaje(InfoPlanificador* planificador){
 				}
 
 				//Agrega el nuevo personaje a la cola de listos del planificador
+				printf("asd1\n");
 				NodoPersonaje* personaje;
+				printf("asd2\n");
 				personaje=malloc(sizeof(NodoPersonaje));
+				printf("asd3\n");
 				personaje->simboloRepresentativo=*simboloRecibido; //Ej: @ ! / % $ &
+				printf("asd4\n");
 				personaje->socket=socketNuevaConexion;
+				printf("asd5\n");
 				queue_push(planificador->colaListos,personaje);
+				printf("asd6\n");
 
 				log_info(logPlanificador,"Se agrego al Personaje %c a la cola de listos",*simboloRecibido);
 
-				//log_info(logger,"Mando el socket %d (Thread)", personaje->socket);
+
 
 			}
 
-		}//Cierra el while(1)
+//		}//Cierra el while(1)
 
 	    return EXIT_SUCCESS;
 	}
@@ -914,7 +938,6 @@ char* print_ip(int ip)
 }
 bool esMiNivel(NodoNivel* nodo){
 //	printf("%s %s\n",nodo->nombreNivel,nombreNivel);
-
 	if(strcmp(nodo->nombreNivel,nombreNivel)==0)
 		return true;
 	return false;
