@@ -60,6 +60,7 @@ int cantAsignada;
 typedef struct t_infoPlanificador {
 	int port;
 	t_queue* colaListos;
+	int contPersonajes;
 } InfoPlanificador;
 
 typedef struct t_nodoNivel {//TODO completar segun las necesidades
@@ -86,6 +87,7 @@ typedef struct t_nodoPersonaje {//TODO completar segun las necesidades
 	char simboloRepresentativo; //Ej: @ ! / % $ &
 	int socket;
 	char recursoPedido;
+	int orden;
 } NodoPersonaje;
 
 typedef struct t_msjPersonaje {
@@ -269,6 +271,7 @@ int planificador (InfoNivel* nivel) {
 	InfoPlanificador *planificadorActual;
 	planificadorActual=malloc(sizeof(InfoPlanificador));
 	planificadorActual->colaListos=colaListos;
+	planificadorActual->contPersonajes=0;
 	//pasar puerto de la plataforma
 	planificadorActual->port=nivel->puertoPlanif;
 	//Este thread se encargará de escuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
@@ -901,18 +904,13 @@ int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha){
 				}
 
 				//Agrega el nuevo personaje a la cola de listos del planificador
-				printf("asd1\n");
 				NodoPersonaje* personaje;
-				printf("asd2\n");
 				personaje=malloc(sizeof(NodoPersonaje));
-				printf("asd3\n");
 				personaje->simboloRepresentativo=*simboloRecibido; //Ej: @ ! / % $ &
-				printf("asd4\n");
 				personaje->socket=socketNuevaConexion;
-				printf("asd5\n");
+				personaje->orden=planificador->contPersonajes;
 				queue_push(planificador->colaListos,personaje);
-				printf("asd6\n");
-
+				planificador->contPersonajes++;
 				log_info(logPlanificador,"Se agrego al Personaje %c a la cola de listos",*simboloRecibido);
 
 

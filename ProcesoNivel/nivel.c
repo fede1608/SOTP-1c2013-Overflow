@@ -27,7 +27,8 @@ int socketOrq;
 ITEM_NIVEL * listaItems = NULL;
 t_list * listaPersonajes;
 t_log * logger;
-
+int* deadlockActivado;
+int* sleepDeadlock;
 typedef struct t_posicion {
 	int8_t x;
 	int8_t y;
@@ -132,6 +133,7 @@ int main(void){
 	char** ipPuertoOrq;
 	char* nombreNivel;
 	int puertoEscuchaNivel=0;
+	listaPersonajes= list_create();
 	nombreNivel=config_get_string_value(configNivel,"Nombre");
 	aux1=config_get_string_value(configNivel,"orquestador");
 	ipPuertoOrq=string_split(aux1, ":");
@@ -157,28 +159,32 @@ int main(void){
 		}
 	}
 	//*****  INICIO HEADER DEL DEADLOCK Y SLEEP ******
+	//todo preguntar al ayudante de donde deberia venir esta info: si de la config del nivel o de la plataforma
 		Header headerDeadlock;
-		int* deadlockActivado;
+
 		deadlockActivado=malloc(sizeof(int));
 		if(recibirHeader(socketOrq,&headerDeadlock)){
 //			printf("Se recibe validacion del Deadlock\n");
 			if(recibirData(socketOrq,headerDeadlock,(void**)deadlockActivado)){
-//				printf("Se recibe validacion del Deadlock\n");
 				mandarMensaje(socketOrq,1,sizeof(int),deadlockActivado);
 			}
 		}
 		Header headerSleepDeadlock;
-			int* sleepDeadlock;
+
 			sleepDeadlock=malloc(sizeof(int));
 			if(recibirHeader(socketOrq,&headerSleepDeadlock)){
 //				printf("Se recibio el Header sleep del Deadlock\n");
 				if(recibirData(socketOrq,headerSleepDeadlock,(void**)sleepDeadlock)){
-//					printf("Se recibio el Sleep del Deadlock\n");
-
 					mandarMensaje(socketOrq,1,sizeof(int),sleepDeadlock);
 				}
 			}
+			log_debug(logger,"Vars recibidas: deadlock: %d sleepDL: %d",*deadlockActivado,*sleepDeadlock);
 		//*****  FIN DEL HEADER DEL DEADLOCK Y SLEEP ******
+		//********** Thread deteccion deadlock***********
+			pthread_t thr_detectorDeadlock;
+			pthread_create(&thr_detectorDeadlock, NULL, detectarDeadlock, NULL);
+		//********** Fin Thread deteccion deadlock***********
+
 	nivel_gui_inicializar();
 	nivel_gui_get_area_nivel(&rows, &cols);
 	nivel_gui_dibujar(listaItems);
@@ -207,7 +213,7 @@ int main(void){
 	fd_set descriptoresLectura;	/* Descriptores de interes para select() */						/* Buffer para leer de los socket */
 	int maximo;							/* Número de descriptor más grande */
 	int i;								/* Para bucles */
-	listaPersonajes= list_create();
+
 	int socketEscucha;
 	socketEscucha=quieroUnPutoSocketDeEscucha(puertoEscuchaNivel);
 	log_info(logger,"Escuchando Conexiones en el puerto: %d",puertoEscuchaNivel);
@@ -252,15 +258,6 @@ int main(void){
 
 
 			nivel_gui_dibujar(listaItems);
-
-			//********** Thread deteccion deadlock***********
-			//detectarDeadlock();
-			if (deadlockActivado>0){
-				pthread_t thr_detectorDeadlock;
-				pthread_create(&thr_detectorDeadlock, NULL, detectarDeadlock, NULL);
-//				usleep (sleepDeadlock);
-			}
-		    //********** Fin Thread deteccion deadlock***********
 
 		}
 
@@ -575,10 +572,12 @@ void desconexion(NodoPersonaje* dataPer){
 
 void detectarDeadlock(){
 
+while(*deadlockActivado){
 	int totalPj,totalRec,i,j;
 	int** asignados;
 	int** requeridos;
 	int* disponible;
+	char* recursos;
 	bool * finish;
 	NodoPersonaje* nodoPer;
 	NodoRecurso* nodoRec;
@@ -587,12 +586,17 @@ void detectarDeadlock(){
 	bool flag=true;
 	log_info(logger,"Algoritmo de Deteccion de Deadlock empezado...");
 	totalPj=list_size(listaPersonajes);
+	if(totalPj==0) {
+		log_info(logger,"Algoritmo de Deteccion de Deadlock suspendido por falta de personajes...");
+		usleep(*sleepDeadlock);
+		continue;
+	}
 	totalRec=cantidadItems(listaItems,RECURSO_ITEM_TYPE);
-	if(totalPj==0) return;
 	log_debug(logger,"TotPj: %d Tot Recursos: %d",totalPj,totalRec);
 	asignados=malloc(sizeof(int*) * totalPj);
 	requeridos=malloc(sizeof(int*) * totalPj);
 	disponible=malloc(sizeof(int)*totalRec);
+	recursos=malloc(sizeof(char)*totalRec);
 	finish=malloc(sizeof(bool)*totalPj);
 	//armado de matriz de recursos asignado y matriz de flags finish
 	for(i=0;i<totalPj;i++) {
@@ -624,6 +628,7 @@ void detectarDeadlock(){
 	for(j=0;j<totalRec;j++) {
 		nodoRec=list_get((nodoPer->listaRecursosAsignados),j);
 		itemNivel=obtenerRecurso(listaItems,nodoRec->id);
+		recursos[j]=itemNivel->id;
 		disponible[j]=itemNivel->quantity;
 	}
 
@@ -636,7 +641,7 @@ void detectarDeadlock(){
 			if(finish[i]==false)
 			{
 				for(j=0;j<totalRec;j++) {
-					log_debug(logger,"RecReq: %d RecDisp: %d",requeridos[i][j],disponible[j]);
+					log_debug(logger,"Recurso: %c RecAsig: %d RecReq: %d RecDisp: %d",recursos[j],asignados[i][j],requeridos[i][j],disponible[j]);
 						if(requeridos[i][j]<=disponible[j])
 						{
 							count++;
@@ -645,38 +650,44 @@ void detectarDeadlock(){
 				flag=false;
 				if(count==totalRec)
 				{
-					for(j=0;j<totalRec;j++)         {
+					for(j=0;j<totalRec;j++){
 						disponible[j]+=asignados[i][j];        //allocated reources are released and added to available!
 					}
 					finish[i]=true;
-					log_info(logger,"Personaje %c is transferred to running state and assumed finished",nodoPer->id);
+					log_info(logger,"Personaje %c se pasa al estado ejecutando y se asume terminado",nodoPer->id);
 				}
 				else{
 					flag=true;
-					log_info(logger,"Personaje %c is not transferred to running state and assumed finished",nodoPer->id);
+					log_info(logger,"Personaje %c no se pasa al estado ejecutando y no se puede terminar",nodoPer->id);
 				}
 			}
 		}
 		count=0;
-		for(j=0;j<totalPj;j++)    {
-			if(finish[j]==true)
+		for(i=0;i<totalPj;i++)    {
+			if(finish[i]==true)
 			{
 				count++;
 			}
 		}
 	}//fin while
-
-	for(i=0;i<totalPj;i++)    {
+	int suma;
+	for(i=0;i<totalPj;i++){
+		suma=0;
 		if(finish[i]==false)
 		{
+			for(j=0;j<totalRec;j++)
+				suma+=asignados[i][j];
 			nodoPer=list_get(listaPersonajes,i);
-			log_info(logger,"Oops! Deadlock detected and causing process is:process(%c)",nodoPer->id);
-			break;
+			if(suma>0){
+			log_info(logger,"Shit! Deadlock detectado en el personaje: %c",nodoPer->id);
+			}
+			else
+			log_info(logger,"Shit! Starvation detectado en el personaje: %c",nodoPer->id);
 		}
 	}
 	i=i-1;
 	if(finish[i]==true)
-		log_info(logger,"Hurray! Deadlock not detected:-)");
+		log_info(logger,"Vamo'! Deadlock no Detectado");
 
 	for(i=0;i<totalPj;i++)    {
 		free(asignados[i]);
@@ -684,8 +695,12 @@ void detectarDeadlock(){
 	}
 	free(asignados);
 	free(requeridos);
+	free(recursos);
 	free(disponible);
 	free(finish);
-
+	log_debug(logger,"Sleep iniciado: %d",*sleepDeadlock);
+	usleep(*sleepDeadlock);
+	log_debug(logger,"Sleep terminado: %d",*sleepDeadlock);
+	}
 	return;
 }
