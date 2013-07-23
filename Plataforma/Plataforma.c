@@ -316,6 +316,28 @@ int planificador (InfoNivel* nivel) {
 		nombreNivel = nivel->nombre;
 
 		if(!list_find(listaNiveles,esMiNivel)){
+
+			//Desconectar sockets de cola de listos
+
+			int i;
+			NodoPersonaje * auxPersDesc;
+
+			//Desconectar sockets de cola de listos para que terminen los PJ's
+
+			for(i=0;i<queue_size(colaListos);i++){
+				auxPersDesc = queue_pop(planificadorActual->colaListos);
+				close(auxPersDesc->socket);
+				g_contPersonajes--;
+			}
+
+			//Desconectar sockets de cola de bloqueados para que terminen los PJ's
+
+			for(i=0;i<queue_size(colaBloqueados);i++){
+				auxPersDesc = queue_pop(planificadorActual->colaBloqueados);
+				close(auxPersDesc->socket);
+				g_contPersonajes--;
+			}
+
 			log_info(logPlanificador,"Se rompe el while(1) y se cierra el thread");
 			break;
 		}
