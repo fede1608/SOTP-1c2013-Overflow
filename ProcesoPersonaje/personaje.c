@@ -153,6 +153,7 @@ int main(void){
 			if((seMurio==-1)||(seMurio==1))tipomsj=3;
 			if((seMurio==-2)||(seMurio==2))tipomsj=4;
 			if(seMurio==-3)tipomsj=6;
+			seMurio=0;
 			Header unHeader;
 			if((c!=0)&&(tipomsj==1)){//si no es la primera vez q se conecta al orq manda el nombre del nivel anterior
 				//mandar nivel que termino

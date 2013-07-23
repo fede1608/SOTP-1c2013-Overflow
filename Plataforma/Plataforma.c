@@ -324,16 +324,16 @@ int planificador (InfoNivel* nivel) {
 
 			//Desconectar sockets de cola de listos para que terminen los PJ's
 
-			for(i=0;i<queue_size(colaListos);i++){
-				auxPersDesc = queue_pop(planificadorActual->colaListos);
+			while(!queue_is_empty(colaListos)){
+				auxPersDesc = queue_pop(colaListos);
 				close(auxPersDesc->socket);
 				g_contPersonajes--;
 			}
 
 			//Desconectar sockets de cola de bloqueados para que terminen los PJ's
 
-			for(i=0;i<queue_size(colaBloqueados);i++){
-				auxPersDesc = queue_pop(planificadorActual->colaBloqueados);
+			while(!queue_is_empty(colaBloqueados)){
+				auxPersDesc = queue_pop(colaBloqueados);
 				close(auxPersDesc->socket);
 				g_contPersonajes--;
 			}
