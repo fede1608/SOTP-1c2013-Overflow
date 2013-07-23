@@ -1038,6 +1038,8 @@ int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha){
 					NodoPersonaje* auxNodoP= list_get(planificador->colaBloqueados->elements,i);
 					if(auxNodoP->simboloRepresentativo==*simboloRecibido){
 						list_remove(planificador->colaBloqueados->elements,i);
+						i--;
+						tam--;
 					}
 				}
 				//Agrega el nuevo personaje a la cola de listos del planificador
