@@ -2,6 +2,6 @@ nombre=Luigi
 simbolo=%
 planDeNiveles=[Nivel2,Nivel8]
 obj[Nivel2]=[F,C,F,C,F,C,F,C,F]
-obj[NIvel8]=[H,E,C]
+obj[Nivel8]=[H,E,C]
 vidas=5
 orquestador=127.0.0.1:4999
