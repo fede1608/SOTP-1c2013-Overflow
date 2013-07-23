@@ -1,6 +1,0 @@
-nombre=Tortuga
-simbolo=&
-planDeNiveles=[DeadLock]
-obj[DeadLock]=[B,H]
-vidas=5
-orquestador=127.0.0.1:4999

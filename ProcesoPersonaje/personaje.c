@@ -397,6 +397,7 @@ int main(void){
 			seMurio=0;
 			}
 			mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
+			log_debug(log,"veclong: %d ii: %d c: %d llego: %d",veclong,ii,c,llego);
 			log_info(log,"Se envio respuesta de turno concluido al Planificador");
 		}//fin if(alive)
 

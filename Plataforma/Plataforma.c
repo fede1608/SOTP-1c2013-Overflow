@@ -241,8 +241,8 @@ log_info(logOrquestador,"Proceso plataforma finalizado correctamente\n");
 
 //******************** KOOPA *********************
 //todo hay que ver donde metemos a koopa para que esto sea consistente, yo diria meterlo en la misma carpeta q el planificador
-char *environ[]= {"../../Libs","../../Varios/reglas2.txt",NULL};
-execv("../../Varios/koopa1.2",environ);
+char *environ[]= {"../../Libs","reglas.txt",NULL};
+execv("koopa",environ);
 //printf("salio todo mal\n");
 //******************** FIN INOTIFY *********************
 

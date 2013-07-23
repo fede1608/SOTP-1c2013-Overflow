@@ -494,8 +494,8 @@ void sacarInfoCaja(char * caja, char* id, int* x , int* y, int* cant)
 	char* aux;
 	vecStr=string_split(caja, ",");
 	*id=*vecStr[1];
-	*x=(int)strtol(vecStr[3], &aux, 10);
-	*y=(int)strtol(vecStr[4], &aux, 10);
+	*x=(int)strtol(vecStr[4], &aux, 10);
+	*y=(int)strtol(vecStr[3], &aux, 10);
 	*cant=(int)strtol(vecStr[2], &aux, 10);
 	}
 t_list* inicializarListaRecursos(void){
