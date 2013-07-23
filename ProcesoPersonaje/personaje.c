@@ -156,8 +156,9 @@ int main(void){
 			}
 			//esperar solicitud de info nivel/Planif
 			int tipomsj=1;
-			if(seMurio==-1)tipomsj=3;
-			if(seMurio==-2)tipomsj=4;
+			log_debug(log,"seMurio: %d",seMurio);
+			if((seMurio==-1)||(seMurio==1))tipomsj=3;
+			if((seMurio==-2)||(seMurio==2))tipomsj=4;
 			if(seMurio==-3)tipomsj=6;
 			mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
 			log_debug(log,"NivelActual: %s",nivelActual);
@@ -266,9 +267,27 @@ int main(void){
 					//logica de muerte
 				}
 			}else{
-				log_error(log,"Se perdio la conexion con el planificador");
+				if(seMurio==0){
+					log_error(log,"Se perdio la conexion con el planificador");
+					exit(0);
+				}else {
+					mandarMensaje(unSocket,4 , sizeof(char),&recActual);
+					c--;
+					llego=0;
+					ii=veclong;
+					seMurio=-1;
+					if(seMurio==2) {
+						c=-1;//reiniciar plan de niveles
+						seMurio=-2;
+					}
+					MensajePersonaje respAlPlanf;
+					respAlPlanf.bloqueado=0;
+					respAlPlanf.solicitaRecurso=0;
+					respAlPlanf.finNivel=1;
+					respAlPlanf.recursoSolicitado='0';
+					mandarMensaje(unSocketPlanif,8,sizeof(MensajePersonaje),&respAlPlanf);
+				}
 				alive=0;
-				exit(0);
 			}
 
 		if(alive) {//si el orquestador no lo mato
