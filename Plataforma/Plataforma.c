@@ -570,20 +570,20 @@ int orquestador (void) {
 						case 3:
 						pthread_mutex_lock(&nodoN->sem);
 						{//todo borrar imprimir PJ listos
-						log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+						log_debug(logOrquestador,"*****Personajes en la Cola de Listos*****");
 						int p;
 						int tam=queue_size(nodoN->colaListos);
 						for (p=0;p<tam;p++){
 							NodoPersonaje* nodoP=list_get(nodoN->colaListos->elements,p);
-							log_info(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+							log_debug(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
 
 						}
 						//imprimir PJ bloqueados
-						log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+						log_debug(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
 						tam=queue_size(nodoN->colaBloqueados);
 						for (p=0;p<tam;p++){
 							NodoPersonaje* nodoP=list_get(nodoN->colaBloqueados->elements,p);
-							log_info(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+							log_debug(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
 
 						}}
 
@@ -617,20 +617,20 @@ int orquestador (void) {
 
 
 							{//todo borrar imprimir PJ listos
-							log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+							log_debug(logOrquestador,"*****Personajes en la Cola de Listos*****");
 							int p;
 							int tam=queue_size(nodoN->colaListos);
 							for (p=0;p<tam;p++){
 								NodoPersonaje* nodoP=list_get(nodoN->colaListos->elements,p);
-								log_info(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+								log_debug(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
 
 							}
 							//imprimir PJ bloqueados
-							log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+							log_debug(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
 							tam=queue_size(nodoN->colaBloqueados);
 							for (p=0;p<tam;p++){
 								NodoPersonaje* nodoP=list_get(nodoN->colaBloqueados->elements,p);
-								log_info(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+								log_debug(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
 
 							}}
 
@@ -642,20 +642,20 @@ int orquestador (void) {
 						pthread_mutex_lock(&nodoN->sem);
 
 						{//todo borrar imprimir PJ listos
-						log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+						log_debug(logOrquestador,"*****Personajes en la Cola de Listos*****");
 						int p;
 						int tam=queue_size(nodoN->colaListos);
 						for (p=0;p<tam;p++){
 							NodoPersonaje* nodoP=list_get(nodoN->colaListos->elements,p);
-							log_info(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+							log_debug(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
 
 						}
 						//imprimir PJ bloqueados
-						log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+						log_debug(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
 						tam=queue_size(nodoN->colaBloqueados);
 						for (p=0;p<tam;p++){
 							NodoPersonaje* nodoP=list_get(nodoN->colaBloqueados->elements,p);
-							log_info(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+							log_debug(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
 
 						}}
 
@@ -694,20 +694,20 @@ int orquestador (void) {
 								}
 							}
 							{//todo borrar imprimir PJ listos
-								log_info(logOrquestador,"*****Personajes en la Cola de Listos*****");
+								log_debug(logOrquestador,"*****Personajes en la Cola de Listos*****");
 								int p;
 								int tam=queue_size(nodoN->colaListos);
 								for (p=0;p<tam;p++){
 									NodoPersonaje* nodoP=list_get(nodoN->colaListos->elements,p);
-									log_info(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
+									log_debug(logOrquestador,"%d ° Personaje: %c",p+1,nodoP->simboloRepresentativo);
 
 								}
 								//imprimir PJ bloqueados
-								log_info(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
+								log_debug(logOrquestador,"*****Personajes en la Cola de Bloqueados*****");
 								tam=queue_size(nodoN->colaBloqueados);
 								for (p=0;p<tam;p++){
 									NodoPersonaje* nodoP=list_get(nodoN->colaBloqueados->elements,p);
-									log_info(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
+									log_debug(logOrquestador,"%d ° Personaje: %c Recurso Solicitado: %c",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido);
 
 								}}
 

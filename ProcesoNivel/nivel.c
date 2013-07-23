@@ -681,7 +681,7 @@ while(*deadlockActivado){
 	Header unHeader;
 	unHeader.type=3;
 	unHeader.payloadlength=0;
-	log_info(logger,"%d Personajes en DeadLock o starvation",totalPj-count);
+	log_info(logger,"%d Personajes en DeadLock o starvation",count);
 	pjsEnDeadlock=malloc(sizeof(char)*(totalPj-count));
 	sumaBools=1;
 	for(i=0;i<totalPj;i++){

@@ -148,20 +148,21 @@ int main(void){
 					log_debug("Handshake contestado del Orquestador %c",*auxC);
 				}
 			}
-			Header unHeader;
-			if(c!=0){//si no es la primera vez q se conecta al orq manda el nombre del nivel anterior
-				//mandar nivel que termino
-				mandarMensaje(unSocketOrq,2,strlen(niveles[c-1])+1,niveles[c-1]);
-				log_debug(log,"NivelAnterior: %s",nivelActual);
-			}
-			//esperar solicitud de info nivel/Planif
 			int tipomsj=1;
 			log_debug(log,"seMurio: %d",seMurio);
 			if((seMurio==-1)||(seMurio==1))tipomsj=3;
 			if((seMurio==-2)||(seMurio==2))tipomsj=4;
 			if(seMurio==-3)tipomsj=6;
+			Header unHeader;
+			if((c!=0)&&(tipomsj==1)){//si no es la primera vez q se conecta al orq manda el nombre del nivel anterior
+				//mandar nivel que termino
+				mandarMensaje(unSocketOrq,2,strlen(niveles[c-1])+1,niveles[c-1]);
+				log_debug(log,"NivelAnterior: %s",nivelActual);
+			}
+			//esperar solicitud de info nivel/Planif
+
 			mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
-			log_debug(log,"NivelActual: %s",nivelActual);
+			log_debug(log,"MsjType: %d NivelActual: %s",tipomsj,nivelActual);
 			if(recibirHeader(unSocketOrq,&unHeader)){
 				if(recibirData(unSocketOrq,unHeader,(void**)&ipNivelPlanif)){
 				//Obtener info de ip & port
