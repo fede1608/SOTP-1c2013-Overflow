@@ -896,21 +896,22 @@ int orquestador (void) {
 									msj.portNivel=nivel->port;
 									msj.portPlanificador=nivel->puertoPlanif;
 									log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
-								}
-								//saca al personaje de la cola de bloqueados si se murio por sigInt
-								if(unHeader.type==3) {
-									int p;
-									int tam=queue_size(nivel->colaBloqueados);
-									for (p=0;p<tam;p++){
-										NodoPersonaje* nodoP=list_get(nivel->colaBloqueados->elements,p);
-										if(nodoP->simboloRepresentativo==*simboloRecibido){
-											list_remove(nivel->colaBloqueados->elements,p);
-											tam--;
-											p--;
-											log_debug(logOrquestador,"Se depuro la cola de bloqueados del personaje salido");
+									if(unHeader.type==3) {
+										int p;
+										int tam=queue_size(nivel->colaBloqueados);
+										for (p=0;p<tam;p++){
+											NodoPersonaje* nodoP=list_get(nivel->colaBloqueados->elements,p);
+											if(nodoP->simboloRepresentativo==*simboloRecibido){
+												list_remove(nivel->colaBloqueados->elements,p);
+												tam--;
+												p--;
+												log_debug(logOrquestador,"Se depuro la cola de bloqueados del personaje salido");
+											}
 										}
 									}
 								}
+								//saca al personaje de la cola de bloqueados si se murio por sigInt
+
 
 								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
 									log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
