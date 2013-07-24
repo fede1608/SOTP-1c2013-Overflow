@@ -585,6 +585,7 @@ while(*deadlockActivado){
 	int** asignados;
 	int** requeridos;
 	int* disponible;
+	int* requeridosTot;
 	char* recursos;
 	bool * finish;
 	NodoPersonaje* nodoPer;
@@ -605,14 +606,20 @@ while(*deadlockActivado){
 	asignados=malloc(sizeof(int*) * totalPj);
 	requeridos=malloc(sizeof(int*) * totalPj);
 	disponible=malloc(sizeof(int)*totalRec);
+	requeridosTot=malloc(sizeof(int)*totalRec);
 	recursos=malloc(sizeof(char)*totalRec);
 	finish=malloc(sizeof(bool)*totalPj);
+	//inicializador de requeridos totales
+	for(j=0;j<totalRec;j++)
+		requeridosTot[j]=0;
 	//armado de matriz de recursos asignado y matriz de flags finish
+
 	for(i=0;i<totalPj;i++) {
 		finish[i]=false;
 		nodoPer=list_get(listaPersonajes,i);
 		asignados[i]=malloc(sizeof(int)*totalRec);
 		for(j=0;j<totalRec;j++) {
+
 			nodoRec=list_get((nodoPer->listaRecursosAsignados),j);
 			asignados[i][j]=nodoRec->cantAsignada;
 		}
@@ -627,8 +634,10 @@ while(*deadlockActivado){
 
 			if(nodoPer->personajeBloqueado){
 				nodoRec=list_get((nodoPer->listaRecursosAsignados),j);
-				if(nodoPer->recBloqueado==nodoRec->id)
+				if(nodoPer->recBloqueado==nodoRec->id){
 					requeridos[i][j]=1;
+					requeridosTot[j]+=1;
+				}
 			}
 		}
 	}
@@ -695,8 +704,9 @@ while(*deadlockActivado){
 		sumaBools=sumaBools&&finish[i];
 		if(finish[i]==false)
 		{
-			for(j=0;j<totalRec;j++)
-				suma+=asignados[i][j];
+			for(j=0;j<totalRec;j++){
+				suma+=((asignados[i][j]>0)&&(asignados[i][j]<=requeridosTot[j]));
+			}
 			nodoPer=list_get(listaPersonajes,i);
 			if(suma>0){
 			pjsEnDeadlock[unHeader.payloadlength]=nodoPer->nodo->id;
