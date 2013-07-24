@@ -161,7 +161,7 @@ int main(void){
 			if((seMurio==-1)||(seMurio==1)){tipomsj=3;seMurio=0;}
 			if((seMurio==-2)){tipomsj=4;seMurio=0;}
 			if(seMurio==-3){tipomsj=6;seMurio=0;}
-
+			if(seMurio==-4){tipomsj=7;seMurio=-4;}
 			if(seMurio==2){
 			c=0;
 			seMurio=-2;
@@ -186,7 +186,7 @@ int main(void){
 			close(unSocketOrq);
 			usleep(1*1000000);
 	}
-
+		seMurio=0;
 		new_action.sa_handler = manejador;
 		sigemptyset (&new_action.sa_mask);
 		new_action.sa_flags =0; //settea las señales como interruptoras del recv
@@ -286,6 +286,17 @@ int main(void){
 					ii=veclong;
 					alive=0;
 					seMurio=-3;
+					//logica de muerte
+				}
+				if(unHeader.type==10){
+					recibirData(unSocketPlanif,unHeader,(void**)&charAux);
+					log_info(log,"El nivel se ha desconectado y se volvera a solcitar su informacion");
+					//cerrar conexion con el nivel
+					c--;
+					llego=0;
+					ii=veclong;
+					alive=0;
+					seMurio=-4;
 					//logica de muerte
 				}
 			}else{

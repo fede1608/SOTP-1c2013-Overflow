@@ -305,7 +305,7 @@ int planificador (InfoNivel* nivel) {
 
 	while(1){
 
-		/*TODO: no me gusta como esta hecho pero es
+		/*Handleo desconexion de Nivel: no me gusta como esta hecho pero es
 		 * la unica solucion que se me ocurrio en este momento.
 		 * La idea es que esta variable global sea una flag que se active
 		 * cuando un nivel se cierra y funciona barbaro para romper
@@ -321,21 +321,23 @@ int planificador (InfoNivel* nivel) {
 
 			int i;
 			NodoPersonaje * auxPersDesc;
-
+			char mj= 'K';
 			//Desconectar sockets de cola de listos para que terminen los PJ's
 
 			while(!queue_is_empty(colaListos)){
 				auxPersDesc = queue_pop(colaListos);
+				mandarMensaje(auxPersDesc->socket, 10, sizeof(char), &mj);
 				close(auxPersDesc->socket);
-				g_contPersonajes--;
+//				g_contPersonajes--;
 			}
 
 			//Desconectar sockets de cola de bloqueados para que terminen los PJ's
 
 			while(!queue_is_empty(colaBloqueados)){
 				auxPersDesc = queue_pop(colaBloqueados);
+				mandarMensaje(auxPersDesc->socket, 10, sizeof(char), &mj);
 				close(auxPersDesc->socket);
-				g_contPersonajes--;
+//				g_contPersonajes--;
 			}
 
 			log_info(logPlanificador,"Se rompe el while(1) y se cierra el thread");
@@ -870,7 +872,7 @@ int orquestador (void) {
 								}
 							}
 							break;
-						case 3: case 4:	case 6://case 3: el personaje se muere por sigterm y reinicia el nivelActual
+						case 3: case 4:	case 6: case 7://case 3: el personaje se muere por sigterm y reinicia el nivelActual
 									//case 4:el personaje pierde todas las vidas y reinicia el plan de niveles
 
 							log_info(logOrquestador,"Esperando solicitud de nivel...");
@@ -878,7 +880,8 @@ int orquestador (void) {
 							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
 								if(unHeader.type==3) log_info(logOrquestador,"El Personaje %c murio por la señal SIGTERM y reinicia el nivel: %s",*simboloRecibido,nivelDelPersonaje);
 								else if(unHeader.type==4)log_info(logOrquestador,"El Personaje %c perdio todas sus vidas y debe reiniciar su plan de niveles desde: %s",*simboloRecibido,nivelDelPersonaje);
-								else log_info(logOrquestador,"El Personaje %c fue asesinado descaradamente por el orquestador y solicita volver al nivel: %s",*simboloRecibido,nivelDelPersonaje);
+								else if(unHeader.type==6)log_info(logOrquestador,"El Personaje %c fue asesinado descaradamente por el orquestador y solicita volver al nivel: %s",*simboloRecibido,nivelDelPersonaje);
+								else log_info(logOrquestador,"El Personaje %c informa que el nivel se cerro inesperadamente y vuelve a solicitar la informacion del nivel: %s",*simboloRecibido,nivelDelPersonaje);
 	//						if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
 
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
