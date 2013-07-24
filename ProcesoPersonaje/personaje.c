@@ -297,11 +297,11 @@ int main(void){
 					c--;
 					llego=0;
 					ii=veclong;
-					seMurio=-1;
+
 					if(seMurio==2) {
 						c=-1;//reiniciar plan de niveles
 						seMurio=-2;
-					}
+					}else seMurio=-1;
 					MensajePersonaje respAlPlanf;
 					respAlPlanf.bloqueado=0;
 					respAlPlanf.solicitaRecurso=0;

@@ -12,6 +12,8 @@ o
 export LD_LIBRARY_PATH=/home/utnso/tp-20131c-overflow/Libs/:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/home/utnso/TPSO/tp-20131c-overflow/Libs:$LD_LIBRARY_PATH
 
+curl -u 'overflowDT' -L -o TP.tar https://api.github.com/repos/sisoputnfrba/tp-20131c-overflow/tarball/master
+
 Parámetros
 ----------
 ./koopa [archivo.txt]
