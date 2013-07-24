@@ -68,8 +68,8 @@ void manejador (int sig){
 		}
 		break;
 	case SIGUSR1:
-		log_info(log,"Te han Concedido una vida. Vidas restantes: %d",vidas);
 		vidas++;
+		log_info(log,"Te han Concedido una vida. Vidas restantes: %d",vidas);
 		break;
 	}
 }
@@ -84,7 +84,7 @@ int main(void){
 	struct sigaction new_action;
 	new_action.sa_handler = manejador;
 	sigemptyset (&new_action.sa_mask);
-	new_action.sa_flags = 0;
+	new_action.sa_flags = SA_RESTART;
 	sigaction (SIGINT, &new_action, NULL);
 	sigaction (SIGTERM, &new_action, NULL);
 	sigaction (SIGUSR1, &new_action, NULL);
@@ -119,7 +119,16 @@ int main(void){
 
 
 	for(c=0;c<cantNiv;c++){ //for each nivel
+		ConxNivPlan ipNivelPlanif;
+		ipNivelPlanif.portNivel=0;
+		struct sigaction new_action;
+		new_action.sa_handler = manejador;
+		sigemptyset (&new_action.sa_mask);
+		new_action.sa_flags = SA_RESTART;
+		sigaction (SIGINT, &new_action, NULL);
+		sigaction (SIGTERM, &new_action, NULL);
 
+		while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y sino entra en un ciclo hasta que entre
 			memcpy(objNivel+4,niveles[c],strlen(niveles[c]));
 			memcpy(objNivel+4+strlen(niveles[c]),corchete,2);
 
@@ -133,9 +142,8 @@ int main(void){
 			rec.x=-1;
 			rec.y=-1;
 
-		ConxNivPlan ipNivelPlanif;
-		ipNivelPlanif.portNivel=0;
-		while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y sino entra en un ciclo hasta que entre
+
+
 		//conexion solicitud de ip:puerto al orquestator y cierre de esa conex
 			int unSocketOrq;
 			unSocketOrq = quieroUnPutoSocketAndando(ipPuertoOrq[0],puertoOrq);
@@ -150,10 +158,14 @@ int main(void){
 			}
 			int tipomsj=1;
 			log_debug(log,"seMurio: %d",seMurio);
-			if((seMurio==-1)||(seMurio==1))tipomsj=3;
-			if((seMurio==-2)||(seMurio==2))tipomsj=4;
-			if(seMurio==-3)tipomsj=6;
-			seMurio=0;
+			if((seMurio==-1)||(seMurio==1)){tipomsj=3;seMurio=0;}
+			if((seMurio==-2)){tipomsj=4;seMurio=0;}
+			if(seMurio==-3){tipomsj=6;seMurio=0;}
+
+			if(seMurio==2){
+			c=0;
+			seMurio=-2;
+			}
 			Header unHeader;
 			if((c!=0)&&(tipomsj==1)){//si no es la primera vez q se conecta al orq manda el nombre del nivel anterior
 				//mandar nivel que termino
@@ -174,6 +186,14 @@ int main(void){
 			close(unSocketOrq);
 			usleep(1*1000000);
 	}
+
+		new_action.sa_handler = manejador;
+		sigemptyset (&new_action.sa_mask);
+		new_action.sa_flags =0; //settea las señales como interruptoras del recv
+		sigaction (SIGINT, &new_action, NULL);
+		sigaction (SIGTERM, &new_action, NULL);
+
+
 			//conectar con Planificador
 			int unSocketPlanif;
 			unSocketPlanif = quieroUnPutoSocketAndando(ipPuertoOrq[0],ipNivelPlanif.portPlanificador);
