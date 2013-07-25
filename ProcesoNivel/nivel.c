@@ -324,7 +324,7 @@ void handler(NodoPersonaje* dataPer){
 								idRec=dataPer->recBloqueado;
 								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
 								nodoRecAux->cantAsignada++;
-								restarRecurso(listaItems, dataPer->recBloqueado);
+//								restarRecurso(listaItems, dataPer->recBloqueado);
 								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
 							}
 							log_debug(logger,"Resp del recData: %d",resp);
@@ -348,7 +348,7 @@ void handler(NodoPersonaje* dataPer){
 								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
 								nodoRecAux->cantAsignada++;
 								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c",*carAux,dataPer->nodo->id);
-								restarRecurso(listaItems, dataPer->recBloqueado);
+//								restarRecurso(listaItems, dataPer->recBloqueado);
 							}
 							dataPer->nodo->posx=posAux.x;
 							dataPer->nodo->posy=posAux.y;
@@ -408,7 +408,7 @@ void handler(NodoPersonaje* dataPer){
 								idRec=dataPer->recBloqueado;
 								NodoRecurso* nodoRecAux = list_find(nodoPerAux->listaRecursosAsignados,esRecurso);
 								nodoRecAux->cantAsignada++;
-								restarRecurso(listaItems, dataPer->recBloqueado);
+//								restarRecurso(listaItems, dataPer->recBloqueado);
 								log_debug(logger,"Hay instancias del recurso %c y se le dio una al Personaje %c",dataPer->recBloqueado,dataPer->nodo->id);
 							}
 							log_info(logger,"El Personaje %c solicita salir del nivel.",(dataPer->nodo)->id);
@@ -538,8 +538,11 @@ void liberarRecursos(t_list* listaPer,char personaje){
 					return false;
 				}
 	void liberarInstancias(NodoRecurso* nodo){
+		ITEM_NIVEL * auxItem=  obtenerRecurso(listaItems,nodo->id);
+		log_debug(logger,"L BF Rec: %c Instancias: %d",nodo->id,auxItem->quantity);
 		if(sumarRecurso(listaItems,nodo->id,nodo->cantAsignada)){
 			log_info(logger,"Se libero %d instancias del Recurso %c",nodo->cantAsignada,nodo->id);
+			log_debug(logger,"L AF Rec: %c Instancias: %d",nodo->id,auxItem->quantity);
 			free(nodo);
 		}
 	}
@@ -558,9 +561,12 @@ void liberarRecursos(t_list* listaPer,char personaje){
 	//todo validar
 	recibirHeader(socketOrq,&unHeader);
 	recibirData(socketOrq,unHeader,(void**)buffer);
-	for(i=0;i<(list_size(nodoPerAux->listaRecursosAsignados));i++)
+	for(i=0;i<(list_size(nodoPerAux->listaRecursosAsignados));i++){
 		log_debug(logger,"Se asigno %d instancias del Recurso %c segun el Orquestador",(buffer[i].cantAsignada),buffer[i].id);
+		ITEM_NIVEL * auxItem=  obtenerRecurso(listaItems,buffer[i].id);
+		log_debug(logger,"A BF Rec: %c Instancias: %d",buffer[i].id,auxItem->quantity);
 		sumarRecurso(listaItems,buffer[i].id,-(buffer[i].cantAsignada));
+		log_debug(logger,"A AF Rec: %c Instancias: %d",buffer[i].id,auxItem->quantity);}
 	free(buffer);
 	list_destroy_and_destroy_elements(nodoPerAux->listaRecursosAsignados,liberarInstancias);
 	free(nodoPerAux);
