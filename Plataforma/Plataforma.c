@@ -34,9 +34,12 @@
 #include "config.h"
  #include <errno.h>
 //----------------------------------------------------------------
-//son constantes
+
+//************************** CONSTANTES **************************
 #define EVENT_SIZE ( sizeof (struct inotify_event))
 #define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + 16 ) )
+//----------------------------------------------------------------
+
 //******************** DEFINICIONES GLOBALES *********************
 //Variables Globales del sistema
 //int varGlobalQuantum=3;
@@ -45,9 +48,9 @@ int varGlobalQuantum;
 int varGlobalSleep;
 int varGlobalDeadlock;
 int varGlobalSleepDeadlock;
-int flagGlobalFin=1;//flag q anuncia el fin del programa
-int g_contPersonajes=0;//contador global de personajes
-char* nombreNivel;//se usa para la funcion que se manda al list_find
+int flagGlobalFin=1; // Flag que informa el fin del programa. Por defecto está en 1 = No termino.
+int g_contPersonajes=0; //Contador global de personajes. Por defecto está en 0.
+char* nombreNivel; //Es usado por la funcion esMiNivel que se manda al list_find
 t_list* listaNiveles;
 
 //Structs propios de la plataforma
@@ -112,7 +115,7 @@ t_log * logPlanificador;
 
 //************************** PROTOTIPOS **************************
 
-//Prototipos de funciones a utilizar. Se definien luego de la función main.
+//Prototipos de funciones a utilizar. Se definen luego de la función main.
 int planificador (InfoNivel* nivel);
 int orquestador (void);
 int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha);
@@ -127,127 +130,156 @@ void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, 
 //Función principal del proceso, es la encargada de crear al orquestador y al planificador
 //Cardinalidad = un único thread
 int main (void) {
+
+	//Se crea la lista que va a contener niveles (se usa en el orquestador)
 	listaNiveles=list_create();
+
+	//Inicialización de los logs para el orquestador y los planificadores
 	logOrquestador = log_create("LogOrquestador.log","Orquestador",true,detail);
 	logPlanificador = log_create("LogPlanificador.log","Planificador",true,detail);
+
+	//Se carga el archivo de configuración que utiliza la plataforma
 	t_config* config = config_create("config.txt");
 	varGlobalQuantum=config_get_int_value(config,"Quantum");
+	//Tener en cuenta que en el archivo de configuración los valores de los tiempos están en
+	//segundos y es necesario pasarlos a micro segundos para usarlos en las funciones sleep
 	varGlobalSleep=(int)(config_get_double_value(config,"TiempoDeRetardoDelQuantum")* 1000000);
 	varGlobalDeadlock=config_get_int_value(config,"AlgoritmoDeDeteccionDeInterbloqueo");
 	varGlobalSleepDeadlock=(int)(config_get_double_value(config,"EjecucionDeAlgoritmoDeDeteccionDeInterbloqueo")* 1000000);
-	log_info(logOrquestador,"Quantum: %d Sleep: %d microseconds",varGlobalQuantum,	varGlobalSleep);
-	log_info(logOrquestador,"Proceso plataforma iniciado. Creando THR Orquestador...");
-	log_info(logOrquestador,"Proceso plataforma iniciado");
-	log_info(logOrquestador,"Creando THR Orquestador");
 
+	log_info(logOrquestador,"Proceso plataforma iniciado");
+	log_info(logOrquestador,"Quantum: %d Sleep: %d microsegundos",varGlobalQuantum,	varGlobalSleep);
+	log_info(logOrquestador,"Creando THR Orquestador...");
+
+	//Inicialización del thread orquestador
 	pthread_t thr_orquestador;
 	pthread_create(&thr_orquestador, NULL, orquestador, NULL);
 	log_info(logOrquestador,"THR Orquestador creado correctamente");
 
+	//TODO: Revisar cuando se espera y cierra el orquestador
 	//pthread_join(thr_orquestador, NULL); //Esperamos que termine el thread orquestador
 	//pthread_detach(thr_orquestador);
 
 	//********************* INICIO INOTIFY *********************
-	int fd;//file_descriptor
-	int wd;// watch_descriptor
+	//Descripción del segmento:
+	//INOTIFY es un un subsistema del kernel de linux que nos informa de cambios
+	//que hayan tenido lugar en el filesystem. En la plataforma esto se utiliza
+	//para recargar el archivo de configuración en caso de que haya sido modificado
+	//mientras la plataforma se encuentra corriendo.
 
+	int fd; //file_descriptor
+	int wd; //watch_descriptor
+
+	//Obtenemos la ruta del archivo de configuración de la plataforma
 	char cwd[1024];
 	char * fileconf="/config.txt";
 	if (getcwd(cwd, sizeof(cwd)) != NULL){
-		log_debug(logOrquestador,"Current working dir: %s", cwd);
+		log_debug(logOrquestador,"Directorio (CWD) de INOTIFY: %s", cwd);
 		strcat(cwd, fileconf);
-		log_debug(logOrquestador,"Current file: %s", cwd);
+		log_debug(logOrquestador,"Archivo de INOTIFY: %s", cwd);
 	}
-	else
-	   perror("getcwd() error");
+	else {
+		log_debug(logOrquestador,"Error con la funcion getcwd(...) en el segmento INOTIFY de main()");
+	}
 
 	struct timeval time;
 	fd_set rfds;
 	int ret;
-	//Creamos una instancia de inotify, me devuelve un archivo descriptor
+
+	//Creamos una instancia de inotify, devuelve un archivo descriptor
 	fd = inotify_init();
-	//Verificamos los errores
+
+	//Comprobamos que haya un descriptor válido, sino es así se inicio mal el inotify
 	if ( fd < 0 ) {
-		perror( "inotify_init" );
+		log_debug(logOrquestador,"Error con la funcion inotify_init(...) en el segmento INOTIFY de main()");
 	}
-	// Creamos un watch para el evento IN_MODIFY
-	//watch_descriptor= inotify_add_watch(archivoDescrpitor, path, evento)
+	//Creamos un watch para el evento IN_MODIFY. Esto quiere decir que el archivo de configuración
+	//será "monitoreado" para saber si es modificado, si esto sucede se disparará un evento.
+	//Sintaxis: watch_descriptor = inotify_add_watch (archivoDescrpitor, path, evento)
 	wd = inotify_add_watch( fd, cwd, IN_MODIFY);
 
-	// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
-	// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
+	// El archivo descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos.
+	// Para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
 	// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
 	// referente a los eventos ocurridos
-	while(flagGlobalFin) { //sale cuando se termina el programa
+
+	//Ciclo While A: Sale cuando se termina el programa (flagGlobalfin = 0)
+	while(flagGlobalFin) {
+
 		time.tv_sec = 2;
 		time.tv_usec = 0;//varGlobalSleep;
-
-
 
 		FD_ZERO(&rfds);
 		FD_SET(fd,&rfds);
 		ret = select (fd + 1, &rfds, NULL, NULL, &time);
 		if (ret < 0){
-			 perror ("select");
+			log_debug(logOrquestador,"Error con la funcion select(...) en el segmento INOTIFY de main()");
 		}
 		if (!ret){
-			 /* timed out!  */
+			log_debug(logOrquestador,"Error de timeout en el segmento INOTIFY de main()");
 		}
 		if (FD_ISSET (fd, &rfds)){
 
-	//	while(1){//flagGlobalFin) { //sale cuando se termina el programa
-		int i = 0;
-		char buffer[EVENT_BUF_LEN];
-		int length = read( fd, buffer, EVENT_BUF_LEN );
-		//Verficamos los errores
-		if ( length < 0 ) {
-			perror( "read" );
-		}
+			char buffer[EVENT_BUF_LEN];
+			//Leemos el archivo FD que contiene los eventos y los guardamos en un buffer
+			int length = read( fd, buffer, EVENT_BUF_LEN );
+			//Verficamos si hubo errores en la lectura del archivo FD
+			if ( length < 0 ) {
+				log_debug(logOrquestador,"Error al leer del archivo FD en el segmento INOTIFY de main()");
+			}
 
-		while ( i < length ) {
-		struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
-		//si watcheamos un archivo no va a venir el nombre poqrue es redundante por eso event->len es igual a 0
+			//A continuación recorremos el buffer para revisar todos los eventos que pudieron haber sucedido
+			int i = 0;
+			//Ciclo While B: Mientras haya evento en el buffer
+			while ( i < length ) {
+				//Guardamos en event el evento del buffer
+				struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
 
-		log_debug(logOrquestador,"wd=%d mask=%u cookie=%u len=%u",
-		                event->wd, event->mask,
-		                event->cookie, event->len);
-				if ( event->mask & IN_MODIFY)
-				{
+				//NOTA: Si "watcheamos" (monitoreamos) un archivo no va a venir el nombre porque es redundante por eso event->len es igual a 0
+				//Logeamos el evento
+				log_debug(logOrquestador,"Evento INOTIFY: wd=%d mask=%u cookie=%u len=%u",
+							event->wd, event->mask,
+							event->cookie, event->len);
 
+				//Si el evento fue de tipo IN_MODIFY quiere decir que el archivo de configuración fue modificado
+				//mientras la plataforma se encuentra corriendo y debemos volver a cargar la configuración
+				if ( event->mask & IN_MODIFY) {
 					config_destroy(config);
 					config = config_create("config.txt");
 					if(config_has_property(config,"Quantum")){
-					varGlobalQuantum=config_get_int_value(config,"Quantum");
-					log_info(logOrquestador,"El archivo de configuracion fue modificado");
-					log_info(logOrquestador,"Nuevo Valor del Quantum: %d",varGlobalQuantum);
+						varGlobalQuantum=config_get_int_value(config,"Quantum");
+						log_info(logOrquestador,"El archivo de configuracion fue modificado");
+						log_info(logOrquestador,"Nuevo valor del Quantum: %d",varGlobalQuantum);
 					}
 				}
 
-		buffer[EVENT_BUF_LEN]="";
-		i += EVENT_SIZE + event->len;
+				buffer[EVENT_BUF_LEN]="";
+				i += EVENT_SIZE + event->len;
 
-		}
+			} //Ciera el ciclo While B
+		} //Cierra If
+	} //Cierra el cilco While A (el que comprueba la finalización del programa)
 
-	}
+	//A partir de este punto se supone que el programa esta finalizandose
+	//porque flagGlobalfin es igual a 0 al salir del ciclo anterior
 
-}
-//removing the “/tmp” directory from the watch list.
-inotify_rm_watch(fd,wd);
+	//Removemos el watch que habíamos aplicado al archivo
+	inotify_rm_watch(fd,wd);
 
-//Se cierra la instancia de inotify
-close(fd);
-//******************** FIN INOTIFY *********************
-config_destroy(config);
-log_info(logOrquestador,"Proceso plataforma finalizado correctamente\n");
+	//Se cierra la instancia de inotify
+	close(fd);
+	//******************** FIN INOTIFY *********************
 
-//******************** KOOPA *********************
-//todo hay que ver donde metemos a koopa para que esto sea consistente, yo diria meterlo en la misma carpeta q el planificador
-char *environ[]= {"../../Libs","reglas.txt",NULL};
-execv("koopa",environ);
-//printf("salio todo mal\n");
-//******************** FIN INOTIFY *********************
+	config_destroy(config);
+	log_info(logOrquestador,"Proceso plataforma finalizado correctamente\n");
 
-return 0;
+	//******************** KOOPA *********************
+	//todo hay que ver donde metemos a koopa para que esto sea consistente, yo diria meterlo en la misma carpeta q el planificador
+	char *environ[]= {"../../Libs","reglas.txt",NULL};
+	execv("koopa",environ);
+	//printf("salio todo mal\n");
+
+	return 0;
 }
 //FIN DE MAIN
 
@@ -277,6 +309,7 @@ int planificador (InfoNivel* nivel) {
 	planificadorActual->contPersonajes=0;
 	//pasar puerto de la plataforma
 	planificadorActual->port=nivel->puertoPlanif;
+
 	//Este thread se encargará de escuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
 //	pthread_t threadPersonaje;
 //	pthread_create(&threadPersonaje, NULL, listenerPersonaje, (void *)planificadorActual);
@@ -315,9 +348,8 @@ int planificador (InfoNivel* nivel) {
 
 		nombreNivel = nivel->nombre;
 
-		if(!list_find(listaNiveles,esMiNivel)){
-
-			//Desconectar sockets de cola de listos
+		//esMiNivel es una función booleana que devuelve un true si dos niveles son iguales
+		if(!list_find(listaNiveles, esMiNivel)){
 
 			int i;
 			NodoPersonaje * auxPersDesc;
