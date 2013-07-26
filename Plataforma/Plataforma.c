@@ -38,6 +38,7 @@
 //************************** CONSTANTES **************************
 #define EVENT_SIZE ( sizeof (struct inotify_event))
 #define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + 16 ) )
+#define PUERTO_ORQUESTADOR 4999
 //----------------------------------------------------------------
 
 //******************** DEFINICIONES GLOBALES *********************
@@ -631,8 +632,8 @@ int planificador (InfoNivel* nivel) {
 //proceso personaje que se conecte.
 //Cardinalidad = un único thread que atiende las solicitudes
 int orquestador (void) {
-	//t_list* listaNiveles=list_create();
-	int contadorPuerto=4999;
+	//PUERTO_ORQUESTADOR es una constante
+	int contadorPuerto = PUERTO_ORQUESTADOR;
 	int socketNuevaConexion;
 	//Struct con info de conexión (IP y puerto) del nivel y el planificador asociado a ese nivel
 	typedef struct t_infoConxNivPlan {
@@ -645,16 +646,16 @@ int orquestador (void) {
 	ConxNivPlan msj;
 
 	log_info(logOrquestador,"THR Orquestador: iniciado");
-	log_info(logOrquestador,"THR Orquestador: Esperando conexiones de personajes o Niveles...");
+	log_info(logOrquestador,"THR Orquestador: Esperando conexiones de personajes o niveles...");
 
 	//Creamos un socket de escucha para el puerto inicial setteado en contadorPuerto
 	int socketEscucha;
 	if ((socketEscucha = quieroUnPutoSocketDeEscucha(contadorPuerto)) != 1){
 		contadorPuerto++;
-		log_info(logOrquestador,"Socket de escucha para el puerto 4999 creado");
+		log_info(logOrquestador,"Socket de escucha para el puerto %d creado", PUERTO_ORQUESTADOR);
 	}
 	else {
-		log_error(logOrquestador,"No se pudo crear el socket de escucha para el puerto 4999");
+		log_error(logOrquestador,"No se pudo crear el socket de escucha para el puerto %d", PUERTO_ORQUESTADOR);
 	}
 	//TODO: Supongo que el while(1) debería estar dentro del else
 	//Chequear eso
