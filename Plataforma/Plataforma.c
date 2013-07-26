@@ -51,7 +51,7 @@ int varGlobalSleepDeadlock;
 int flagGlobalFin=1; // Flag que informa el fin del programa. Por defecto está en 1 = No termino.
 int g_contPersonajes=0; //Contador global de personajes. Por defecto está en 0.
 char* nombreNivel; //Es usado por la funcion esMiNivel que se manda al list_find
-t_list* listaNiveles;
+t_list* listaNiveles; //Variable global utilizada dentro del planificador y orquestador
 
 //Structs propios de la plataforma
 
@@ -68,7 +68,7 @@ typedef struct t_infoPlanificador {
 } InfoPlanificador;
 
 typedef struct t_nodoNivel {//TODO completar segun las necesidades
-	char* nombreNivel; //Ej: @ ! / % $ &
+	char* nombreNivel;
 	char ip[20];
 	int port;
 	int puertoPlanif;
@@ -131,7 +131,7 @@ void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, 
 //Cardinalidad = un único thread
 int main (void) {
 
-	//Se crea la lista que va a contener niveles (se usa en el orquestador)
+	//Se crea la lista que va a contener niveles (se usa en el orquestador y planificador)
 	listaNiveles=list_create();
 
 	//Inicialización de los logs para el orquestador y los planificadores
@@ -179,7 +179,7 @@ int main (void) {
 		log_debug(logOrquestador,"Archivo de INOTIFY: %s", cwd);
 	}
 	else {
-		log_debug(logOrquestador,"Error con la funcion getcwd(...) en el segmento INOTIFY de main()");
+		log_error(logOrquestador,"Error con la funcion getcwd(...) en el segmento INOTIFY de main()");
 	}
 
 	struct timeval time;
@@ -191,7 +191,7 @@ int main (void) {
 
 	//Comprobamos que haya un descriptor válido, sino es así se inicio mal el inotify
 	if ( fd < 0 ) {
-		log_debug(logOrquestador,"Error con la funcion inotify_init(...) en el segmento INOTIFY de main()");
+		log_error(logOrquestador,"Error con la funcion inotify_init(...) en el segmento INOTIFY de main()");
 	}
 	//Creamos un watch para el evento IN_MODIFY. Esto quiere decir que el archivo de configuración
 	//será "monitoreado" para saber si es modificado, si esto sucede se disparará un evento.
@@ -213,10 +213,10 @@ int main (void) {
 		FD_SET(fd,&rfds);
 		ret = select (fd + 1, &rfds, NULL, NULL, &time);
 		if (ret < 0){
-			log_debug(logOrquestador,"Error con la funcion select(...) en el segmento INOTIFY de main()");
+			log_error(logOrquestador,"Error con la funcion select(...) en el segmento INOTIFY de main()");
 		}
 		if (!ret){
-			log_debug(logOrquestador,"Error de timeout en el segmento INOTIFY de main()");
+			log_error(logOrquestador,"Error de timeout en el segmento INOTIFY de main()");
 		}
 		if (FD_ISSET (fd, &rfds)){
 
@@ -225,7 +225,7 @@ int main (void) {
 			int length = read( fd, buffer, EVENT_BUF_LEN );
 			//Verficamos si hubo errores en la lectura del archivo FD
 			if ( length < 0 ) {
-				log_debug(logOrquestador,"Error al leer del archivo FD en el segmento INOTIFY de main()");
+				log_error(logOrquestador,"Error al leer del archivo FD en el segmento INOTIFY de main()");
 			}
 
 			//A continuación recorremos el buffer para revisar todos los eventos que pudieron haber sucedido
@@ -274,12 +274,19 @@ int main (void) {
 	log_info(logOrquestador,"Proceso plataforma finalizado correctamente\n");
 
 	//******************** KOOPA *********************
+	//Antes de cerrar el proceso plataforma ejecutamos lo último que nos pide el TP:
+	//ejectura el proceso koopa (se supone que para este momento todos los pjs terminaron
+	//su plan de niveles)
 	//todo hay que ver donde metemos a koopa para que esto sea consistente, yo diria meterlo en la misma carpeta q el planificador
-	char *environ[]= {"../../Libs","reglas.txt",NULL};
-	execv("koopa",environ);
-	//printf("salio todo mal\n");
 
-	return 0;
+	//Se crea un array con los argumentos que deberá recibir la función main(...) de koopa
+	//El array debe terminar en NULL para indicar el fin del mismo
+	char *environ[]= {"../../Libs","reglas.txt",NULL};
+	//Ejecutamos koopa (en un nuevo proceso)
+	execv("koopa",environ);
+
+	//Finaliza la función main() del proceso plataforma
+	return EXIT_SUCCESS;
 }
 //FIN DE MAIN
 
@@ -289,38 +296,35 @@ int main (void) {
 //Cardinalidad = 0 hasta N threads ejecutándose simultáneamente, uno por nivel
 int planificador (InfoNivel* nivel) {
 
-
-	//cola de personajes listos y bloqueados
+	//Cola de personajes listos y bloqueados
 	t_queue *colaListos=queue_create();
 	t_queue *colaBloqueados=queue_create();
 	nivel->nodoN->colaBloqueados=colaBloqueados;
 	nivel->nodoN->colaListos=colaListos;
+
 	//TODO implementar handshake Conectarse con el nivel
-	//int socketNivel=quieroUnPutoSocketAndando(nivel->ipN,nivek->portN);
+	//int socketNivel=quieroUnPutoSocketAndando(nivel->ipN,nivel->portN);
 
 	log_info(logPlanificador,"IP: %s // Puerto: %d",nivel->ip,nivel->port);
 
-	// Creamos el listener de personajes del planificador (guardar socket e info del pj en la estructura)
+	//Configuramos el planificador
 	void* nodoAux;
 	InfoPlanificador *planificadorActual;
 	planificadorActual=malloc(sizeof(InfoPlanificador));
 	planificadorActual->colaListos=colaListos;
 	planificadorActual->colaBloqueados=colaBloqueados;
 	planificadorActual->contPersonajes=0;
-	//pasar puerto de la plataforma
+	//Pasar puerto especificado por el nivel al planificador
 	planificadorActual->port=nivel->puertoPlanif;
-
-	//Este thread se encargará de escuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
-//	pthread_t threadPersonaje;
-//	pthread_create(&threadPersonaje, NULL, listenerPersonaje, (void *)planificadorActual);
-//	log_info(logPlanificador,"THR de escucha del planificador de puerto %d creado correctamente",nivel->port);
 
 	//Se necesita algun char (cualquiera) para poder usar la función de enviar mensaje más adelante
 	char* auxcar;
 	auxcar=malloc(sizeof(char));
 	*auxcar='P';
 
-	int quantum=varGlobalQuantum;
+	//Hacemos que el planificador utilize el quantum definido en la variable global varGlobalQuantum
+	//que depende del valor especificado en el archivo de configuración
+	int quantum = varGlobalQuantum;
 
 	/*Esta var auxiliar lo que hace es que si no se pudo
 	 * mandar el movimiento permitido al personaje,
@@ -330,15 +334,17 @@ int planificador (InfoNivel* nivel) {
 	int varAuxiliar=0;
 
 	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
-    int socketEscucha;
+    //Creamos un socket de escucha
+	int socketEscucha;
     if((socketEscucha=quieroUnPutoSocketDeEscucha(planificadorActual->port)) != 1)
     	log_info(logPlanificador,"Escuchando Conexiones en el puerto: %d",planificadorActual->port);
     else
-    	log_error(logPlanificador,"No se pudo crear el socket de escucha");
+    	log_error(logPlanificador,"No se pudo crear el socket de escucha en el puerto: %d",planificadorActual->port);
 
+    //Ciclo While A: permanente que atenderá las solicitudes de los personajes para el nivel asociado a este planificador
 	while(1){
 
-		/*Handleo desconexion de Nivel: no me gusta como esta hecho pero es
+		/*todo Handleo desconexion de Nivel: no me gusta como esta hecho pero es
 		 * la unica solucion que se me ocurrio en este momento.
 		 * La idea es que esta variable global sea una flag que se active
 		 * cuando un nivel se cierra y funciona barbaro para romper
@@ -346,118 +352,143 @@ int planificador (InfoNivel* nivel) {
 		 * se desconecten varios niveles al mismo tiempo,
 		 * quizas cierra alguno que no va*/
 
+		//nombreNivel es una variable global, es decir que puede ser accedida directamente por la función esMiNivel más adelante
 		nombreNivel = nivel->nombre;
 
-		//esMiNivel es una función booleana que devuelve un true si dos niveles son iguales
+		//esMiNivel es una función booleana que devuelve un true si la variable global "nombreNivel" es igual a
+		//el nombre de un nivel que se le pasa como argumento
+
+		//Si en la lista global de niveles que se encuentran conectados a la plataforma no se encuentra el de este planificador
 		if(!list_find(listaNiveles, esMiNivel)){
 
 			int i;
 			NodoPersonaje * auxPersDesc;
-			char mj= 'K';
-			//Desconectar sockets de cola de listos para que terminen los PJ's
+			char mj= 'K'; //Es necesario mandar algo en el mensaje, puede ser cualquier cosa porque lo importante en este caso es el header
 
+			//Desconectar sockets de cola de listos para que terminen los PJ's
+			//Ciclo mientras la cola de listos contenga elementos
 			while(!queue_is_empty(colaListos)){
 				auxPersDesc = queue_pop(colaListos);
+				//Enviamos un mensaje de desconexión al personaje
+				//NOTA: Para el personaje un header = 10 equivale a desconexión por nivel
 				mandarMensaje(auxPersDesc->socket, 10, sizeof(char), &mj);
 				close(auxPersDesc->socket);
-//				g_contPersonajes--;
 			}
 
 			//Desconectar sockets de cola de bloqueados para que terminen los PJ's
-
+			//Ciclo mientras la cola de bloqueados contenga elementos
 			while(!queue_is_empty(colaBloqueados)){
 				auxPersDesc = queue_pop(colaBloqueados);
+				//Enviamos un mensaje de desconexión al personaje
+				//NOTA: Para el personaje un header = 10 equivale a desconexión por nivel
 				mandarMensaje(auxPersDesc->socket, 10, sizeof(char), &mj);
 				close(auxPersDesc->socket);
-//				g_contPersonajes--;
 			}
 
-			log_info(logPlanificador,"Se rompe el while(1) y se cierra el thread");
-			break;
+			log_info(logPlanificador,"El nivel de este planificador ya no se encuentra en la lista de niveles de la plataforma. Todos los personajes desconectados, se rompe el while(1) y se cierra el thread.");
+			break; //Esto termina el ciclo permanente A ( el While(1) )
 		}
+
+		//A partir de este momento se realiza la atención de nuevas conexiones a través de un select()
+		//El uso del select() reemplazó al thread de listenerDePersonajes()
 
 		/* Se inicializa descriptoresLectura */
 		FD_ZERO (&descriptoresLectura);
-		FD_SET (socketEscucha, &descriptoresLectura);/* Se añade para select() el socket servidor */
+		FD_SET (socketEscucha, &descriptoresLectura);/* Se añade para select() el socket de escucha del servidor */
 		/* Espera indefinida hasta que alguno de los descriptores tenga algo
 		 * que decir: un nuevo cliente  */
 		struct timeval timeout;
 		timeout.tv_sec=0;
 		timeout.tv_usec=0;
+		//Select al estar configurado con un timeout de 0 segundos (y microsegundos), espera hasta que le llegue algo (bloqueante)
 		select (socketEscucha + 1, &descriptoresLectura, NULL, NULL, &timeout);
 		/* Se comprueba si algún cliente nuevo desea conectarse y se le
-		 * admite */
+		 * admite. FD_ISSET nos dice si hubo cambios en ese descriptor */
 		pthread_mutex_lock(&nivel->nodoN->sem);
-		if (FD_ISSET (socketEscucha, &descriptoresLectura)){
-			listenerPersonaje(planificadorActual,socketEscucha);
-		}
+			if (FD_ISSET (socketEscucha, &descriptoresLectura)){
+				//Dentro de la función listenerPersonaje el nuevo personaje se agrega a la cola de listos y ,además, si
+				//estaba en la cola de bloqueados se lo quita de la misma
+				listenerPersonaje(planificadorActual,socketEscucha);
+			}
 		pthread_mutex_unlock(&nivel->nodoN->sem);
 
+		//A partir de este momento se realiza la atención de los personajes que ya estaban conectados al planificador
 
-
-
-		//Si la cola no esta vacia
+		//Si la cola de personajes listos no esta vacia
 		if(!queue_is_empty(colaListos)){
-//			pthread_mutex_lock(&nivel->nodoN->sem);
-			//imprimir PJ listos
-			log_info(logPlanificador,"*****Personajes en la Cola de Listos*****");
+			//pthread_mutex_lock(&nivel->nodoN->sem);
+
+			//Imprimir PJ listos
+			log_info(logPlanificador,"*****Personajes en la cola de Listos*****");
 			int p;
+			//Este mutex evita que se este cargando un nuevo personaje a través de un listenerPersonaje mientras se procesa
+			//a los que ya se encuentran conectados al planificador
 			pthread_mutex_lock(&nivel->nodoN->sem);
-			int tam=queue_size(colaListos);
-			for (p=0;p<tam;p++){
-				NodoPersonaje* nodoP=queue_pop(colaListos);
-				log_info(logPlanificador,"%d° Personaje: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->socket);
-				queue_push(colaListos,nodoP);
-			}
+				int tam=queue_size(colaListos);
+				for (p=0;p<tam;p++){
+					//Agarramos el primer personaje de la cola de listos
+					NodoPersonaje* nodoP=queue_pop(colaListos);
+					//Lo logeamos
+					log_info(logPlanificador,"%d° Personaje: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->socket);
+					//Lo volvemos a poner al final de la cola
+					queue_push(colaListos,nodoP);
+				}
 			pthread_mutex_unlock(&nivel->nodoN->sem);
-			//imprimir PJ bloqueados
+
+			//Imprimir PJ bloqueados
+			//Este mutex cumple la misma función que cuando se procesa la cola de listos
 			pthread_mutex_lock(&nivel->nodoN->sem);
-			log_info(logPlanificador,"*****Personajes en la Cola de Bloqueados*****");
-			tam=queue_size(colaBloqueados);
-			for (p=0;p<tam;p++){
-				NodoPersonaje* nodoP=queue_pop(colaBloqueados);
-				log_info(logPlanificador,"%d° Personaje: %c Recurso Solicitado: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido,nodoP->socket);
-				queue_push(colaBloqueados,nodoP);
-			}
+				log_info(logPlanificador,"*****Personajes en la cola de Bloqueados*****");
+				tam=queue_size(colaBloqueados);
+				for (p=0;p<tam;p++){
+					//Agarramos el primer personaje de la cola de bloqueados
+					NodoPersonaje* nodoP=queue_pop(colaBloqueados);
+					//Lo logeamos
+					log_info(logPlanificador,"%d° Personaje: %c Recurso Solicitado: %c Socket: %d",p+1,nodoP->simboloRepresentativo,nodoP->recursoPedido,nodoP->socket);
+					//Lo volemos a poner al final de la cola
+					queue_push(colaBloqueados,nodoP);
+				}
 			pthread_mutex_unlock(&nivel->nodoN->sem);
-//			log_info(logPlanificador,"La lista no esta vacia");
+
 			NodoPersonaje *personajeActual; //todo Revisar que los punteros de personajeActual anden bien
 
+			//Quantum > 0, es decir le queda quantum al personaje que esta siendo atendido
 			if(quantum>0){
 
 				log_info(logPlanificador,"El Quantum %d es mayor a 0",quantum);
 				//Mandar mensaje de movimiento permitido al socket del personaje del nodo actual (primer nodo de la cola)
 				pthread_mutex_lock(&nivel->nodoN->sem);
-				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
-				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
-
-					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
-					varAuxiliar=0;
-				}
-				else {
-					log_error(logPlanificador,"No se pudo enviar un Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
-					varAuxiliar=1;
-				}
+					personajeActual = (NodoPersonaje*) queue_peek(colaListos);
+					if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
+						log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+						varAuxiliar=0;
+					}
+					else {
+						log_error(logPlanificador,"No se pudo enviar un Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
+						varAuxiliar=1;
+					}
 				pthread_mutex_unlock(&nivel->nodoN->sem);
 
 			}
+			//En caso de que no le quede quantum al personaje que estaba siendo atendido
 			else {
+				//Restauramos el valor del quantum
 				quantum=varGlobalQuantum;
 
 				log_info(logPlanificador,"Se termino el quantum");
 				//Sacar el nodo actual (primer nodo de la cola) y enviarlo al fondo de la misma
-				//todo Sincronizar colaListos con el Listener
 				pthread_mutex_lock(&nivel->nodoN->sem);
-				NodoPersonaje* perAux=queue_pop(colaListos);
+					NodoPersonaje* perAux = queue_pop(colaListos);
 
-				log_info(logPlanificador,"Se saco al pj %c de la cola de listos",perAux->simboloRepresentativo);
-				queue_push(colaListos,perAux);
+					log_info(logPlanificador,"Se saco al pj %c de la cola de listos",perAux->simboloRepresentativo);
+					queue_push(colaListos,perAux);
 
-				log_info(logPlanificador,"Se puso al pj %c al final de la cola de listos",perAux->simboloRepresentativo);
-				//Buscar el primero de la cola de listos y mandarle un mensaje de movimiento permitido
-				personajeActual = (NodoPersonaje*) queue_peek(colaListos);
+					log_info(logPlanificador,"Se puso al pj %c al final de la cola de listos",perAux->simboloRepresentativo);
+					//Buscar el primero de la cola de listos y mandarle un mensaje de movimiento permitido
+					personajeActual = (NodoPersonaje*) queue_peek(colaListos);
 				pthread_mutex_unlock(&nivel->nodoN->sem);
-				log_info(logPlanificador,"Se saco al primer personaje de la cola: %c",perAux->simboloRepresentativo);
+
+				log_info(logPlanificador,"El primer personaje de la cola es: %c",personajeActual->simboloRepresentativo);
 				if(mandarMensaje(personajeActual->socket, 8, sizeof(char), auxcar) > 0){
 					log_info(logPlanificador,"Se mando Mov permitido al personaje %c",personajeActual->simboloRepresentativo);
 					varAuxiliar=0;
@@ -1073,19 +1104,24 @@ int orquestador (void) {
 //Función que escucha nuevas conexiones de personajes
 int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha){
 
+		//IMPLEMENTACIÓN DENTRO DEL CÓDIGO DEL TP SIN USAR SELECT()
+		//  Este thread se encargará de escuchar nuevas conexiones de personajes indefinidamente (ver función listenerPersonaje)
+		//	pthread_t threadPersonaje;
+		//	pthread_create(&threadPersonaje, NULL, listenerPersonaje, (void *)planificadorActual);
+		//	log_info(logPlanificador,"THR de escucha del planificador de puerto %d creado correctamente",nivel->port);
+
 	    int socketNuevaConexion;
 
 
+	    //Usar el siguiente ciclo indefinido si se va a utilizar la función en un thread (es decir, sin usar select())
 	    //Ciclo While(1) para escuchar nuevos personajes indefinidamente
-//		while (1){
+	    //while (1){
 
 			// Escuchar nuevas conexiones entrantes.
 			if (listen(socketEscucha, 1) != 0) {
-				//log_error(logger,"Error al bindear socket escucha");
 				log_error(logPlanificador,"Error al bindear socket escuchar");
 				return EXIT_FAILURE;
 			}
-			//log_info(logger,"Escuchando conexiones entrantes");
 			log_info(logPlanificador,"Escuchando conexiones entrantes");
 
 			// Aceptar una nueva conexion entrante. Se genera un nuevo socket con la nueva conexion.
@@ -1128,7 +1164,7 @@ int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha){
 
 			}
 
-//		}//Cierra el while(1)
+		//}Cierra el while(1)
 
 	    return EXIT_SUCCESS;
 	}
