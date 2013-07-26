@@ -51,8 +51,7 @@ int varGlobalDeadlock;
 int varGlobalSleepDeadlock;
 int flagGlobalFin=1; // Flag que informa el fin del programa. Por defecto está en 1 = No termino.
 int g_contPersonajes=0; //Contador global de personajes. Por defecto está en 0.
-pthread_mutex_t semNombreNivel;
-char* nombreNivel; //Es usado por la funcion esMiNivel que se manda al list_find
+
 t_list* listaNiveles; //Variable global utilizada dentro del planificador y orquestador
 
 //Structs propios de la plataforma
@@ -122,7 +121,6 @@ int planificador (InfoNivel* nivel);
 int orquestador (void);
 int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha);
 char* print_ip(int ip);
-bool esMiNivel(NodoNivel* nodo);
 void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, int quantum, t_queue * colaListos);
 //----------------------------------------------------------------
 
@@ -298,6 +296,14 @@ int main (void) {
 //Cardinalidad = 0 hasta N threads ejecutándose simultáneamente, uno por nivel
 int planificador (InfoNivel* nivel) {
 
+	char* nombreNivel;
+
+	bool esMiNivel(NodoNivel* nodo){
+	//	printf("%s %s\n",nodo->nombreNivel,nombreNivel);
+		if(strcmp(nodo->nombreNivel,nombreNivel)==0)
+			return true;
+		return false;
+	}
 	//Cola de personajes listos y bloqueados
 	t_queue *colaListos=queue_create();
 	t_queue *colaBloqueados=queue_create();
@@ -355,7 +361,7 @@ int planificador (InfoNivel* nivel) {
 		 * quizas cierra alguno que no va*/
 
 		//nombreNivel es una variable global, es decir que puede ser accedida directamente por la función esMiNivel más adelante
-		pthread_mutex_lock(&semNombreNivel);
+//		pthread_mutex_lock(&semNombreNivel);
 		nombreNivel = nivel->nombre;
 
 		//esMiNivel es una función booleana que devuelve un true si la variable global "nombreNivel" es igual a
@@ -391,7 +397,7 @@ int planificador (InfoNivel* nivel) {
 			log_info(logPlanificador,"El nivel de este planificador ya no se encuentra en la lista de niveles de la plataforma. Todos los personajes desconectados, se rompe el while(1) y se cierra el thread.");
 			break; //Esto termina el ciclo permanente A ( el While(1) )
 		}
-		pthread_mutex_unlock(&semNombreNivel);
+//		pthread_mutex_unlock(&semNombreNivel);
 		//A partir de este momento se realiza la atención de nuevas conexiones a través de un select()
 		//El uso del select() reemplazó al thread de listenerDePersonajes()
 
@@ -634,10 +640,18 @@ int planificador (InfoNivel* nivel) {
 //proceso personaje que se conecte.
 //Cardinalidad = un único thread que atiende las solicitudes
 int orquestador (void) {
+	char* nombreNivel;
+
+	bool esMiNivel(NodoNivel* nodo){
+	//	printf("%s %s\n",nodo->nombreNivel,nombreNivel);
+		if(strcmp(nodo->nombreNivel,nombreNivel)==0)
+			return true;
+		return false;
+	}
 	//PUERTO_ORQUESTADOR es una constante
 	int contadorPuerto = PUERTO_ORQUESTADOR;
 	int socketNuevaConexion;
-	pthread_mutex_init(&semNombreNivel, NULL);
+//	pthread_mutex_init(&semNombreNivel, NULL);
 	//Struct con info de conexión (IP y puerto) del nivel y el planificador asociado a ese nivel
 	typedef struct t_infoConxNivPlan {
 		char ipNivel[16];
@@ -862,10 +876,10 @@ int orquestador (void) {
 				 * (el socket se desconecta)
 				es eliminado de la lista de niveles */
 				else {
-					pthread_mutex_lock(&semNombreNivel);
+//					pthread_mutex_lock(&semNombreNivel);
 					nombreNivel = nodoN->nombreNivel;
 					list_remove_by_condition(listaNiveles, esMiNivel);
-					pthread_mutex_unlock(&semNombreNivel);
+//					pthread_mutex_unlock(&semNombreNivel);
 					log_info(logOrquestador,"Se borro el nivel %s por desconexion",nodoN->nombreNivel);
 					close(nodoN->socket);
 				}
@@ -931,11 +945,11 @@ int orquestador (void) {
 								log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 								//settear variable global para usar en funcion q se manda a list_find
-								pthread_mutex_lock(&semNombreNivel);
+//								pthread_mutex_lock(&semNombreNivel);
 								nombreNivel=nivelDelPersonaje;
-								log_info(logOrquestador,"Se busca el nivel");
+								log_info(logOrquestador,"Se busca el nivel %s",nombreNivel);
 								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
-								pthread_mutex_unlock(&semNombreNivel);
+//								pthread_mutex_unlock(&semNombreNivel);
 								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
 								if(nivel!=NULL){
 									g_contPersonajes++;
@@ -967,11 +981,11 @@ int orquestador (void) {
 								log_info(logOrquestador,"El personaje %c solicita informacion del nivel %s",*simboloRecibido,nivelDelPersonaje);
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 								//settear variable global para usar en funcion q se manda a list_find
-								pthread_mutex_lock(&semNombreNivel);
+//								pthread_mutex_lock(&semNombreNivel);
 								nombreNivel=nivelDelPersonaje;
-								log_info(logOrquestador,"Se busca el nivel");
+								log_info(logOrquestador,"Se busca el nivel %s",nombreNivel);
 								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
-								pthread_mutex_unlock(&semNombreNivel);
+//								pthread_mutex_unlock(&semNombreNivel);
 								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
 								if(nivel!=NULL){
 									log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
@@ -1003,11 +1017,11 @@ int orquestador (void) {
 
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 								//settear variable global para usar en funcion q se manda a list_find
-								pthread_mutex_lock(&semNombreNivel);
+//								pthread_mutex_lock(&semNombreNivel);
 								nombreNivel=nivelDelPersonaje;
-								log_debug(logOrquestador,"Se busca el nivel");
+								log_debug(logOrquestador,"Se busca el nivel %s",nombreNivel);
 								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
-								pthread_mutex_unlock(&semNombreNivel);
+//								pthread_mutex_unlock(&semNombreNivel);
 								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
 								if(nivel!=NULL){
 									log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");
@@ -1237,12 +1251,7 @@ char* print_ip(int ip)
     snprintf(aux,16,"%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
     return aux;
 }
-bool esMiNivel(NodoNivel* nodo){
-//	printf("%s %s\n",nodo->nombreNivel,nombreNivel);
-	if(strcmp(nodo->nombreNivel,nombreNivel)==0)
-		return true;
-	return false;
-}
+
 
 void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, int quantum, t_queue * colaListos){
 	NodoPersonaje* auxP = queue_pop(colaListos);
