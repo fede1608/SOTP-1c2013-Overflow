@@ -14,6 +14,12 @@ export LD_LIBRARY_PATH=/home/utnso/TPSO/tp-20131c-overflow/Libs:$LD_LIBRARY_PATH
 
 curl -u 'overflowDT' -L -o TP.tar https://api.github.com/repos/sisoputnfrba/tp-20131c-overflow/tarball/master
 
+sudo rm /etc/udev/rules.d/70-persistent-net.rules
+
+chmod -v -R 777 carpetaDelRepo
+
+export LD_LIBRARY_PATH=/home/utnso/tp-20131c-overflow-master/Tests/Libs/
+
 Parámetros
 ----------
 ./koopa [archivo.txt]

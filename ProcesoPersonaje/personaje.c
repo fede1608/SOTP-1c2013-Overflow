@@ -50,7 +50,6 @@ t_log * log;
 //El manejador de señales
 void manejador (int sig){
 	switch (sig){
-	case SIGINT:
 	case SIGTERM:
 		//Se debe notificar al nivel el motivo de la muerte y liberar recursos
 		if (vidas>0){
@@ -85,7 +84,6 @@ int main(void){
 	new_action.sa_handler = manejador;
 	sigemptyset (&new_action.sa_mask);
 	new_action.sa_flags = SA_RESTART;
-	sigaction (SIGINT, &new_action, NULL);
 	sigaction (SIGTERM, &new_action, NULL);
 	sigaction (SIGUSR1, &new_action, NULL);
 
@@ -125,7 +123,6 @@ int main(void){
 		new_action.sa_handler = manejador;
 		sigemptyset (&new_action.sa_mask);
 		new_action.sa_flags = SA_RESTART;
-		sigaction (SIGINT, &new_action, NULL);
 		sigaction (SIGTERM, &new_action, NULL);
 
 		while(ipNivelPlanif.portNivel==0){//checkea q el nivel haya llegado al planif y sino entra en un ciclo hasta que entre
@@ -190,7 +187,6 @@ int main(void){
 		new_action.sa_handler = manejador;
 		sigemptyset (&new_action.sa_mask);
 		new_action.sa_flags =0; //settea las señales como interruptoras del recv
-		sigaction (SIGINT, &new_action, NULL);
 		sigaction (SIGTERM, &new_action, NULL);
 
 

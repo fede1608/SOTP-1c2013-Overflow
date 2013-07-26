@@ -28,7 +28,7 @@ all: ProcesoPersonaje
 ProcesoPersonaje: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "ProcesoPersonaje" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L/home/utnso/TPSO/tp-20131c-overflow/Tests/Libs -L/home/utnso/tp-20131c-overflow-master/Tests/Libs -o "ProcesoPersonaje" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

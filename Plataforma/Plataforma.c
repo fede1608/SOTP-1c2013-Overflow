@@ -616,7 +616,7 @@ int planificador (InfoNivel* nivel) {
 
 		}
 		else{
-			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
+//			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
 			usleep(varGlobalSleep); //para que no quede en espera activa
 		}
 

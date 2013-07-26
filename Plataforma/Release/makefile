@@ -28,7 +28,7 @@ all: ProcesoPlataforma
 ProcesoPlataforma: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "ProcesoPlataforma" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L/home/utnso/TPSO/tp-20131c-overflow/Libs -L/home/utnso/tp-20131c-overflow-master/Tests/Libs -o "ProcesoPlataforma" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
