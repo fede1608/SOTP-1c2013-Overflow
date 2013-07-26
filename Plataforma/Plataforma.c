@@ -413,6 +413,7 @@ int planificador (InfoNivel* nivel) {
 		pthread_mutex_unlock(&nivel->nodoN->sem);
 
 		//A partir de este momento se realiza la atención de los personajes que ya estaban conectados al planificador
+		//enviándole el mensaje de movimiento permitido al personaje que corresponda según el quantum
 
 		//Si la cola de personajes listos no esta vacia
 		if(!queue_is_empty(colaListos)){
@@ -499,57 +500,96 @@ int planificador (InfoNivel* nivel) {
 				}
 			}
 
+
+			//A partir de este momento se realiza la atención al mensaje que nos está enviándo el personaje que tiene el turno
+
 			//Esperar respuesta de turno terminado (con la info sobre si quedo bloqueado y si tomo recurso)
 			Header headerMsjPersonaje;
 			MensajePersonaje msjPersonaje;
 			log_info(logPlanificador,"Esperando respuesta de turno concluido");
-			if(varAuxiliar == 0 && recibirHeader(personajeActual->socket, &headerMsjPersonaje) > 0){
-				if(recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje)){
-					log_info(logPlanificador,"Respuesta recibida");
-					//Comportamientos según el mensaje que se recibe del personaje
 
-					log_debug(logPlanificador,"NeedRec: %d Blocked: %d FinNivel: %d Rec: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
-		//Si solicita recurso y SI quedo bloqueado {quatum=varGlogalQuantum; poner al final de la cola de bloquedados}
+			//Si no hubo errores al envíar el mensaje de movimiento permitdo a un personaje y el mismo respondió con algo
+			if(varAuxiliar == 0 && recibirHeader(personajeActual->socket, &headerMsjPersonaje) > 0){
+
+				//Recibir data nos permite acceder al contenido del mensaje que nos envió el personaje
+				if(recibirData(personajeActual->socket, headerMsjPersonaje, (void**) &msjPersonaje)){
+
+					log_info(logPlanificador,"Respuesta recibida");
+					log_debug(logPlanificador,"Solicita Recurso: %d Bloqueado: %d FinNivel: %d Recurso: %c",msjPersonaje.solicitaRecurso,msjPersonaje.bloqueado,msjPersonaje.finNivel,msjPersonaje.recursoSolicitado);
+
+					//***Comportamientos según el mensaje que se recibe del personaje***
+
+					//Si solicita recurso y SI quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola de bloquedados}
+					//Solicita SI, Bloqueado SI
 					if(msjPersonaje.solicitaRecurso & msjPersonaje.bloqueado){
 						log_debug(logPlanificador,"Per: %c Rec %c bloq1 %d",personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado,quantum);
-						personajeActual->recursoPedido=msjPersonaje.recursoSolicitado;
-						quantum=varGlobalQuantum+1;
+						personajeActual->recursoPedido = msjPersonaje.recursoSolicitado;
+						//Se restaura el quantum
+						quantum = varGlobalQuantum + 1;
 						pthread_mutex_lock(&nivel->nodoN->sem);
-						queue_push(colaBloqueados,queue_pop(colaListos));
+						 	//Sacamos al personaje de la cola de listos y lo ponemos al final de la cola de bloqueados
+							queue_push(colaBloqueados,queue_pop(colaListos));
 						pthread_mutex_unlock(&nivel->nodoN->sem);
 						log_debug(logPlanificador,"Per: %c Rec %c bloq2 %d",personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado,quantum);
-					}else{
-		//Si solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum; poner al final de la cola}
+					}
+
+					//En este caso o no solicita un recurso o no quedo bloqueado
+					else {
+
+						//SI solicita recurso y NO quedo bloqueado {quantum=varGlogalQuantum + 1; poner al final de la cola}
+						//Solicita SI, Bloqueado NO
 						if(msjPersonaje.solicitaRecurso & !msjPersonaje.bloqueado){
+
+							//Si el movimiento realizado por el personaje era el último que necesitaba para terminar el nivel
+							//Solicita SI, Bloqueado NO, Fin SI
 							if(msjPersonaje.finNivel){
 								log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
 								pthread_mutex_lock(&nivel->nodoN->sem);
-								queue_pop(colaListos);
+									//Como termino lo sacamos de la cola de listos
+									queue_pop(colaListos);
 								pthread_mutex_unlock(&nivel->nodoN->sem);
-								msjPersonaje.solicitaRecurso=0;
-								msjPersonaje.bloqueado=0;
-								quantum=varGlobalQuantum+1;
+								msjPersonaje.solicitaRecurso = 0;
+								msjPersonaje.bloqueado = 0;
+								//Se restaura el quantum
+								quantum = varGlobalQuantum + 1;
+								//TODO: Acá no habría que cerrar la conexión con el personaje con un close(personajeActual->socket); ?
 								log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
-							}else{
-							log_info(logPlanificador,"Rec no bloq1 %d",quantum);
-							quantum=varGlobalQuantum+1;
-							pthread_mutex_lock(&nivel->nodoN->sem);
-							queue_push(colaListos,queue_pop(colaListos));
-							pthread_mutex_unlock(&nivel->nodoN->sem);
-							log_info(logPlanificador,"Se puso el Personaje %c al final de la cola luego de asignarle el recurso %c", personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado);
 							}
-						}else{
+
+							//Si el movimiento realizado por el personaje NO era el último para terminar el nivel
+							//Solicita SI, Bloqueado NO, Fin NO
+							else{
+								log_info(logPlanificador,"Rec no bloq1 %d",quantum);
+								//Se restaura el quantum
+								quantum = varGlobalQuantum + 1;
+								pthread_mutex_lock(&nivel->nodoN->sem);
+									//Como se le otorga un recurso, debe pasar al final de la cola de listos
+									queue_push(colaListos,queue_pop(colaListos));
+								pthread_mutex_unlock(&nivel->nodoN->sem);
+								log_info(logPlanificador,"Se puso el Personaje %c al final de la cola luego de asignarle el recurso %c", personajeActual->simboloRepresentativo,msjPersonaje.recursoSolicitado);
+							}
+						}
+
+						//En caso de que NO solicita recurso
+						//Solicita NO, Bloqueado NO
+						else{
+
+							//Si el personaje termina el nivel sin tener que haber pedido un recurso en el úlitmo moviemiento
 							if(msjPersonaje.finNivel){
 								log_info(logPlanificador,"El personaje %c termino el Nivel",personajeActual->simboloRepresentativo);
 								pthread_mutex_lock(&nivel->nodoN->sem);
-								queue_pop(colaListos);
+									//Como termino lo sacamos de la cola de listos
+									queue_pop(colaListos);
 								pthread_mutex_unlock(&nivel->nodoN->sem);
 								msjPersonaje.solicitaRecurso=0;
 								msjPersonaje.bloqueado=0;
-								quantum=varGlobalQuantum+1;
+								//Se restaura el quantum
+								quantum = varGlobalQuantum + 1;
+								//Terminamos la conexión con el personaje
 								close(personajeActual->socket);
 								log_info(logPlanificador,"El personaje %c fue retirado de la cola",personajeActual->simboloRepresentativo);
 							}
+
 						}
 					}
 
@@ -557,25 +597,28 @@ int planificador (InfoNivel* nivel) {
 					log_debug(logPlanificador,"Quatum Left: %d Sleep: %d",quantum,varGlobalSleep);
 					usleep(varGlobalSleep);
 				}
+
+				//En caso de que haya habido algún error al recibir los datos o aparentemente se haya desconectado el personaje
 				else {
 					//Se retira al PJ de la cola de Listos
-					//Por aparente desconexion
 					desconexionPersonaje(personajeActual->socket, msjPersonaje, quantum, colaListos);
 					log_error(logPlanificador,"No llego la data del PJ: %c",personajeActual->simboloRepresentativo);
-
 				}
 			}
+
+			//En caso de que haya habido algún error al recibir el header o aparentemente se haya desconectado el personaje
 			else {
 				//Se retira al PJ de la cola de Listos
-				//Por aparente desconexion
 				desconexionPersonaje(personajeActual->socket, msjPersonaje, quantum, colaListos);
 				log_error(logPlanificador,"No llego el header del PJ: %c",personajeActual->simboloRepresentativo);
 			}
-//			pthread_mutex_unlock(&nivel->nodoN->sem);
-		}else{
-//			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
+
+		}
+		else{
+			log_debug(logPlanificador,"Cola de listos vacia --> Sleep");
 			usleep(varGlobalSleep); //para que no quede en espera activa
 		}
+
 	}//Cierra While(1)
 
 	return EXIT_SUCCESS;
@@ -1189,12 +1232,13 @@ bool esMiNivel(NodoNivel* nodo){
 }
 
 void desconexionPersonaje(int socketDesconectar, MensajePersonaje msjPersonaje, int quantum, t_queue * colaListos){
-	NodoPersonaje* auxP=queue_pop(colaListos);
+	NodoPersonaje* auxP = queue_pop(colaListos);
 	log_info(logOrquestador,"Se desconecto imprevistamente el Pj: %c socket:%d",auxP->simboloRepresentativo,socketDesconectar);
-	msjPersonaje.solicitaRecurso=0;
-	msjPersonaje.bloqueado=0;
-	quantum=varGlobalQuantum+1;
+	msjPersonaje.solicitaRecurso = 0;
+	msjPersonaje.bloqueado = 0;
+	quantum =varGlobalQuantum + 1;
 	g_contPersonajes--;
+	//todo: porque no cerramos la conexión?
 //	close(socketDesconectar);
 }
 //----------------------------------------------------------------
