@@ -216,9 +216,9 @@ int main (void) {
 		if (ret < 0){
 			log_error(logOrquestador,"Error con la funcion select(...) en el segmento INOTIFY de main()");
 		}
-		if (!ret){
-			log_error(logOrquestador,"Error de timeout en el segmento INOTIFY de main()");
-		}
+//		if (!ret){
+//			log_error(logOrquestador,"Error de timeout en el segmento INOTIFY de main()");
+//		}
 		if (FD_ISSET (fd, &rfds)){
 
 			char buffer[EVENT_BUF_LEN];
