@@ -1017,11 +1017,11 @@ int orquestador (void) {
 
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 								//settear variable global para usar en funcion q se manda a list_find
-//								pthread_mutex_lock(&semNombreNivel);
+
 								nombreNivel=nivelDelPersonaje;
 								log_debug(logOrquestador,"Se busca el nivel %s",nombreNivel);
 								NodoNivel* nivel =list_find(listaNiveles,esMiNivel);
-//								pthread_mutex_unlock(&semNombreNivel);
+
 								log_info(logOrquestador,"Se encontro el nivel %p",nivel);
 								if(nivel!=NULL){
 									log_info(logOrquestador,"El nivel existe (o sea, es != NULL)");

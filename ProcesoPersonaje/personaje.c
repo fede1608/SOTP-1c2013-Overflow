@@ -148,8 +148,8 @@ int main(void){
 			auxC=malloc(sizeof(char));
 			*auxC=charPer;
 			//handshake Orquestador-Personaje
-			if (mandarMensaje(unSocketOrq ,0 , sizeof(char),auxC)) {
-				if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
+			if (mandarMensaje(unSocketOrq ,0 , sizeof(char),auxC)>0) {
+				if(recibirMensaje(unSocketOrq,(void**)&auxC)>0) {
 					log_debug("Handshake contestado del Orquestador %c",*auxC);
 				}
 			}
@@ -173,8 +173,8 @@ int main(void){
 
 			mandarMensaje(unSocketOrq,tipomsj,strlen(nivelActual)+1,nivelActual);
 			log_debug(log,"MsjType: %d NivelActual: %s",tipomsj,nivelActual);
-			if(recibirHeader(unSocketOrq,&unHeader)){
-				if(recibirData(unSocketOrq,unHeader,(void**)&ipNivelPlanif)){
+			if(recibirHeader(unSocketOrq,&unHeader)>0){
+				if(recibirData(unSocketOrq,unHeader,(void**)&ipNivelPlanif)>0){
 				//Obtener info de ip & port
 					log_debug(log,"IPNivel:%s PortNivel:%d IPPlanf:%s PortPlanf:%d",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,ipNivelPlanif.ipPlanificador,ipNivelPlanif.portPlanificador);
 				}
@@ -198,9 +198,9 @@ int main(void){
 			charbuf=malloc(sizeof(char));
 			*charbuf=charPer;
 			//handshake
-			if (mandarMensaje(unSocketPlanif,0 , sizeof(char),charbuf)) {
+			if (mandarMensaje(unSocketPlanif,0 , sizeof(char),charbuf)>0) {
 				log_info(log,"Se envío el Handshake al planificador");
-				if(recibirMensaje(unSocketPlanif, (void**)&charbuf)>=0) {
+				if(recibirMensaje(unSocketPlanif, (void**)&charbuf)>0) {
 					log_info(log,"Llego el Handshake del Planificador: %c",*charbuf);
 				}
 				else {
@@ -217,9 +217,9 @@ int main(void){
 			log_info(log,"Se creo un nuevo socket con el nivel. Direccion: %s // Puerto: %d // Socket: %d",ipNivelPlanif.ipNivel,ipNivelPlanif.portNivel,unSocket);
 			*charbuf=charPer;
 
-			if (mandarMensaje(unSocket,0 , sizeof(char),charbuf)) {
+			if (mandarMensaje(unSocket,0 , sizeof(char),charbuf)>0) {
 				log_info(log,"Llego el OK al nivel");
-				if(recibirMensaje(unSocket, (void**)&charbuf)>=0) {
+				if(recibirMensaje(unSocket, (void**)&charbuf)>0) {
 					log_info(log,"Llego el OK del nivel char %c",*charbuf);
 				}
 				else {
@@ -323,11 +323,11 @@ int main(void){
 			if((rec.x==-1)&&(rec.y==-1)){ //si no tiene asignada un destino solicitar uno
 				buffer= &recActual;
 				//solicitar Posicion del recurso recActual
-				if (mandarMensaje(unSocket,1, sizeof(char),buffer)) {
+				if (mandarMensaje(unSocket,1, sizeof(char),buffer)>0) {
 					log_info(log,"Solicitada la posicion del recurso actual %c necesario al nivel",recActual);
 					Header unHeader;
 
-					if (recibirHeader(unSocket,&unHeader)) {
+					if (recibirHeader(unSocket,&unHeader)>0) {
 						log_debug(log,"pos %d %d %d %d",pos.x,pos.y,unHeader.payloadlength,unHeader.type);
 						Posicion lifeSucks;
 						recibirData(unSocket,unHeader,(void**)&lifeSucks);
@@ -356,9 +356,9 @@ int main(void){
 			buffer=&pos;
 			char* sth;
 
-			if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)) {
+			if (mandarMensaje(unSocket,2 , sizeof(Posicion),buffer)>0) {
 				log_info(log,"Llego el header de la posicion del personaje %d %d",pos.x,pos.y);
-				if (recibirMensaje(unSocket, (void**)&sth)>=0) {
+				if (recibirMensaje(unSocket, (void**)&sth)>0) {
 					log_info(log,"Llego header respuesta: %c del nivel",*sth);
 				}
 			}
@@ -373,12 +373,12 @@ int main(void){
 				llego=0;
 				buffer = &recActual;
 
-				if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)) {
+				if (mandarMensaje(unSocket,(int8_t)3 , sizeof(char),buffer)>0) {
 					log_info(log,"Se envio el mensaje de peticion de recurso %c al nivel",recActual);
 					Header unHeader;
 					Posicion lifeSucks;
 					respAlPlanf.recursoSolicitado=recActual;
-					if (recibirHeader(unSocket,&unHeader)) {
+					if (recibirHeader(unSocket,&unHeader)>0) {
 						int * respRec;
 						respRec=malloc(sizeof(int));
 						recibirData(unSocket,unHeader,(void**)respRec);
@@ -461,8 +461,8 @@ char* auxC;
 auxC=malloc(sizeof(char));
 *auxC=charPer;
 //handshake Orquestador-Personaje
-if (mandarMensaje(unSocketOrq ,0 , sizeof(char),auxC)) {
-	if(recibirMensaje(unSocketOrq,(void**)&auxC)>=0) {
+if (mandarMensaje(unSocketOrq ,0 , sizeof(char),auxC)>0) {
+	if(recibirMensaje(unSocketOrq,(void**)&auxC)>0) {
 		log_debug("Handshake contestado del Orquestador %c",*auxC);
 	}
 }
