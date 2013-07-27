@@ -716,6 +716,9 @@ int orquestador (void) {
 					switch(unHeader.type){
 
 						case 3:
+						log_info(logOrquestador,"Resolver deadlock");
+						pjDeadlock=malloc(unHeader.payloadlength);
+						recibirData(nodoN->socket,unHeader,(void**)pjDeadlock);
 						pthread_mutex_lock(&nodoN->sem);
 
 						{//todo borrar imprimir PJ listos
@@ -737,9 +740,7 @@ int orquestador (void) {
 						}}
 
 
-							log_info(logOrquestador,"Resolver deadlock");
-							pjDeadlock=malloc(unHeader.payloadlength);
-							recibirData(nodoN->socket,unHeader,(void**)pjDeadlock);
+
 							int r2,minimo2,p2,tamColaBloq2;
 							NodoPersonaje* nodoPj;
 							minimo2=9999;//valor absurdo
@@ -788,6 +789,9 @@ int orquestador (void) {
 							pthread_mutex_unlock(&nodoN->sem);
 							break;
 						case 4://el nivel envia los recursos liberados
+						log_info(logOrquestador,"El nivel %s solicita liberar recursos",nodoN->nombreNivel);
+						nodoR=malloc(unHeader.payloadlength);
+						recibirData(nodoN->socket,unHeader,(void**)nodoR);
 						pthread_mutex_lock(&nodoN->sem);
 
 						{//todo borrar imprimir PJ listos
@@ -810,9 +814,7 @@ int orquestador (void) {
 
 
 
-							log_info(logOrquestador,"El nivel %s solicita liberar recursos",nodoN->nombreNivel);
-							nodoR=malloc(unHeader.payloadlength);
-							recibirData(nodoN->socket,unHeader,(void**)nodoR);
+
 							//buscar en entre los bloqueados y empezar a asignar recursos liberados, pasar pj a listos
 							int p,r,tamColaBloq;
 							for(r=0;r<(unHeader.payloadlength/sizeof(NodoRecurso));r++)
@@ -925,7 +927,7 @@ int orquestador (void) {
 					msj.portPlanificador=0;
 					simboloRecibido=malloc(sizeof(char));
 
-					if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido) >= 0){
+					if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido) > 0){
 						if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
 							log_info(logOrquestador,"Entro Personaje: %c",*simboloRecibido);
 						}
@@ -933,14 +935,14 @@ int orquestador (void) {
 					char* nivelDelPersonaje;
 					//Esperar solicitud de info de conexion de Nivel y Planifador
 
-					if(recibirHeader(socketNuevaConexion,&unHeader)){
+					if(recibirHeader(socketNuevaConexion,&unHeader)>0){
 						log_debug(logOrquestador,"Info Header: payload:%d type:%d",unHeader.payloadlength,unHeader.type);
 						switch(unHeader.type){
 						case 1://Personaje entra por primera vez al orquestador (incrementa el contador de personajes)
 							log_info(logOrquestador,"El Personaje %c se conecto por primera vez",*simboloRecibido);
 							log_info(logOrquestador,"Esperando solicitud de nivel...");
 							nivelDelPersonaje=malloc(unHeader.payloadlength);
-							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)>0){
 	//						if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
 								log_info(logOrquestador,"Nivel recibido %s",nivelDelPersonaje);
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
@@ -961,7 +963,7 @@ int orquestador (void) {
 									log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
 								}
 								//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
-								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>0){
 									log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
 								}
 								else {
@@ -973,11 +975,11 @@ int orquestador (void) {
 
 							log_info(logOrquestador,"Esperando solicitud de nivel...");
 							nivelDelPersonaje=malloc(unHeader.payloadlength);
-							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)>0){
 							log_info(logOrquestador,"El Personaje %c termino el nivel %s",*simboloRecibido,nivelDelPersonaje);
 							}
 							log_info(logOrquestador,"Esperando solicitud de nivel...");
-							if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>=0) {
+							if(recibirMensaje(socketNuevaConexion, (void**) &nivelDelPersonaje)>0) {
 								log_info(logOrquestador,"El personaje %c solicita informacion del nivel %s",*simboloRecibido,nivelDelPersonaje);
 								//Enviar info de conexión (IP y port) del Nivel y el Planificador asociado a ese nivel
 								//settear variable global para usar en funcion q se manda a list_find
@@ -995,7 +997,7 @@ int orquestador (void) {
 									log_info(logOrquestador,"Se copiaron los datos del nivel al mensaje para mandar al Personaje %c",*simboloRecibido);
 								}
 								//TODO: en el caso que el nivel fuera NULL no debería mandar igual un mensaje,
-								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>0){
 									log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
 								}
 								else {
@@ -1008,7 +1010,7 @@ int orquestador (void) {
 
 							log_info(logOrquestador,"Esperando solicitud de nivel...");
 							nivelDelPersonaje=malloc(unHeader.payloadlength);
-							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)>0){
 								if(unHeader.type==3) log_info(logOrquestador,"El Personaje %c murio por la señal SIGTERM y reinicia el nivel: %s",*simboloRecibido,nivelDelPersonaje);
 								else if(unHeader.type==4)log_info(logOrquestador,"El Personaje %c perdio todas sus vidas y debe reiniciar su plan de niveles desde: %s",*simboloRecibido,nivelDelPersonaje);
 								else if(unHeader.type==6)log_info(logOrquestador,"El Personaje %c fue asesinado descaradamente por el orquestador y solicita volver al nivel: %s",*simboloRecibido,nivelDelPersonaje);
@@ -1046,7 +1048,7 @@ int orquestador (void) {
 								//saca al personaje de la cola de bloqueados si se murio por sigInt
 
 
-								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>=0){
+								if(mandarMensaje(socketNuevaConexion,1,sizeof(ConxNivPlan),&msj)>0){
 									log_info(logOrquestador,"Se enviaron los datos del nivel al Personaje %c",*simboloRecibido);
 								}
 								else {
@@ -1057,7 +1059,7 @@ int orquestador (void) {
 
 						case 5: //el pj termina su plan de nivel
 							nivelDelPersonaje=malloc(unHeader.payloadlength);
-							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)){
+							if(recibirData(socketNuevaConexion,unHeader,(void**)nivelDelPersonaje)>0){
 								g_contPersonajes--;
 								log_info(logOrquestador,"El personaje %c termino su plan de niveles",*simboloRecibido);
 
@@ -1079,7 +1081,7 @@ int orquestador (void) {
 
 				case 2: //case Nivel
 					simboloRecibido=malloc(unHeader.payloadlength);
-					if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>=0){
+					if(recibirData(socketNuevaConexion,unHeader,(void**)simboloRecibido)>0){
 						if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido) > 0) {
 							//log_info(logger,"Mando mensaje al personaje %c",*rec);
 							log_info(logOrquestador,"Entro Nivel: %s",simboloRecibido);
@@ -1113,11 +1115,11 @@ int orquestador (void) {
 					*aux=nodoNivel->port;
 					//manda el puerto asignado al nivel para que escuche conexiones.
 					//TODO: y si es -1 de qué nos pintamos?
-					if(!mandarMensaje(socketNuevaConexion,1, sizeof(int),aux)){
+					if(mandarMensaje(socketNuevaConexion,1, sizeof(int),aux)<1){
 						log_error(logOrquestador,"No se pudo enviar un mensaje al nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
 						break;}
 					free(aux);
-					if(!recibirMensaje(socketNuevaConexion,(void**)&aux)){
+					if(recibirMensaje(socketNuevaConexion,(void**)&aux)<1){
 						log_error(logOrquestador,"No se pudo recibir un mensaje del nivel %s de socket %d",simboloRecibido,socketNuevaConexion);
 						break; }
 					free(aux);
@@ -1204,9 +1206,9 @@ int listenerPersonaje(InfoPlanificador* planificador, int socketEscucha){
 
 			//Handshake en el que recibe el simbolo del personaje
 			char *simboloRecibido; //Ej: @ ! / % $ &
-			if(recibirMensaje(socketNuevaConexion, (void**) &simboloRecibido)>=0) {
+			if(recibirMensaje(socketNuevaConexion, (void**) &simboloRecibido)>0) {
 				//log_info(logger,"Llego el Personaje %c del nivel",*simboloRecibido);
-				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido)) {
+				if (mandarMensaje(socketNuevaConexion,0 , sizeof(char),simboloRecibido)>0) {
 					//log_info(logger,"Mando mensaje al personaje %c",*simboloRecibido);
 					log_info(logPlanificador,"Handshake respondido al Personaje %c", *simboloRecibido);
 				}

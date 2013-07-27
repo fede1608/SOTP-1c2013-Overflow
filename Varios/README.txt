@@ -20,6 +20,8 @@ chmod -v -R 777 carpetaDelRepo
 
 export LD_LIBRARY_PATH=/home/utnso/tp-20131c-overflow-master/Tests/Libs/
 
+
+
 Parámetros
 ----------
 ./koopa [archivo.txt]
@@ -32,3 +34,23 @@ Librería
 ----------
 En /memoria hay un ejemplo de implementación de la librería de memoria. Al importar ese proyecto al eclipse debería poderse compilar y empezar a trabajar sobre el código.
 La única precondición es tener importado también el proyecto so-commons-library.
+
+1) Abrir el Ubuntu Server desde VM VirtualBox
+2) Ejecutar ifconfig y ver la IP
+3) Abrir WinSCP. Usar la IP del paso 2 y el login utnso/utnso
+4) Abrir el archivo .zip con el TP y copiar todo lo de adentro al server
+5) Ejecutar chmod -v -R 777 tp-20131c-overflow-master
+6) Ejecutar export LD_LIBRARY_PATH=/home/utnso/tp-20131c-overflow-master/Tests/Libs/
+------------------------------------------------------------------------------------
+7) DEJAR ABIERTO EL SERVIDOR EN LA VM Y ABRIR LA CANTIDAD DE PUTTYS NECESARIOS
+------------------------------------------------------------------------------------
+Para cada Putty configurar y ejecutar cuando corresponda.
+Ejemplo para levantar un personaje:
+
+8) cd tp-20131c-overflow-master/Tests/Esquema1/P1
+9) nano config.txt (cambiar la IP por la del servidor de la plataforma)
+10) Apretar Ctrl+X -> S -> Enter
+
+Esperar hasta que todos estén listos y ejecutar el siguiente comando para que arranque el personaje
+
+11) ./P1
