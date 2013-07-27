@@ -410,6 +410,7 @@ int planificador (InfoNivel* nivel) {
 			if(send(auxPersDesc1->socket, &mj1,0, 0)==-1){
 				g_contPersonajes--;
 				close(auxPersDesc1->socket);
+				log_info(logOrquestador,"Se desconecto imprevistamente el personaje %c",auxPersDesc1->simboloRepresentativo);
 			}
 			else
 				queue_push(colaBloqueados,auxPersDesc1);
@@ -810,6 +811,25 @@ int orquestador (void) {
 						log_info(logOrquestador,"El nivel %s solicita liberar recursos",nodoN->nombreNivel);
 						nodoR=malloc(unHeader.payloadlength);
 						recibirData(nodoN->socket,unHeader,(void**)nodoR);
+						pthread_mutex_lock(&nodoN->sem);
+						int tamB=queue_size(nodoN->colaBloqueados);
+						int i;
+						for(i=0;i<tamB;i++){
+							NodoPersonaje * auxPersDesc1;
+							char mj1= 'K';
+							auxPersDesc1 = queue_pop(nodoN->colaBloqueados);
+							//Enviamos un mensaje de desconexión al personaje
+							//NOTA: Para el personaje un header = 10 equivale a desconexión por nivel
+
+							if(send(auxPersDesc1->socket, &mj1,0, 0)==-1){
+								g_contPersonajes--;
+								close(auxPersDesc1->socket);
+								log_info(logOrquestador,"Se desconecto imprevistamente el personaje %c",auxPersDesc1->simboloRepresentativo);
+							}
+							else
+								queue_push(nodoN->colaBloqueados,auxPersDesc1);
+						}
+						pthread_mutex_unlock(&nodoN->sem);
 						pthread_mutex_lock(&nodoN->sem);
 
 						{//todo borrar imprimir PJ listos
