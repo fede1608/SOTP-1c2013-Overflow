@@ -397,6 +397,24 @@ int planificador (InfoNivel* nivel) {
 			log_info(logPlanificador,"El nivel de este planificador ya no se encuentra en la lista de niveles de la plataforma. Todos los personajes desconectados, se rompe el while(1) y se cierra el thread.");
 			break; //Esto termina el ciclo permanente A ( el While(1) )
 		}
+		pthread_mutex_lock(&nivel->nodoN->sem);
+		int tamB=queue_size(colaBloqueados);
+		int i;
+		for(i=0;i<tamB;i++){
+			NodoPersonaje * auxPersDesc1;
+			char mj1= 'K';
+			auxPersDesc1 = queue_pop(colaBloqueados);
+			//Enviamos un mensaje de desconexión al personaje
+			//NOTA: Para el personaje un header = 10 equivale a desconexión por nivel
+
+			if(send(auxPersDesc1->socket, &mj1,0, 0)==-1){
+				g_contPersonajes--;
+				close(auxPersDesc1->socket);
+			}
+			else
+				queue_push(colaBloqueados,auxPersDesc1);
+		}
+		pthread_mutex_unlock(&nivel->nodoN->sem);
 //		pthread_mutex_unlock(&semNombreNivel);
 		//A partir de este momento se realiza la atención de nuevas conexiones a través de un select()
 		//El uso del select() reemplazó al thread de listenerDePersonajes()
